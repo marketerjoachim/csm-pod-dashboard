@@ -875,7 +875,7 @@ tailwind.config = {{
   .tip .tip-text {{ visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; padding: 8px 12px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #cbd5e1; font-size: 0.75rem; font-weight: 400; text-transform: none; letter-spacing: 0; line-height: 1.5; white-space: normal; width: 240px; z-index: 50; transition: opacity 0.15s, visibility 0.15s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }}
   .tip:hover .tip-text {{ visibility: visible; opacity: 1; }}
   .tip .tip-text::before {{ content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-bottom-color: #1e293b; }}
-  th {{ position: relative; white-space: nowrap; }}
+  th {{ position: relative; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
   td {{ white-space: nowrap; }}
   th .col-resize {{ position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; z-index: 5; }}
   th .col-resize:hover, th .col-resize.active {{ background: rgba(56,189,248,0.4); }}
@@ -1556,20 +1556,35 @@ if(scrollEl&&hintEl){{scrollEl.addEventListener('scroll',function(){{if(scrollEl
 
 // Column resize — must be called after table is visible (after unlock)
 let resizeInited=false;
+function setColWidth(table,colIdx,w){{
+  const px=w+'px';
+  const ths=table.querySelectorAll('thead th');
+  if(ths[colIdx]){{ths[colIdx].style.minWidth=px;ths[colIdx].style.maxWidth=px;ths[colIdx].style.width=px;}}
+  table.querySelectorAll('tbody tr').forEach(function(tr){{
+    const td=tr.children[colIdx];
+    if(td){{td.style.minWidth=px;td.style.maxWidth=px;td.style.width=px;}}
+  }});
+}}
 function initColResize(){{
   if(resizeInited)return;
   const table=document.getElementById('mainTable');
   if(!table)return;
+  table.style.tableLayout='fixed';
   const ths=table.querySelectorAll('thead th');
   requestAnimationFrame(function(){{
-    // Snapshot natural widths
+    // Snapshot natural widths then apply fixed layout
+    const widths=[];
+    table.style.tableLayout='auto';
     ths.forEach(function(th,i){{
       let w=th.offsetWidth;
-      if(i===0)w=Math.round(w*0.75); // shrink # col
-      if(i===1)w=Math.round(w*0.70); // shrink Workspace col
-      th.style.minWidth=w+'px';
-      th.style.maxWidth=w+'px';
+      if(i===0)w=Math.round(w*0.75);
+      if(i===1)w=Math.round(w*0.70);
+      widths.push(w);
     }});
+    table.style.tableLayout='fixed';
+    const totalW=widths.reduce((a,b)=>a+b,0);
+    table.style.width=totalW+'px';
+    widths.forEach(function(w,i){{setColWidth(table,i,w);}});
     // Add resize handles
     ths.forEach(function(th,i){{
       if(i===ths.length-1)return;
@@ -1580,14 +1595,15 @@ function initColResize(){{
         e.preventDefault();
         e.stopPropagation();
         const startX=e.pageX;
-        const startW=parseInt(th.style.minWidth)||th.offsetWidth;
+        const startW=parseInt(th.style.width)||th.offsetWidth;
         handle.classList.add('active');
         document.body.style.cursor='col-resize';
         document.body.style.userSelect='none';
         function onMove(e2){{
-          const nw=Math.max(30,startW+(e2.pageX-startX))+'px';
-          th.style.minWidth=nw;
-          th.style.maxWidth=nw;
+          const nw=Math.max(30,startW+(e2.pageX-startX));
+          setColWidth(table,i,nw);
+          const tw=parseInt(table.style.width)||0;
+          table.style.width=(tw-startW+nw)+'px';
         }}
         function onUp(){{
           handle.classList.remove('active');
