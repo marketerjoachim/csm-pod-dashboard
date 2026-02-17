@@ -331,7 +331,7 @@ def compute_tenure_months(start_date_str):
 
 
 def compute_ltv(ws):
-    """Compute 3yr LTV, priority, tier, signals for a workspace."""
+    """Compute 2yr LTV, priority, tier, signals for a workspace."""
     plan = ws["plan"]
     arr = PLAN_ARR.get(plan, 9000)
     health = ws["health"]
@@ -434,8 +434,8 @@ def compute_ltv(ws):
         effort = max(effort, 1.2)
 
     # --- LTV ---
-    ltv_3yr = arr * ret * growth * 3
-    priority = ltv_3yr / effort
+    ltv_2yr = arr * ret * growth * 2
+    priority = ltv_2yr / effort
 
     # --- Tier ---
     if priority >= 100000:
@@ -510,7 +510,7 @@ def compute_ltv(ws):
         "arr": arr,
         "ret": round(ret, 2),
         "growth": round(growth, 2),
-        "ltv": round(ltv_3yr),
+        "ltv": round(ltv_2yr),
         "priority": round(priority),
         "tier": tier,
         "signals": signals,
@@ -802,11 +802,11 @@ tailwind.config = {{
       </div>
       <div class="text-right">
         <p class="text-dark-500 text-sm">Updated Feb 17, 2026</p>
-        <p class="text-dark-600 text-xs">{total_ws} workspaces &middot; {fmt_m(total_arr)} ARR &middot; {fmt_m(total_ltv)} est. 3yr LTV</p>
+        <p class="text-dark-600 text-xs">{total_ws} workspaces &middot; {fmt_m(total_arr)} ARR &middot; {fmt_m(total_ltv)} est. 2yr LTV</p>
       </div>
     </div>
     <div class="flex items-center gap-4">
-      <p class="text-dark-400 text-sm max-w-3xl">LTV-based priority model for CSM resource allocation across all pods. Workspaces ranked by estimated 3-year lifetime value adjusted for retention probability, growth potential, and required CSM effort.</p>
+      <p class="text-dark-400 text-sm max-w-3xl">LTV-based priority model for CSM resource allocation across all pods. Workspaces ranked by estimated 2-year lifetime value adjusted for retention probability, growth potential, and required CSM effort.</p>
       <button onclick="document.getElementById('infoPage').classList.toggle('hidden')" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:bg-dark-700 hover:text-dark-200 transition">How This Works</button>
     </div>
   </div>
@@ -829,7 +829,7 @@ tailwind.config = {{
       <!-- The big idea -->
       <div>
         <h3 class="text-base font-700 text-white mb-2">The big idea: Priority = Lifetime Value &divide; Effort</h3>
-        <p class="text-dark-300 leading-relaxed mb-3">Every workspace gets a <strong class="text-white">Priority Index</strong> score. This is simply: <em>how much is this client worth to us over the next 3 years, divided by how much CSM time they need?</em> High-value, low-effort clients rank highest. At-risk clients that need heavy investment rank lower &mdash; unless saving them protects a lot of revenue.</p>
+        <p class="text-dark-300 leading-relaxed mb-3">Every workspace gets a <strong class="text-white">Priority Index</strong> score. This is simply: <em>how much is this client worth to us over the next 2 years, divided by how much CSM time they need?</em> High-value, low-effort clients rank highest. At-risk clients that need heavy investment rank lower &mdash; unless saving them protects a lot of revenue.</p>
         <p class="text-dark-300 leading-relaxed">Workspaces are grouped into 4 tiers based on this score:</p>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
           <div class="rounded-lg p-3 border-l-3 border-emerald-500 bg-emerald-500/5">
@@ -853,8 +853,8 @@ tailwind.config = {{
 
       <!-- How LTV is calculated -->
       <div>
-        <h3 class="text-base font-700 text-white mb-2">How we estimate 3-Year Lifetime Value</h3>
-        <p class="text-dark-300 leading-relaxed mb-3">The formula: <code class="bg-dark-800 px-2 py-0.5 rounded text-emerald-400">3yr LTV = Annual Revenue &times; Retention Chance &times; Growth Potential &times; 3</code></p>
+        <h3 class="text-base font-700 text-white mb-2">How we estimate 2-Year Lifetime Value</h3>
+        <p class="text-dark-300 leading-relaxed mb-3">The formula: <code class="bg-dark-800 px-2 py-0.5 rounded text-emerald-400">2yr LTV = Annual Revenue &times; Retention Chance &times; Growth Potential &times; 2</code></p>
         <div class="space-y-3">
           <div class="flex gap-3">
             <span class="text-white font-600 shrink-0 w-36">Annual Revenue</span>
@@ -898,11 +898,11 @@ tailwind.config = {{
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">Ret. %</p>
-            <p class="text-dark-400 text-xs mt-1">Estimated retention probability &mdash; the chance this client will still be with us in a year. Drives the LTV calculation. A client with 92% retention is worth almost 4x more over 3 years than one at 25%.</p>
+            <p class="text-dark-400 text-xs mt-1">Estimated retention probability &mdash; the chance this client will still be with us in a year. Drives the LTV calculation. A client with 92% retention is worth almost 4x more over 2 years than one at 25%.</p>
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
-            <p class="text-white font-600">3yr LTV</p>
-            <p class="text-dark-400 text-xs mt-1">The estimated total revenue from this client over 3 years. This is the single most important number. It factors in their plan price, how likely they are to stay, and how much they could grow.</p>
+            <p class="text-white font-600">2yr LTV</p>
+            <p class="text-dark-400 text-xs mt-1">The estimated total revenue from this client over 2 years. This is the single most important number. It factors in their plan price, how likely they are to stay, and how much they could grow.</p>
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">Est. ARR</p>
@@ -1008,7 +1008,7 @@ tailwind.config = {{
             <th class="sortable text-right px-3 py-3 font-600" data-sort="sh" onclick="sortCol(this)"><span class="tip">Shopify/30d<span class="tip-text">Client's Shopify store sales last 30 days. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="sortable text-right px-3 py-3 font-600" data-sort="ar" onclick="sortCol(this)"><span class="tip">ROAS (ATD)<span class="tip-text">All-time return on ad spend. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="sortable text-center px-3 py-3 font-600" data-sort="ret" onclick="sortCol(this)"><span class="tip">Ret. %<span class="tip-text">Estimated 1-year retention probability. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
-            <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" onclick="sortCol(this)"><span class="tip">3yr LTV<span class="tip-text">Estimated 3-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
+            <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" onclick="sortCol(this)"><span class="tip">2yr LTV<span class="tip-text">Estimated 2-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Signals<span class="tip-text">Quick-glance tags. Use filter to find specific signals.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropSig')">&#9662;</span><div class="col-dropdown" id="dropSig"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Action / Note<span class="tip-text">Recommended next step or CSM's latest note.</span></span></th>
             <th class="text-center px-2 py-3 font-600"><span class="tip">S<span class="tip-text">Open in Stripe.</span></span></th>
@@ -1051,7 +1051,7 @@ function updateKPIs(){{
   else{{const pm=PM[curPod];ws=pm.cnt;arr=pm.arr;ltv=pm.ltv;risk=pm.risk;rated=pm.rated;total=pm.cnt;}}
   el.innerHTML=`
     <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Pod ARR</p><p class="text-2xl sm:text-3xl font-800 text-white">${{fmt(arr)}}</p><p class="text-dark-500 text-xs mt-1">${{ws}} active workspaces</p></div>
-    <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Est. 3-Year LTV</p><p class="text-2xl sm:text-3xl font-800 text-emerald-400">${{fmt(ltv)}}</p><p class="text-dark-500 text-xs mt-1">Based on current signals</p></div>
+    <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Est. 2-Year LTV</p><p class="text-2xl sm:text-3xl font-800 text-emerald-400">${{fmt(ltv)}}</p><p class="text-dark-500 text-xs mt-1">Based on current signals</p></div>
     <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Health Rated</p><p class="text-2xl sm:text-3xl font-800 text-amber-400">${{rated}} <span class="text-lg text-dark-500">/ ${{total}}</span></p><p class="text-dark-500 text-xs mt-1">${{total-rated}} unrated (blind spot)</p></div>
     <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">At Risk (Health 1-3)</p><p class="text-2xl sm:text-3xl font-800 text-red-400">${{risk}}</p><p class="text-dark-500 text-xs mt-1">Documented retention plans</p></div>`;
 }}
@@ -1160,7 +1160,7 @@ function renderTable(){{
       <td class="px-3 py-2.5 text-center">${{retBadge(w.ret)}}</td>
       <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${{fmt(w.l)}}</td>
       <td class="px-3 py-2.5"><div class="flex gap-1 flex-wrap">${{sigTags(w.s)}}</div></td>
-      <td class="px-3 py-2.5 text-xs text-dark-400 max-w-[240px]">${{w.act}}</td>
+      <td class="px-3 py-2.5 text-xs text-dark-400 min-w-[200px]">${{w.act}}</td>
       <td class="px-2 py-2.5 text-center">${{stripeLink(w.w)}}</td>
       <td class="px-2 py-2.5 text-center">${{attioLink(w.ri)}}</td>
     </tr>`).join('');
@@ -1303,7 +1303,7 @@ def main():
 
     print(f"  Total workspaces: {len(workspaces)}")
     print(f"  Total ARR: ${total_arr:,.0f}")
-    print(f"  Total 3yr LTV: ${total_ltv:,.0f}")
+    print(f"  Total 2yr LTV: ${total_ltv:,.0f}")
     print(f"  Health rated: {rated} / {len(workspaces)} ({unrated} unrated)")
     print(f"  With Customer Score: {with_cs} / {len(workspaces)}")
     print(f"  With Start Date: {with_sd} / {len(workspaces)}")
