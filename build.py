@@ -900,7 +900,7 @@ tailwind.config = {{
       <h1 class="text-3xl sm:text-4xl font-800 text-white mb-1">Daily Customer Update</h1>
       <p class="text-dark-400 text-sm">Feb 16, 2026 &mdash; Yesterday's churn summary across all pods</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="dailyCards"></div>
+    <div class="grid grid-cols-1 gap-4" id="dailyCards"></div>
   </div>
 
   <!-- ============ CUSTOMER PRIORITIZATION TAB ============ -->
@@ -1160,9 +1160,17 @@ function switchTopTab(tab){{
 
 function renderDailyCards(){{
   const el=document.getElementById('dailyCards');
-  const podOrder=['Marcus+Martin','Sebastian+Daniel','Aimy+Espen','Nicklas+Hamsa'];
-  el.innerHTML=podOrder.map(pod=>{{
+  const pods=['Marcus+Martin','Sebastian+Daniel','Aimy+Espen','Nicklas+Hamsa'];
+  const podOrder=pods.sort((a,b)=>{{
+    const da=DAILY[a],db=DAILY[b];
+    if(da.churnArr!==db.churnArr)return da.churnArr-db.churnArr;
+    return db.arr-da.arr;
+  }});
+  const medals=['🥇','🥈','🥉',''];
+  el.innerHTML=podOrder.map((pod,idx)=>{{
     const d=DAILY[pod];
+    const medal=medals[idx]||'';
+    const rank=idx+1;
     const hasCh=d.churnCnt>0;
     const churnColor=hasCh?'text-red-400':'text-emerald-400';
     const churnLabel=hasCh?d.churnCnt+' churned ('+fmtChurnArr(d.churnArr)+')':'No churns yesterday';
@@ -1188,7 +1196,11 @@ function renderDailyCards(){{
     return`
     <div class="glass rounded-xl p-5">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-lg font-700 text-white">${{pod.replace('+',' + ')}}</h3>
+        <div class="flex items-center gap-3">
+          <span class="text-dark-500 text-sm font-600">#${{rank}}</span>
+          ${{medal?'<span class="text-2xl">'+medal+'</span>':''}}
+          <h3 class="text-lg font-700 text-white">${{pod.replace('+',' + ')}}</h3>
+        </div>
       </div>
       <div class="grid grid-cols-3 gap-3 text-center mb-4">
         <div><p class="text-lg font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Active Customers</p></div>
