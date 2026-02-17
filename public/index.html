@@ -624,7 +624,7 @@ const D=[
 ];
 const PM={'Marcus+Martin':{cnt:82,arr:2204000,ltv:4381147,rated:26,risk:13,t1:11,t2:23,t3:31,t4:17,csms:[{n:'Marcus',role:'FE',cl:'blue',cnt:32,arr:868000,unr:30},{n:'Martin',role:'BE',cl:'purple',cnt:50,arr:1336000,unr:26}]},'Sebastian+Daniel':{cnt:79,arr:1723000,ltv:3564199,rated:26,risk:17,t1:11,t2:11,t3:21,t4:36,csms:[{n:'Sebastian',role:'FE',cl:'blue',cnt:50,arr:802000,unr:49},{n:'Daniel',role:'BE',cl:'purple',cnt:29,arr:921000,unr:4}]},'Aimy+Espen':{cnt:16,arr:186000,ltv:303944,rated:11,risk:7,t1:0,t2:1,t3:6,t4:9,csms:[{n:'Aimy',role:'FE',cl:'blue',cnt:16,arr:186000,unr:5}]},'Nicklas+Hamsa':{cnt:57,arr:536000,ltv:771086,rated:32,risk:9,t1:0,t2:4,t3:12,t4:41,csms:[{n:'Nicklas',role:'FE',cl:'blue',cnt:50,arr:476000,unr:23},{n:'Hamsa',role:'BE',cl:'purple',cnt:7,arr:60000,unr:2}]}};
 const TOTAL={ws:234,arr:4649000,ltv:9020376,risk:46};
-const DAILY={'Marcus+Martin':{cnt:82,arr:2204000,churnCnt:0,churnArr:0,churns:[]},'Sebastian+Daniel':{cnt:79,arr:1723000,churnCnt:0,churnArr:0,churns:[]},'Aimy+Espen':{cnt:16,arr:186000,churnCnt:0,churnArr:0,churns:[]},'Nicklas+Hamsa':{cnt:57,arr:536000,churnCnt:1,churnArr:12000,churns:[{ri:'686b3476-4e8f-4a29-93ff-577949ccb041',n:'Parken Jewelry',pl:'Growth',arr:12000,ss:'Cancelled - ended at Feb 16, 2026',sid:'sub_1S8PbhFopWoUwtLcrJWWXZFj'}]}};
+const DAILY={'Marcus+Martin':{cnt:82,arr:2204000,churnCnt:0,churnArr:0,churns:[]},'Sebastian+Daniel':{cnt:79,arr:1723000,churnCnt:0,churnArr:0,churns:[]},'Aimy+Espen':{cnt:16,arr:186000,churnCnt:0,churnArr:0,churns:[]},'Nicklas+Hamsa':{cnt:57,arr:536000,churnCnt:1,churnArr:12000,churns:[{ri:'686b3476-4e8f-4a29-93ff-577949ccb041',n:'Parken Jewelry',pl:'Growth',arr:12000,ss:'Cancelled - ended at Feb 16, 2026',sid:'sub_1S8PbhFopWoUwtLcrJWWXZFj',lr:'',cc:''}]}};
 
 let curPod='all',curTier='all',curCSM='all';
 let curTopTab='daily';
@@ -671,19 +671,23 @@ function renderDailyCards(){
     let churnRows='';
     if(hasCh){
       churnRows=d.churns.map(c=>`
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-dark-800/50 last:border-0">
-          <div class="flex-1 min-w-0">
-            <p class="text-white text-sm font-600 truncate">${c.n}</p>
-            <p class="text-dark-500 text-xs mt-0.5">${c.ss}</p>
+        <div class="py-3 border-b border-dark-800/50 last:border-0">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div class="flex-1 min-w-0">
+              <p class="text-white text-sm font-600 truncate">${c.n}</p>
+              <p class="text-dark-500 text-xs mt-0.5">${c.ss}</p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <span class="text-xs text-dark-400">${c.pl}</span>
+              <span class="text-sm font-600 text-red-400">&minus;${c.arr.toLocaleString()}</span>
+              <span class="inline-flex gap-2">
+                ${c.sid?'<a href="https://dashboard.stripe.com/subscriptions/'+c.sid+'" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>':''}
+                <a href="https://app.attio.com/metric/workspaces/record/${c.ri}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>
+              </span>
+            </div>
           </div>
-          <div class="flex items-center gap-3 shrink-0">
-            <span class="text-xs text-dark-400">${c.pl}</span>
-            <span class="text-sm font-600 text-red-400">&minus;${c.arr.toLocaleString()}</span>
-            <span class="inline-flex gap-2">
-              ${c.sid?'<a href="https://dashboard.stripe.com/subscriptions/'+c.sid+'" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>':''}
-              <a href="https://app.attio.com/metric/workspaces/record/${c.ri}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>
-            </span>
-          </div>
+          ${c.lr?'<p class="text-xs mt-1.5"><span class="text-dark-500">Churn reason:</span> <span class="text-amber-400 font-500">'+c.lr+'</span></p>':''}
+          ${c.cc?'<p class="text-xs mt-1 text-dark-400"><span class="text-dark-500">Comment:</span> '+c.cc+'</p>':''}
         </div>`).join('');
     }
     return`

@@ -274,6 +274,9 @@ def normalize_record(rec, trust_created_at=True):
     soft_churn_raw = rec.get("soft_churn")
     soft_churn = soft_churn_raw in ("true", True, "True")
 
+    lost_reason = rec.get("lost_reason") or ""
+    churn_comment = rec.get("churn_comment", "") or ""
+
     active_status = rec.get("active_status", [])
     if isinstance(active_status, str):
         active_status = [s.strip() for s in active_status.split(",") if s.strip()]
@@ -316,6 +319,8 @@ def normalize_record(rec, trust_created_at=True):
         "bull": bull,
         "upsell_arr": upsell_arr,
         "rev_share": rev_share,
+        "lost_reason": lost_reason,
+        "churn_comment": churn_comment,
     }
 
 
@@ -729,6 +734,8 @@ def compute_daily_churn(workspaces):
                 ws = ws_lookup.get(record_id)
                 pod = ws["pod"] if ws else "Unknown"
                 name = ws["name"] if ws else "Unknown"
+                lost_reason = ws.get("lost_reason", "") if ws else ""
+                churn_comment = ws.get("churn_comment", "") if ws else ""
                 if pod in pod_churns:
                     pod_churns[pod].append({
                         "record_id": record_id,
@@ -737,6 +744,8 @@ def compute_daily_churn(workspaces):
                         "arr": entry.get("arr", 0),
                         "sub_status": entry.get("sub_status", ""),
                         "stripe_sub_id": entry.get("stripe_sub_id", ""),
+                        "lost_reason": lost_reason,
+                        "churn_comment": churn_comment,
                     })
 
     # Build JS constant
@@ -748,9 +757,12 @@ def compute_daily_churn(workspaces):
         for c in churns:
             name_esc = c["name"].replace("\\", "\\\\").replace("'", "\\'")
             sub_status_esc = c["sub_status"].replace("\\", "\\\\").replace("'", "\\'")
+            lr_esc = c["lost_reason"].replace("\\", "\\\\").replace("'", "\\'")
+            cc_esc = c["churn_comment"].replace("\\", "\\\\").replace("'", "\\'")
             churn_js_items.append(
                 f"{{ri:'{c['record_id']}',n:'{name_esc}',pl:'{c['plan']}',"
-                f"arr:{c['arr']},ss:'{sub_status_esc}',sid:'{c['stripe_sub_id']}'}}"
+                f"arr:{c['arr']},ss:'{sub_status_esc}',sid:'{c['stripe_sub_id']}',"
+                f"lr:'{lr_esc}',cc:'{cc_esc}'}}"
             )
         churns_str = ",".join(churn_js_items)
         churn_count = len(churns)
@@ -1224,19 +1236,23 @@ function renderDailyCards(){{
     let churnRows='';
     if(hasCh){{
       churnRows=d.churns.map(c=>`
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-dark-800/50 last:border-0">
-          <div class="flex-1 min-w-0">
-            <p class="text-white text-sm font-600 truncate">${{c.n}}</p>
-            <p class="text-dark-500 text-xs mt-0.5">${{c.ss}}</p>
+        <div class="py-3 border-b border-dark-800/50 last:border-0">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div class="flex-1 min-w-0">
+              <p class="text-white text-sm font-600 truncate">${{c.n}}</p>
+              <p class="text-dark-500 text-xs mt-0.5">${{c.ss}}</p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <span class="text-xs text-dark-400">${{c.pl}}</span>
+              <span class="text-sm font-600 text-red-400">&minus;${{c.arr.toLocaleString()}}</span>
+              <span class="inline-flex gap-2">
+                ${{c.sid?'<a href="https://dashboard.stripe.com/subscriptions/'+c.sid+'" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>':''}}
+                <a href="https://app.attio.com/metric/workspaces/record/${{c.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>
+              </span>
+            </div>
           </div>
-          <div class="flex items-center gap-3 shrink-0">
-            <span class="text-xs text-dark-400">${{c.pl}}</span>
-            <span class="text-sm font-600 text-red-400">&minus;${{c.arr.toLocaleString()}}</span>
-            <span class="inline-flex gap-2">
-              ${{c.sid?'<a href="https://dashboard.stripe.com/subscriptions/'+c.sid+'" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>':''}}
-              <a href="https://app.attio.com/metric/workspaces/record/${{c.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>
-            </span>
-          </div>
+          ${{c.lr?'<p class="text-xs mt-1.5"><span class="text-dark-500">Churn reason:</span> <span class="text-amber-400 font-500">'+c.lr+'</span></p>':''}}
+          ${{c.cc?'<p class="text-xs mt-1 text-dark-400"><span class="text-dark-500">Comment:</span> '+c.cc+'</p>':''}}
         </div>`).join('');
     }}
     return`
