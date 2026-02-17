@@ -343,7 +343,7 @@ let curPod='all',curTier='all',curCSM='all';
 
 function fmt(v){if(!v)return'<span class="text-dark-600">&mdash;</span>';if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}
 function fmtSh(v){if(!v)return'<span class="text-dark-600">&mdash;</span>';if(v>=1e6)return'<span class="text-emerald-400 font-600">$'+(v/1e6).toFixed(1)+'M</span>';if(v>=1e5)return'<span class="text-emerald-400">$'+(v/1e3).toFixed(0)+'K</span>';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}
-function stars(h){if(h===null||h===undefined)return'<span class="text-dark-600 text-xs">Not rated</span>';const c={1:'text-red-400',2:'text-orange-400',3:'text-amber-400',4:'text-emerald-400',5:'text-emerald-300'};let s='';for(let i=1;i<=5;i++)s+=i<=h?`<span class="${...c}[h]">\u2605</span>`:'<span class="text-dark-700">\u2605</span>';return s;}
+function stars(h){if(h===null||h===undefined)return'<span class="text-dark-600 text-xs">Not rated</span>';const c={1:'text-red-400',2:'text-orange-400',3:'text-amber-400',4:'text-emerald-400',5:'text-emerald-300'};let s='';for(let i=1;i<=5;i++)s+=i<=h?'<span class="'+c[h]+'">\u2605</span>':'<span class="text-dark-700">\u2605</span>';return s;}
 function retBadge(r){const p=Math.round(r*100);let c='text-red-400 bg-red-500/10';if(p>=80)c='text-emerald-400 bg-emerald-500/10';else if(p>=60)c='text-amber-400 bg-amber-500/10';else if(p>=40)c='text-orange-400 bg-orange-500/10';return`<span class="signal-tag ${c}">${p}%</span>`;}
 function sigTags(sigs){const cm={'LTV UP':'bg-emerald-500/10 text-emerald-400','CHURN':'bg-red-500/10 text-red-400','IDLE':'bg-amber-500/10 text-amber-400','INT.ERR':'bg-orange-500/10 text-orange-400','UPSELL':'bg-cyan-500/10 text-cyan-400','REVSHARE':'bg-teal-500/10 text-teal-400','NEW':'bg-dark-700 text-dark-300'};return sigs.map(s=>{let c='bg-dark-700 text-dark-300';for(const[k,v]of Object.entries(cm))if(s.includes(k)){c=v;break;};if(s.includes('ROAS'))c=s.includes('\u2605')?'bg-emerald-500/10 text-emerald-400':s.includes('\u2713')?'bg-blue-500/10 text-blue-400':'bg-amber-500/10 text-amber-400';return`<span class="signal-tag ${c}">${s}</span>`;}).join(' ');}
 function tierCls(t){return{1:'tier-1-row',2:'tier-2-row',3:'tier-3-row',4:'tier-4-row'}[t]||'';}
@@ -453,14 +453,6 @@ function selectPod(p){
 function filterTier(t){curTier=t;updateTierFilters();renderTable();}
 function filterCSM(c){curCSM=c;updateCSMFilters();renderTable();}
 function applyFilters(){renderTable();}
-
-// Health stars fix
-function stars(h){
-  if(h===null||h===undefined)return'<span class="text-dark-600 text-xs">Not rated</span>';
-  const colors={1:'text-red-400',2:'text-orange-400',3:'text-amber-400',4:'text-emerald-400',5:'text-emerald-300'};
-  let s='';for(let i=1;i<=5;i++)s+=i<=h?'<span class="'+colors[h]+'">\u2605</span>':'<span class="text-dark-700">\u2605</span>';
-  return s;
-}
 
 // Init
 selectPod('all');
