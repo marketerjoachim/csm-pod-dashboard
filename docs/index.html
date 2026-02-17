@@ -41,8 +41,8 @@ tailwind.config = {
   .tip .tip-text { visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; padding: 8px 12px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #cbd5e1; font-size: 0.75rem; font-weight: 400; text-transform: none; letter-spacing: 0; line-height: 1.5; white-space: normal; width: 240px; z-index: 50; transition: opacity 0.15s, visibility 0.15s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }
   .tip:hover .tip-text { visibility: visible; opacity: 1; }
   .tip .tip-text::before { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-bottom-color: #1e293b; }
-  th { position: relative; overflow: hidden; text-overflow: ellipsis; }
-  td { overflow: hidden; text-overflow: ellipsis; }
+  th { position: relative; white-space: nowrap; }
+  td { white-space: nowrap; }
   th .col-resize { position: absolute; right: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; z-index: 5; }
   th .col-resize:hover, th .col-resize.active { background: rgba(56,189,248,0.4); }
   th.sortable { cursor: pointer; user-select: none; }
@@ -281,7 +281,7 @@ tailwind.config = {
       <span class="text-dark-500 text-xs" id="scrollHint">Scroll right for more columns &rarr;</span>
     </div>
     <div class="overflow-x-auto scrollbar-thin" id="tableScroll">
-      <table class="text-sm" id="mainTable" style="min-width:1400px">
+      <table class="text-sm" id="mainTable">
         <thead>
           <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800" id="headerRow">
             <th class="sortable text-left px-3 py-3 font-600" data-sort="pi" data-dir="desc" onclick="sortCol(this)"><span class="tip">#<span class="tip-text">Priority rank. #1 = highest-value workspace. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
@@ -777,15 +777,14 @@ function initColResize(){
   const table=document.getElementById('mainTable');
   if(!table)return;
   const ths=table.querySelectorAll('thead th');
-  // Wait one frame so layout is computed
   requestAnimationFrame(function(){
-    // Snapshot natural widths, shrink # col by 25%
-    const widths=[];
-    ths.forEach(function(th,i){ widths.push(th.offsetWidth); });
-    if(widths[0])widths[0]=Math.round(widths[0]*0.75);
-    // Apply fixed layout with measured widths
-    table.style.tableLayout='fixed';
-    ths.forEach(function(th,i){ th.style.width=widths[i]+'px'; });
+    // Snapshot natural widths
+    ths.forEach(function(th,i){
+      let w=th.offsetWidth;
+      if(i===0)w=Math.round(w*0.75); // shrink # col
+      th.style.minWidth=w+'px';
+      th.style.maxWidth=w+'px';
+    });
     // Add resize handles
     ths.forEach(function(th,i){
       if(i===ths.length-1)return;
@@ -796,16 +795,14 @@ function initColResize(){
         e.preventDefault();
         e.stopPropagation();
         const startX=e.pageX;
-        const startW=th.offsetWidth;
-        const nTh=ths[i+1];
-        const nW=nTh?nTh.offsetWidth:0;
+        const startW=parseInt(th.style.minWidth)||th.offsetWidth;
         handle.classList.add('active');
         document.body.style.cursor='col-resize';
         document.body.style.userSelect='none';
         function onMove(e2){
-          const dx=e2.pageX-startX;
-          th.style.width=Math.max(30,startW+dx)+'px';
-          if(nTh)nTh.style.width=Math.max(30,nW-dx)+'px';
+          const nw=Math.max(30,startW+(e2.pageX-startX))+'px';
+          th.style.minWidth=nw;
+          th.style.maxWidth=nw;
         }
         function onUp(){
           handle.classList.remove('active');
