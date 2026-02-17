@@ -37,6 +37,10 @@ tailwind.config = {
   .pod-tab:not(.active):hover { background: rgba(255,255,255,0.04); }
   .link-icon { opacity: 0.5; transition: opacity 0.15s; }
   .link-icon:hover { opacity: 1; }
+  .tip { position: relative; cursor: help; }
+  .tip .tip-text { visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; padding: 8px 12px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #cbd5e1; font-size: 0.75rem; font-weight: 400; text-transform: none; letter-spacing: 0; line-height: 1.5; white-space: normal; width: 240px; z-index: 50; transition: opacity 0.15s, visibility 0.15s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }
+  .tip:hover .tip-text { visibility: visible; opacity: 1; }
+  .tip .tip-text::before { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-bottom-color: #1e293b; }
 </style>
 </head>
 <body class="bg-dark-950 text-dark-200 min-h-screen">
@@ -236,21 +240,21 @@ tailwind.config = {
       <table class="w-full text-sm">
         <thead>
           <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800">
-            <th class="text-left px-3 py-3 font-600 cursor-help" title="Priority rank within the selected pod. #1 is the highest-value workspace based on our scoring model.">#</th>
-            <th class="text-left px-3 py-3 font-600 cursor-help" title="The client's workspace name in our platform.">Workspace</th>
-            <th class="text-left px-3 py-3 font-600 cursor-help" title="Which CSM pod manages this client. Each pod has a front-end CSM (client-facing) and a back-end CSM (operations).">Pod</th>
-            <th class="text-left px-3 py-3 font-600 cursor-help" title="The Customer Success Manager responsible for this workspace.">CSM</th>
-            <th class="text-left px-3 py-3 font-600 cursor-help" title="The client's subscription plan: Starter, Lite, Growth, Pro, Performance, or Enterprise.">Plan</th>
-            <th class="text-center px-3 py-3 font-600 cursor-help" title="CSM's health rating (1-5 stars). How well the client relationship is going. 5 = thriving, 1 = at serious risk. 'Not rated' means the CSM hasn't assessed this client yet.">Health</th>
-            <th class="text-right px-3 py-3 font-600 cursor-help" title="Estimated Annual Recurring Revenue. Based on plan-level averages (e.g. Pro ~$25K/yr, Performance ~$48K/yr), not exact subscription amounts.">Est. ARR</th>
-            <th class="text-right px-3 py-3 font-600 cursor-help" title="The client's total Shopify store sales over the last 30 days. A proxy for how large their e-commerce business is — bigger stores = more to gain from our ads.">Shopify/30d</th>
-            <th class="text-right px-3 py-3 font-600 cursor-help" title="All-Time-Data Return on Ad Spend. For every $1 the client spent on ads through us, how many dollars of revenue did they earn — across their entire history. Higher = better. 2x+ is good, 8x+ is excellent.">ROAS (ATD)</th>
-            <th class="text-center px-3 py-3 font-600 cursor-help" title="Estimated probability that this client will still be paying us in a year. Based on their health rating, churn flags, and activity levels. 92% for health 5, down to 25% for health 1.">Ret. %</th>
-            <th class="text-right px-3 py-3 font-600 cursor-help" title="Estimated 3-Year Lifetime Value. How much total revenue we expect from this client over 3 years, accounting for their chance of churning and growth potential. This is the main number driving prioritization.">3yr LTV</th>
-            <th class="text-left px-3 py-3 font-600 cursor-help" title="Quick-glance tags highlighting important characteristics: CHURN = at risk, IDLE = no campaigns running, ROAS = strong ad performance, UPSELL = should be on a bigger plan, LTV UP = CSM sees high potential.">Signals</th>
-            <th class="text-left px-3 py-3 font-600 cursor-help" title="Recommended next step for this client, or the CSM's latest note. This tells you what needs to happen.">Action / Note</th>
-            <th class="text-center px-2 py-3 font-600 cursor-help" title="Link to this client's subscription in Stripe (our payment platform).">S</th>
-            <th class="text-center px-2 py-3 font-600 cursor-help" title="Link to this client's workspace record in Attio (our CRM).">A</th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">#<span class="tip-text">Priority rank within the selected pod. #1 is the highest-value workspace based on our scoring model.</span></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Workspace<span class="tip-text">The client's workspace name in our platform.</span></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Pod<span class="tip-text">Which CSM pod manages this client. Each pod has a front-end CSM (client-facing) and a back-end CSM (operations).</span></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">CSM<span class="tip-text">The Customer Success Manager responsible for this workspace.</span></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Plan<span class="tip-text">The client's subscription plan: Starter, Lite, Growth, Pro, Performance, or Enterprise.</span></span></th>
+            <th class="text-center px-3 py-3 font-600"><span class="tip">Health<span class="tip-text">CSM's health rating (1-5 stars). How well the client relationship is going. 5 = thriving, 1 = at serious risk. "Not rated" means the CSM hasn't assessed yet.</span></span></th>
+            <th class="text-right px-3 py-3 font-600"><span class="tip">Est. ARR<span class="tip-text">Estimated Annual Recurring Revenue based on plan-level averages (e.g. Pro ~$25K/yr, Performance ~$48K/yr), not exact subscription amounts.</span></span></th>
+            <th class="text-right px-3 py-3 font-600"><span class="tip">Shopify/30d<span class="tip-text">The client's total Shopify store sales over the last 30 days. A proxy for how large their e-commerce business is &mdash; bigger stores have more to gain from our ads.</span></span></th>
+            <th class="text-right px-3 py-3 font-600"><span class="tip">ROAS (ATD)<span class="tip-text">All-Time Return on Ad Spend. For every $1 the client spent on ads through us, how many dollars of revenue did they earn &mdash; across their entire history. 2x+ is good, 8x+ is excellent.</span></span></th>
+            <th class="text-center px-3 py-3 font-600"><span class="tip">Ret. %<span class="tip-text">Estimated probability this client will still be paying us in a year. Based on health rating, churn flags, and activity. 92% for health 5, down to 25% for health 1.</span></span></th>
+            <th class="text-right px-3 py-3 font-600"><span class="tip">3yr LTV<span class="tip-text">Estimated 3-Year Lifetime Value. How much total revenue we expect from this client over 3 years, factoring in churn risk and growth potential. The main number driving prioritization.</span></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Signals<span class="tip-text">Quick-glance tags: CHURN = at risk, IDLE = no campaigns, ROAS = strong ad returns, UPSELL = should be on bigger plan, LTV UP = CSM sees high potential.</span></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Action / Note<span class="tip-text">Recommended next step for this client, or the CSM's latest note.</span></span></th>
+            <th class="text-center px-2 py-3 font-600"><span class="tip">S<span class="tip-text">Link to this client's subscription in Stripe (payment platform).</span></span></th>
+            <th class="text-center px-2 py-3 font-600"><span class="tip">A<span class="tip-text">Link to this client's workspace record in Attio (CRM).</span></span></th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
