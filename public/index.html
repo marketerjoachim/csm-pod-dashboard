@@ -112,6 +112,7 @@ tailwind.config = {
       <h1 class="text-3xl sm:text-4xl font-800 text-white mb-1">Daily Customer Update</h1>
       <p class="text-dark-400 text-sm">Feb 16, 2026 &mdash; Yesterday's churn summary across all pods</p>
     </div>
+    <div class="glass rounded-xl p-5 mb-6" id="dailyAggregate"></div>
     <div class="grid grid-cols-1 gap-4" id="dailyCards"></div>
   </div>
 
@@ -608,6 +609,17 @@ function switchTopTab(tab){
 function renderDailyCards(){
   const el=document.getElementById('dailyCards');
   const pods=['Marcus+Martin','Sebastian+Daniel','Aimy+Espen','Nicklas+Hamsa'];
+  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0;
+  pods.forEach(p=>{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;});
+  const agEl=document.getElementById('dailyAggregate');
+  const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
+  agEl.innerHTML=`
+    <h3 class="text-lg font-700 text-white mb-3">All Teams</h3>
+    <div class="grid grid-cols-3 gap-3 text-center">
+      <div><p class="text-2xl font-700 text-white">${totCnt}</p><p class="text-dark-500 text-xs">Total Customers</p></div>
+      <div><p class="text-2xl font-700 text-white">${fmt(totArr)}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
+      <div><p class="text-2xl font-700 ${agChurnColor}">${totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
+    </div>`;
   const podOrder=pods.sort((a,b)=>{
     const da=DAILY[a],db=DAILY[b];
     if(da.churnArr!==db.churnArr)return da.churnArr-db.churnArr;
