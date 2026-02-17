@@ -273,12 +273,16 @@ tailwind.config = {
 
   <!-- Main Table -->
   <div class="glass rounded-xl overflow-hidden fade-in" style="animation-delay:0.25s">
-    <div class="overflow-x-auto scrollbar-thin">
+    <div class="flex items-center justify-end px-4 pt-3 pb-1">
+      <span class="text-dark-500 text-xs" id="scrollHint">Scroll right for more columns &rarr;</span>
+    </div>
+    <div class="overflow-x-auto scrollbar-thin" id="tableScroll">
       <table class="w-full text-sm">
         <thead>
           <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800" id="headerRow">
             <th class="sortable text-left px-3 py-3 font-600" data-sort="pi" data-dir="desc" onclick="sortCol(this)"><span class="tip">#<span class="tip-text">Priority rank. #1 = highest-value workspace. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
             <th class="sortable text-left px-3 py-3 font-600" data-sort="n" onclick="sortCol(this)"><span class="tip">Workspace<span class="tip-text">The client's workspace name. Click to sort A-Z.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="text-center px-3 py-3 font-600 text-dark-500">Links</th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Pod<span class="tip-text">Which CSM pod manages this client.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropPod')">&#9662;</span><div class="col-dropdown" id="dropPod"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">CSM<span class="tip-text">The Customer Success Manager responsible.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCSM')">&#9662;</span><div class="col-dropdown" id="dropCSM"></div></span></th>
             <th class="sortable text-left px-3 py-3 font-600" data-sort="sd" onclick="sortCol(this)"><span class="tip">Start<span class="tip-text">When the customer started. Longer tenure = more LTV confidence. Based on onboarding date or account creation.</span></span><span class="sort-arrow">&#9650;</span></th>
@@ -292,8 +296,6 @@ tailwind.config = {
             <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" onclick="sortCol(this)"><span class="tip">2yr LTV<span class="tip-text">Estimated 2-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Signals<span class="tip-text">Quick-glance tags. Use filter to find specific signals.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropSig')">&#9662;</span><div class="col-dropdown" id="dropSig"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Action / Note<span class="tip-text">Recommended next step or CSM's latest note.</span></span></th>
-            <th class="text-center px-2 py-3 font-600"><span class="tip">S<span class="tip-text">Open in Stripe.</span></span></th>
-            <th class="text-center px-2 py-3 font-600"><span class="tip">A<span class="tip-text">Open in Attio.</span></span></th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -557,8 +559,8 @@ function sigTags(sigs){const cm={'LTV UP':'bg-emerald-500/10 text-emerald-400','
 function tierCls(t){return{1:'tier-1-row',2:'tier-2-row',3:'tier-3-row',4:'tier-4-row'}[t]||'';}
 function podLabel(p){return p.split('+').map(x=>x[0]).join('');}
 function podColor(p){const m={'Marcus+Martin':'blue','Sebastian+Daniel':'purple','Aimy+Espen':'pink','Nicklas+Hamsa':'teal'};return m[p]||'blue';}
-function stripeLink(wsId){if(!wsId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://dashboard.stripe.com/subscriptions/${wsId}" target="_blank" rel="noopener" class="link-icon text-dark-400 hover:text-blue-400" title="Open in Stripe">⇗</a>`;}
-function attioLink(recId){if(!recId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://app.attio.com/metric/workspaces/record/${recId}/overview" target="_blank" rel="noopener" class="link-icon text-dark-400 hover:text-purple-400" title="Open in Attio">⇗</a>`;}
+function stripeLink(wsId){if(!wsId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://dashboard.stripe.com/subscriptions/${wsId}" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>`;}
+function attioLink(recId){if(!recId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://app.attio.com/metric/workspaces/record/${recId}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>`;}
 
 function updateKPIs(){
   const el=document.getElementById('kpiCards');
@@ -664,6 +666,7 @@ function renderTable(){
     <tr class="workspace-row border-b border-dark-800/50 ${tierCls(w.t)}">
       <td class="px-3 py-2.5 text-dark-500 text-xs font-500">${i+1}</td>
       <td class="px-3 py-2.5 font-600 text-white text-sm whitespace-nowrap">${w.n}</td>
+      <td class="px-3 py-2.5 text-center whitespace-nowrap"><span class="inline-flex gap-2">${stripeLink(w.w)} ${attioLink(w.ri)}</span></td>
       <td class="px-3 py-2.5 text-xs"><span class="text-dark-400">${w.p.split('+')[0].slice(0,3)}</span></td>
       <td class="px-3 py-2.5 text-xs"><span class="px-2 py-0.5 rounded bg-${podColor(w.p)}-500/10 text-${podColor(w.p)}-400">${w.c}</span></td>
       <td class="px-3 py-2.5 text-xs">${fmtDate(w.sd)}</td>
@@ -677,8 +680,6 @@ function renderTable(){
       <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${fmt(w.l)}</td>
       <td class="px-3 py-2.5"><div class="flex gap-1 flex-wrap">${sigTags(w.s)}</div></td>
       <td class="px-3 py-2.5 text-xs text-dark-400 min-w-[200px]">${w.act}</td>
-      <td class="px-2 py-2.5 text-center">${stripeLink(w.w)}</td>
-      <td class="px-2 py-2.5 text-center">${attioLink(w.ri)}</td>
     </tr>`).join('');
 }
 
@@ -759,6 +760,11 @@ function applyFilters(){renderTable();}
 // Init
 buildDropdowns();
 if(!document.getElementById('dashboard').classList.contains('locked'))selectPod('all');
+
+// Scroll hint — hide once user scrolls right
+const scrollEl=document.getElementById('tableScroll');
+const hintEl=document.getElementById('scrollHint');
+if(scrollEl&&hintEl){scrollEl.addEventListener('scroll',function(){if(scrollEl.scrollLeft>20)hintEl.style.opacity='0';else hintEl.style.opacity='1';});hintEl.style.transition='opacity 0.3s';}
 
 // Password auth
 const PW_HASH='b83f9851aaf52cff85bd8b4e2c63a8c97fec407e8249d78cc27e1f8581915f61';
