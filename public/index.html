@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSM Pod Dashboard — Marcus & Martin</title>
+<title>CSM Pod Dashboard — Marketer</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
@@ -30,379 +30,440 @@ tailwind.config = {
   .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
   tr.workspace-row { transition: background 0.15s; }
   tr.workspace-row:hover { background: rgba(255,255,255,0.04); }
-  .health-bar { height: 6px; border-radius: 3px; }
   .fade-in { animation: fadeIn 0.4s ease-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .pod-tab { cursor:pointer; transition: all 0.2s; }
+  .pod-tab.active { background: rgba(255,255,255,0.08); color: #e2e8f0; border-color: rgba(255,255,255,0.15); }
+  .pod-tab:not(.active):hover { background: rgba(255,255,255,0.04); }
+  .link-icon { opacity: 0.5; transition: opacity 0.15s; }
+  .link-icon:hover { opacity: 1; }
 </style>
 </head>
 <body class="bg-dark-950 text-dark-200 min-h-screen">
-
-<div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-8">
+<div class="max-w-[1500px] mx-auto px-4 sm:px-6 py-8">
 
   <!-- Header -->
-  <div class="fade-in mb-8">
+  <div class="fade-in mb-6">
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-2">
       <div>
         <p class="text-dark-400 text-sm font-medium uppercase tracking-wider mb-1">CSM Pod Dashboard</p>
-        <h1 class="text-3xl sm:text-4xl font-800 text-white">Marcus <span class="text-dark-400 font-500">(FE)</span> + Martin <span class="text-dark-400 font-500">(BE)</span></h1>
+        <h1 class="text-3xl sm:text-4xl font-800 text-white">All Pods Overview</h1>
       </div>
-      <p class="text-dark-500 text-sm">Updated Feb 16, 2026</p>
+      <div class="text-right">
+        <p class="text-dark-500 text-sm">Updated Feb 17, 2026</p>
+        <p class="text-dark-600 text-xs">192 workspaces &middot; $4.2M ARR &middot; $9.8M est. 3yr LTV</p>
+      </div>
     </div>
-    <p class="text-dark-400 text-sm max-w-2xl">LTV-based priority model for CSM resource allocation. Workspaces ranked by estimated 3-year lifetime value adjusted for retention probability, growth potential, and required CSM effort.</p>
+    <p class="text-dark-400 text-sm max-w-3xl">LTV-based priority model for CSM resource allocation across all pods. Workspaces ranked by estimated 3-year lifetime value adjusted for retention probability, growth potential, and required CSM effort.</p>
   </div>
 
-  <!-- KPI Cards -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8 fade-in" style="animation-delay:0.1s">
-    <div class="glass rounded-xl p-4 sm:p-5">
-      <p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Pod ARR</p>
-      <p class="text-2xl sm:text-3xl font-800 text-white">$1.48M</p>
-      <p class="text-dark-500 text-xs mt-1">47 active workspaces</p>
-    </div>
-    <div class="glass rounded-xl p-4 sm:p-5">
-      <p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Est. 3-Year LTV</p>
-      <p class="text-2xl sm:text-3xl font-800 text-emerald-400">$3.63M</p>
-      <p class="text-dark-500 text-xs mt-1">Based on current signals</p>
-    </div>
-    <div class="glass rounded-xl p-4 sm:p-5">
-      <p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Health Rated</p>
-      <p class="text-2xl sm:text-3xl font-800 text-amber-400">25 <span class="text-lg text-dark-500">/ 47</span></p>
-      <p class="text-dark-500 text-xs mt-1">22 unrated (blind spot)</p>
-    </div>
-    <div class="glass rounded-xl p-4 sm:p-5">
-      <p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">At Risk (Health 1-3)</p>
-      <p class="text-2xl sm:text-3xl font-800 text-red-400">16</p>
-      <p class="text-dark-500 text-xs mt-1">With documented retention plans</p>
-    </div>
+  <!-- Pod Tabs -->
+  <div class="flex flex-wrap gap-2 mb-6 fade-in" style="animation-delay:0.05s" id="podTabs">
+    <button onclick="selectPod('all')" class="pod-tab active px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50" data-pod="all">All Pods (192)</button>
+    <button onclick="selectPod('Marcus+Martin')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Marcus+Martin">Marcus + Martin (47)</button>
+    <button onclick="selectPod('Sebastian+Daniel')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Sebastian+Daniel">Sebastian + Daniel (72)</button>
+    <button onclick="selectPod('Aimy+Espen')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Aimy+Espen">Aimy + Espen (16)</button>
+    <button onclick="selectPod('Nicklas+Hamsa')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Nicklas+Hamsa">Nicklas + Hamsa (57)</button>
   </div>
 
-  <!-- Split: Marcus vs Martin -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-8 fade-in" style="animation-delay:0.15s">
-    <div class="glass rounded-xl p-4 sm:p-5">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-sm font-bold">M</div>
-        <div>
-          <p class="text-white font-600">Marcus Ryde <span class="text-dark-400 font-400 text-sm">FE / Team Lead</span></p>
-        </div>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center">
-        <div><p class="text-lg font-700 text-white">21</p><p class="text-dark-500 text-xs">Workspaces</p></div>
-        <div><p class="text-lg font-700 text-white">$800K</p><p class="text-dark-500 text-xs">ARR</p></div>
-        <div><p class="text-lg font-700 text-amber-400">19 unrated</p><p class="text-dark-500 text-xs">Health gap</p></div>
-      </div>
-    </div>
-    <div class="glass rounded-xl p-4 sm:p-5">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm font-bold">M</div>
-        <div>
-          <p class="text-white font-600">Martin Hildeskor <span class="text-dark-400 font-400 text-sm">BE</span></p>
-        </div>
-      </div>
-      <div class="grid grid-cols-3 gap-3 text-center">
-        <div><p class="text-lg font-700 text-white">26</p><p class="text-dark-500 text-xs">Workspaces</p></div>
-        <div><p class="text-lg font-700 text-white">$683K</p><p class="text-dark-500 text-xs">ARR</p></div>
-        <div><p class="text-lg font-700 text-emerald-400">23 rated</p><p class="text-dark-500 text-xs">Health covered</p></div>
-      </div>
-    </div>
-  </div>
+  <!-- KPI Cards (dynamic) -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 fade-in" style="animation-delay:0.1s" id="kpiCards"></div>
 
-  <!-- Urgent Actions -->
-  <div class="glass rounded-xl p-5 sm:p-6 mb-8 fade-in" style="animation-delay:0.2s">
-    <h2 class="text-lg font-700 text-white mb-4">Priority Actions</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-amber-400 text-lg">1</span>
-          <p class="text-amber-300 font-600 text-sm">Rate Marcus's 19 Workspaces</p>
-        </div>
-        <p class="text-dark-400 text-xs">$847K ARR has no health signal. Default retention assumptions may be masking churn risk or undervaluing healthy accounts. A 15-min review per workspace transforms forecast accuracy.</p>
-      </div>
-      <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-red-400 text-lg">2</span>
-          <p class="text-red-300 font-600 text-sm">Fix Moniker Integration Error</p>
-        </div>
-        <p class="text-dark-400 text-xs">One technical fix unlocks 4 Enterprise workspaces ($84K ARR). Moniker, Moniker Sport, Moniker Man, and MCB Sportswear all share the same integration blocker.</p>
-      </div>
-      <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-4">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-emerald-400 text-lg">3</span>
-          <p class="text-emerald-300 font-600 text-sm">Upsell Neven Eyewear</p>
-        </div>
-        <p class="text-dark-400 text-xs">$1.2M/mo Shopify sales on a Pro plan is a clear mismatch. Health 4/5 and 2.1x ROAS. Moving to Performance or Enterprise could add $20-50K+ ARR.</p>
-      </div>
-    </div>
-  </div>
+  <!-- CSM Split Cards (dynamic) -->
+  <div id="csmSplit" class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-6 fade-in" style="animation-delay:0.15s"></div>
 
   <!-- Filter/controls -->
-  <div class="flex flex-col sm:flex-row gap-3 mb-4 fade-in" style="animation-delay:0.25s">
-    <div class="flex gap-2 flex-wrap">
-      <button onclick="filterTier('all')" class="filter-btn active px-3 py-1.5 rounded-lg text-xs font-600 bg-dark-800 text-dark-200 hover:bg-dark-700 transition" data-tier="all">All (47)</button>
-      <button onclick="filterTier(1)" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-600 bg-dark-800/50 text-dark-400 hover:bg-dark-700 transition" data-tier="1">Tier 1 (9)</button>
-      <button onclick="filterTier(2)" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-600 bg-dark-800/50 text-dark-400 hover:bg-dark-700 transition" data-tier="2">Tier 2 (17)</button>
-      <button onclick="filterTier(3)" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-600 bg-dark-800/50 text-dark-400 hover:bg-dark-700 transition" data-tier="3">Tier 3 (19)</button>
-      <button onclick="filterTier(4)" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-600 bg-dark-800/50 text-dark-400 hover:bg-dark-700 transition" data-tier="4">Tier 4 (2)</button>
-    </div>
-    <div class="flex gap-2 flex-wrap">
-      <button onclick="filterCSM('all')" class="csm-btn active px-3 py-1.5 rounded-lg text-xs font-600 bg-dark-800 text-dark-200 hover:bg-dark-700 transition" data-csm="all">Both</button>
-      <button onclick="filterCSM('Marcus')" class="csm-btn px-3 py-1.5 rounded-lg text-xs font-600 bg-dark-800/50 text-dark-400 hover:bg-dark-700 transition" data-csm="Marcus">Marcus</button>
-      <button onclick="filterCSM('Martin')" class="csm-btn px-3 py-1.5 rounded-lg text-xs font-600 bg-dark-800/50 text-dark-400 hover:bg-dark-700 transition" data-csm="Martin">Martin</button>
-    </div>
+  <div class="flex flex-col sm:flex-row gap-3 mb-4 fade-in" style="animation-delay:0.2s">
+    <div class="flex gap-2 flex-wrap" id="tierFilters"></div>
+    <div class="flex gap-2 flex-wrap" id="csmFilters"></div>
     <div class="sm:ml-auto">
       <input type="text" id="searchInput" placeholder="Search workspace..." oninput="applyFilters()" class="px-3 py-1.5 rounded-lg text-xs bg-dark-800/50 text-dark-200 border border-dark-700 focus:border-dark-500 focus:outline-none w-48" />
     </div>
   </div>
 
   <!-- Main Table -->
-  <div class="glass rounded-xl overflow-hidden fade-in" style="animation-delay:0.3s">
+  <div class="glass rounded-xl overflow-hidden fade-in" style="animation-delay:0.25s">
     <div class="overflow-x-auto scrollbar-thin">
       <table class="w-full text-sm">
         <thead>
           <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800">
-            <th class="text-left px-4 py-3 font-600">#</th>
-            <th class="text-left px-4 py-3 font-600">Workspace</th>
-            <th class="text-left px-4 py-3 font-600">CSM</th>
-            <th class="text-left px-4 py-3 font-600">Plan</th>
-            <th class="text-center px-4 py-3 font-600">Health</th>
-            <th class="text-right px-4 py-3 font-600">Est. ARR</th>
-            <th class="text-right px-4 py-3 font-600">Shopify/30d</th>
-            <th class="text-right px-4 py-3 font-600">ROAS (ATD)</th>
-            <th class="text-center px-4 py-3 font-600">Ret. %</th>
-            <th class="text-right px-4 py-3 font-600">3yr LTV</th>
-            <th class="text-left px-4 py-3 font-600">Signals</th>
-            <th class="text-left px-4 py-3 font-600">Action / CSM Note</th>
+            <th class="text-left px-3 py-3 font-600">#</th>
+            <th class="text-left px-3 py-3 font-600">Workspace</th>
+            <th class="text-left px-3 py-3 font-600">Pod</th>
+            <th class="text-left px-3 py-3 font-600">CSM</th>
+            <th class="text-left px-3 py-3 font-600">Plan</th>
+            <th class="text-center px-3 py-3 font-600">Health</th>
+            <th class="text-right px-3 py-3 font-600">Est. ARR</th>
+            <th class="text-right px-3 py-3 font-600">Shopify/30d</th>
+            <th class="text-right px-3 py-3 font-600">ROAS (ATD)</th>
+            <th class="text-center px-3 py-3 font-600">Ret. %</th>
+            <th class="text-right px-3 py-3 font-600">3yr LTV</th>
+            <th class="text-left px-3 py-3 font-600">Signals</th>
+            <th class="text-left px-3 py-3 font-600">Action / Note</th>
+            <th class="text-center px-2 py-3 font-600" title="Stripe">S</th>
+            <th class="text-center px-2 py-3 font-600" title="Attio">A</th>
           </tr>
         </thead>
-        <tbody id="tableBody">
-        </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
 
   <!-- Glossary -->
-  <div class="glass rounded-xl p-5 sm:p-6 mt-8 fade-in" style="animation-delay:0.35s">
+  <div class="glass rounded-xl p-5 sm:p-6 mt-8 fade-in" style="animation-delay:0.3s">
     <h2 class="text-lg font-700 text-white mb-4">Glossary</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-      <div class="flex gap-3">
-        <span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">LTV UP</span>
-        <p class="text-dark-400"><strong class="text-dark-300">Time = ROAS:</strong> CSM believes investing dedicated time in this client will produce strong ad return (ROAS), indicating high lifetime value potential. Prioritize.</p>
-      </div>
-      <div class="flex gap-3">
-        <span class="signal-tag bg-blue-500/10 text-blue-400 shrink-0">FE</span>
-        <p class="text-dark-400"><strong class="text-dark-300">Front-End:</strong> Needs client-facing CSM involvement (relationship management, meetings, calls).</p>
-      </div>
-      <div class="flex gap-3">
-        <span class="signal-tag bg-purple-500/10 text-purple-400 shrink-0">C-SUITE</span>
-        <p class="text-dark-400"><strong class="text-dark-300">C-Suite Escalation:</strong> Requires senior leadership involvement to resolve (strategic meeting or escalation).</p>
-      </div>
-      <div class="flex gap-3">
-        <span class="signal-tag bg-red-500/10 text-red-400 shrink-0">CHURN</span>
-        <p class="text-dark-400"><strong class="text-dark-300">Churn Risk:</strong> Workspace flagged with cancelled/overdue status or explicit churn risk indicators.</p>
-      </div>
-      <div class="flex gap-3">
-        <span class="signal-tag bg-amber-500/10 text-amber-400 shrink-0">IDLE</span>
-        <p class="text-dark-400"><strong class="text-dark-300">Inactive:</strong> No active ad campaigns for 20+ days. Risk of disengagement if not addressed.</p>
-      </div>
-      <div class="flex gap-3">
-        <span class="signal-tag bg-orange-500/10 text-orange-400 shrink-0">INT.ERR</span>
-        <p class="text-dark-400"><strong class="text-dark-300">Integration Error:</strong> Technical integration with client's store is broken, blocking all value delivery.</p>
-      </div>
-      <div class="flex gap-3">
-        <span class="signal-tag bg-cyan-500/10 text-cyan-400 shrink-0">UPSELL</span>
-        <p class="text-dark-400"><strong class="text-dark-300">Upsell Candidate:</strong> Client's usage or business size suggests they should be on a higher plan.</p>
-      </div>
-      <div class="flex gap-3">
-        <span class="signal-tag bg-teal-500/10 text-teal-400 shrink-0">REVSHARE</span>
-        <p class="text-dark-400"><strong class="text-dark-300">Revenue Share:</strong> Company earns a % of client's profit/revenue, creating aligned growth incentives.</p>
-      </div>
+      <div class="flex gap-3"><span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">LTV UP</span><p class="text-dark-400"><strong class="text-dark-300">Time = ROAS:</strong> CSM believes investing dedicated time in this client will produce strong ad return, indicating high LTV potential.</p></div>
+      <div class="flex gap-3"><span class="signal-tag bg-red-500/10 text-red-400 shrink-0">CHURN</span><p class="text-dark-400"><strong class="text-dark-300">Churn Risk:</strong> Cancelled/overdue status or explicit churn risk indicators.</p></div>
+      <div class="flex gap-3"><span class="signal-tag bg-amber-500/10 text-amber-400 shrink-0">IDLE</span><p class="text-dark-400"><strong class="text-dark-300">Inactive:</strong> No active ad campaigns for 20+ days. Risk of disengagement.</p></div>
+      <div class="flex gap-3"><span class="signal-tag bg-orange-500/10 text-orange-400 shrink-0">INT.ERR</span><p class="text-dark-400"><strong class="text-dark-300">Integration Error:</strong> Technical integration with client's store is broken.</p></div>
+      <div class="flex gap-3"><span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">ROAS&#9733;</span><p class="text-dark-400"><strong class="text-dark-300">Excellent ROAS:</strong> All-time ROAS above 8x — star performer.</p></div>
+      <div class="flex gap-3"><span class="signal-tag bg-blue-500/10 text-blue-400 shrink-0">ROAS&#10003;</span><p class="text-dark-400"><strong class="text-dark-300">Good ROAS:</strong> All-time ROAS between 2x-8x — solid performer.</p></div>
+      <div class="flex gap-3"><span class="signal-tag bg-cyan-500/10 text-cyan-400 shrink-0">UPSELL</span><p class="text-dark-400"><strong class="text-dark-300">Upsell Candidate:</strong> Usage or business size suggests they should be on a higher plan.</p></div>
+      <div class="flex gap-3"><span class="signal-tag bg-teal-500/10 text-teal-400 shrink-0">REVSHARE</span><p class="text-dark-400"><strong class="text-dark-300">Revenue Share:</strong> Company earns a % of client's profit/revenue.</p></div>
+      <div class="flex gap-3"><span class="signal-tag bg-dark-700 text-dark-300 shrink-0">NEW</span><p class="text-dark-400"><strong class="text-dark-300">New/Onboarding:</strong> Recently started, limited data available.</p></div>
     </div>
   </div>
 
   <!-- Methodology -->
-  <div class="glass rounded-xl p-5 sm:p-6 mt-4 fade-in" style="animation-delay:0.4s">
+  <div class="glass rounded-xl p-5 sm:p-6 mt-4 fade-in" style="animation-delay:0.35s">
     <h2 class="text-lg font-700 text-white mb-3">Methodology</h2>
     <div class="text-dark-400 text-sm space-y-2">
-      <p><strong class="text-dark-300">Priority Index = 3-Year LTV / CSM Effort</strong>, where LTV = ARR x Retention Probability x Growth Multiplier x 3 years.</p>
-      <p><strong class="text-dark-300">Retention Probability</strong> is derived from health rating (1-5 stars maps to 25%-92%), adjusted down for churn flags, prolonged campaign inactivity, or explicit churn risk comments.</p>
-      <p><strong class="text-dark-300">Growth Multiplier (0.5x-2.5x)</strong> factors in current and lifetime ROAS performance, Shopify sales volume (proxy for client business size), CSM-flagged "Time=ROAS" signals, and upsell indicators.</p>
-      <p><strong class="text-dark-300">CSM Effort (0.5x-2.0x)</strong> estimates relative time investment based on integration issues, C-suite escalation needs, client complexity notes, and new client onboarding overhead.</p>
-      <p class="text-dark-500 text-xs mt-3">Note: ARR is estimated from plan-level averages, not individual subscription data. 22 of 47 workspaces are unrated and default to 65% retention. Shopify sales are a 30-day snapshot. Model is directionally correct but exact figures will shift with real per-workspace ARR and health ratings.</p>
+      <p><strong class="text-dark-300">Priority Index = 3-Year LTV / CSM Effort</strong>, where LTV = ARR &times; Retention Probability &times; Growth Multiplier &times; 3 years.</p>
+      <p><strong class="text-dark-300">Retention Probability</strong> is derived from health rating (1-5 stars maps to 25%-92%), adjusted down for churn flags, prolonged campaign inactivity, or explicit churn risk.</p>
+      <p><strong class="text-dark-300">Growth Multiplier (0.5x-2.5x)</strong> factors in current and lifetime ROAS performance, Shopify sales volume, CSM-flagged &quot;Time=ROAS&quot; signals, and upsell indicators.</p>
+      <p><strong class="text-dark-300">CSM Effort (0.5x-2.0x)</strong> estimates relative time investment based on integration issues, C-suite escalation needs, and onboarding overhead.</p>
+      <p><strong class="text-dark-300">Tier Thresholds:</strong> T1 = Priority &ge;100K (highest impact), T2 = &ge;50K, T3 = &ge;15K, T4 = &lt;15K (lowest priority).</p>
+      <p class="text-dark-500 text-xs mt-3">Note: ARR is estimated from plan-level averages, not individual subscription data. Unrated workspaces default to 65% retention. Shopify sales are a 30-day snapshot.</p>
     </div>
   </div>
 
   <p class="text-dark-600 text-xs text-center mt-8 mb-4">Data sourced from Attio CRM. Dashboard generated Feb 2026.</p>
-
 </div>
 
 <script>
-const workspaces = [
-  {rank:1,name:"softmoc.com",csm:"Marcus",plan:"Enterprise",health:null,arr:186000,shopify:null,roas:0,atdRoas:0,retention:0.65,growth:1.0,ltv:362700,priority:329727,tier:1,campaigns:0,daysNoCamp:0,comment:"",churn:"",signals:["NEW"],action:"Rate health immediately. Largest account in pod at 12.5% of total ARR."},
-  {rank:2,name:"R1 Industries",csm:"Marcus",plan:"Performance",health:null,arr:53988,shopify:217000,roas:8.92,atdRoas:11.08,retention:0.65,growth:1.8,ltv:189498,priority:189498,tier:1,campaigns:2,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2605"],action:"Rate health. Star performer with 11x lifetime ROAS."},
-  {rank:3,name:"Broken Oslo",csm:"Martin",plan:"Performance",health:null,arr:47988,shopify:56080,roas:19.71,atdRoas:14.71,retention:0.65,growth:1.6,ltv:145044,priority:145044,tier:1,campaigns:2,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2605"],action:"Rate health. Exceptional ROAS (14.7x lifetime)."},
-  {rank:4,name:"Katia Designs",csm:"Marcus",plan:"Performance",health:null,arr:53988,shopify:433147,roas:1.53,atdRoas:1.86,retention:0.65,growth:1.3,ltv:136860,priority:136860,tier:1,campaigns:1,daysNoCamp:0,comment:"",churn:"",signals:[],action:"Rate health. Largest Shopify store in pod ($433K/mo)."},
-  {rank:5,name:"Test My Food Sensitivity",csm:"Marcus",plan:"Performance",health:4,arr:53988,shopify:29583,roas:1.15,atdRoas:0.97,retention:0.72,growth:1.4,ltv:163260,priority:136050,tier:1,campaigns:3,daysNoCamp:0,comment:"Check invoice due date. Task Silje with nudging. Time=ROAS",churn:"Cancelled / overdue",signals:["LTV UP","CHURN"],action:"CSM sees untapped LTV potential. Resolve overdue invoice, then dedicate time to improve ROAS."},
-  {rank:6,name:"Savvy Touch",csm:"Marcus",plan:"Performance",health:null,arr:53988,shopify:198803,roas:1.26,atdRoas:1.4,retention:0.65,growth:1.2,ltv:131596,priority:131596,tier:1,campaigns:5,daysNoCamp:0,comment:"",churn:"",signals:[],action:"Rate health. Current ROAS (1.3x) has room for optimization."},
-  {rank:7,name:"Neven Eyewear",csm:"Martin",plan:"Pro",health:4,arr:30590,shopify:1177281,roas:2.14,atdRoas:2.14,retention:0.82,growth:1.4,ltv:109115,priority:109115,tier:1,campaigns:1,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2713","UPSELL"],action:"$1.2M/mo Shopify on Pro plan. Upsell to Performance/Enterprise."},
-  {rank:8,name:"A. PUTNAM",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:183346,roas:15.25,atdRoas:10.48,retention:0.65,growth:1.6,ltv:81866,priority:102333,tier:1,campaigns:1,daysNoCamp:0,comment:"Chill client, good ROAS",churn:"",signals:["ROAS\u2605","UPSELL"],action:"Rate health. 10.5x ROAS + $183K Shopify on Pro. Upsell candidate."},
-  {rank:9,name:"Coutr",csm:"Marcus",plan:"Performance",health:null,arr:53988,shopify:68843,roas:0,atdRoas:2.58,retention:0.57,growth:1.2,ltv:110783,priority:100712,tier:1,campaigns:0,daysNoCamp:28,comment:"",churn:"",signals:["ROAS\u2713","IDLE"],action:"Rate health. 28 days inactive but proven 2.6x ROAS. Re-engage."},
-
-  {rank:10,name:"Revoderm",csm:"Martin",plan:"Pro",health:5,arr:30590,shopify:42897,roas:1.34,atdRoas:2.9,retention:0.92,growth:1.1,ltv:97093,priority:97093,tier:2,campaigns:3,daysNoCamp:0,comment:"Update and post creatives",churn:"",signals:["ROAS\u2713"],action:"Healthy & performing. Update creatives as planned."},
-  {rank:11,name:"Azura New York",csm:"Martin",plan:"Pro",health:null,arr:30590,shopify:85282,roas:4.56,atdRoas:8.37,retention:0.65,growth:1.6,ltv:92458,priority:92458,tier:2,campaigns:1,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2605"],action:"Rate health. Strong 8.4x lifetime ROAS."},
-  {rank:12,name:"Laserlab",csm:"Martin",plan:"Pro",health:5,arr:30590,shopify:87686,roas:1.99,atdRoas:1.06,retention:0.92,growth:1.1,ltv:88650,priority:88650,tier:2,campaigns:1,daysNoCamp:0,comment:"Fix Tracking",churn:"",signals:[],action:"Fix tracking issue. Health 5 but needs tracking resolved."},
-  {rank:13,name:"Breathewave",csm:"Martin",plan:"Pro",health:3,arr:30590,shopify:207251,roas:1.89,atdRoas:2.05,retention:0.60,growth:1.6,ltv:85346,priority:85346,tier:2,campaigns:6,daysNoCamp:0,comment:"Scaling. Reach target CPA $15. Get direct line to agency",churn:"",signals:["ROAS\u2713"],action:"Scaling client. Hit $15 CPA target. Get FE access to agency contact."},
-  {rank:14,name:"Green Goddess webshop",csm:"Martin",plan:"Pro",health:3,arr:30590,shopify:162797,roas:2.95,atdRoas:5.58,retention:0.60,growth:1.8,ltv:96358,priority:83790,tier:2,campaigns:5,daysNoCamp:0,comment:"Post first campaign. Demanding on creatives. Jakob handles meetings alone",churn:"",signals:["ROAS\u2605"],action:"High potential (5.6x ROAS). Demanding on creatives. Jakob manages solo."},
-  {rank:15,name:"The Urban Geek",csm:"Martin",plan:"Pro",health:4,arr:30590,shopify:21120,roas:1.18,atdRoas:1.37,retention:0.82,growth:1.1,ltv:82777,priority:82777,tier:2,campaigns:6,daysNoCamp:0,comment:"Get back on up google",churn:"",signals:[],action:"Re-activate Google campaigns alongside Meta."},
-  {rank:16,name:"Pearson Cycles",csm:"Martin",plan:"Pro",health:4,arr:30590,shopify:82578,roas:0,atdRoas:0,retention:0.82,growth:1.1,ltv:79014,priority:79014,tier:2,campaigns:1,daysNoCamp:0,comment:"Post Campaigns",churn:"",signals:[],action:"Post campaigns. Good Shopify volume ($83K/mo). Watch ROAS."},
-  {rank:17,name:"SHEILA",csm:"Martin",plan:"Pro",health:4,arr:30590,shopify:52031,roas:1.44,atdRoas:1.83,retention:0.82,growth:1.1,ltv:79014,priority:79014,tier:2,campaigns:4,daysNoCamp:0,comment:"Post new creatives",churn:"",signals:[],action:"Maintain. Post new creatives as planned."},
-  {rank:18,name:"Frame It All",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:64871,roas:3.01,atdRoas:2.28,retention:0.65,growth:1.5,ltv:71943,priority:71943,tier:2,campaigns:5,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2713"],action:"Rate health. Solid 3x ROAS. Maintain."},
-  {rank:19,name:"Wolfi's",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:155578,roas:1.99,atdRoas:4.31,retention:0.65,growth:1.4,ltv:71943,priority:71943,tier:2,campaigns:4,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2713"],action:"Rate health. $156K Shopify, 4.3x lifetime ROAS."},
-  {rank:20,name:"Huckle Bee Farms",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:274427,roas:2.51,atdRoas:2.96,retention:0.65,growth:1.4,ltv:71943,priority:71943,tier:2,campaigns:3,daysNoCamp:0,comment:"RevShare Agreement. Needs volume",churn:"",signals:["ROAS\u2713","REVSHARE"],action:"Rate health. Rev-share deal needs volume. $274K Shopify = big potential."},
-  {rank:21,name:"Goode Rider",csm:"Martin",plan:"Pro",health:3,arr:30590,shopify:93122,roas:1.49,atdRoas:1.81,retention:0.60,growth:1.3,ltv:71581,priority:71581,tier:2,campaigns:3,daysNoCamp:0,comment:"Keep results steady. Upsell soon. FE (Seb handles email spam issue)",churn:"",signals:["UPSELL"],action:"Stabilize results, then pursue upsell. FE managing spam issue."},
-  {rank:22,name:"XOMD Skincare",csm:"Marcus",plan:"Performance",health:null,arr:53988,shopify:null,roas:0,atdRoas:0,retention:0.55,growth:1.0,ltv:89080,priority:68523,tier:2,campaigns:0,daysNoCamp:0,comment:"",churn:"Cancelled / overdue",signals:["CHURN","NEW"],action:"Rate health urgently. Cancelled/overdue with no campaigns."},
-  {rank:23,name:"Elevex Labs",csm:"Martin",plan:"Pro",health:4,arr:30590,shopify:356,roas:0,atdRoas:0.03,retention:0.82,growth:0.8,ltv:63964,priority:63964,tier:2,campaigns:1,daysNoCamp:0,comment:"Get Results",churn:"",signals:[],action:"Health 4 but near-zero ROAS. Must deliver results to maintain health."},
-  {rank:24,name:"Lavender Life Company",csm:"Martin",plan:"Pro",health:4,arr:30590,shopify:77780,roas:2.15,atdRoas:1.83,retention:0.67,growth:1.2,ltv:73783,priority:61486,tier:2,campaigns:2,daysNoCamp:0,comment:"New creatives. Paused. Not FE priority",churn:"Cancelled / overdue",signals:["CHURN"],action:"Overdue but health 4. New creatives needed to reactivate."},
-  {rank:25,name:"At Present",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:124041,roas:1.0,atdRoas:1.48,retention:0.65,growth:1.1,ltv:57058,priority:57058,tier:2,campaigns:2,daysNoCamp:0,comment:"",churn:"",signals:[],action:"Rate health. Breakeven ROAS (1.0x) needs improvement."},
-  {rank:26,name:"Livefit Nutrition",csm:"Martin",plan:"Pro",health:null,arr:30590,shopify:113335,roas:0,atdRoas:8.13,retention:0.47,growth:1.6,ltv:71168,priority:54744,tier:2,campaigns:0,daysNoCamp:71,comment:"Wait",churn:"Cancelled / overdue",signals:["ROAS\u2605","IDLE","CHURN"],action:"71 days idle but 8.1x lifetime ROAS. High re-engagement potential. CSM says 'Wait'."},
-
-  {rank:27,name:"Ellis Works",csm:"Martin",plan:"Pro",health:3,arr:30590,shopify:1054,roas:0,atdRoas:0,retention:0.60,growth:1.0,ltv:55062,priority:47880,tier:3,campaigns:2,daysNoCamp:0,comment:"Watch campaigns. Google with Owren? C-suite later",churn:"",signals:[],action:"Watch campaign performance. Consider Google. C-suite escalation later."},
-  {rank:28,name:"Folds Wear Inc.",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:10149,roas:2.2,atdRoas:1.98,retention:0.65,growth:1.1,ltv:57058,priority:47548,tier:3,campaigns:4,daysNoCamp:0,comment:"New client",churn:"",signals:["ROAS\u2713"],action:"New client. Good early ROAS (2.2x). Rate health after settling."},
-  {rank:29,name:"Trendzio Jewelry",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:null,roas:0,atdRoas:0,retention:0.65,growth:1.0,ltv:49616,priority:45105,tier:3,campaigns:0,daysNoCamp:0,comment:"",churn:"",signals:["NEW"],action:"Rate health. No campaign data yet."},
-  {rank:30,name:"Glam Box",csm:"Martin",plan:"Pro",health:3,arr:30590,shopify:74656,roas:2.76,atdRoas:2.5,retention:0.50,growth:1.3,ltv:59650,priority:44186,tier:3,campaigns:14,daysNoCamp:0,comment:"FE needed. Unpredictable client but keeps renewing. C-suite to loop in JM",churn:"Cancelled / overdue",signals:["CHURN","ROAS\u2713"],action:"Unpredictable but loyal (keeps renewing, 14 campaigns). C-suite meeting with JM to stabilize."},
-  {rank:31,name:"Pet Planet Toronto",csm:"Martin",plan:"Pro",health:3,arr:30590,shopify:19590,roas:0.51,atdRoas:0.41,retention:0.60,growth:0.8,ltv:46803,priority:40698,tier:3,campaigns:2,daysNoCamp:0,comment:"Post new ads. C-suite Amir to convince them to go beyond Toronto-only targeting",churn:"",signals:[],action:"ROAS suffering from Toronto-only geo restriction. C-suite to persuade broader targeting."},
-  {rank:32,name:"Moniker Sport",csm:"Martin",plan:"Enterprise",health:3,arr:21000,shopify:154062,roas:0,atdRoas:13.39,retention:0.60,growth:1.6,ltv:62370,priority:40239,tier:3,campaigns:0,daysNoCamp:7,comment:"Integration errors. Escalate to engineering. C-suite? Creatives for own brands",churn:"",signals:["ROAS\u2605","INT.ERR"],action:"Blocked by integration error. 13.4x lifetime ROAS. Fix unblocks $154K Shopify client."},
-  {rank:33,name:"Company of Mike Alidadi",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:null,roas:0,atdRoas:0,retention:0.65,growth:1.0,ltv:49616,priority:38166,tier:3,campaigns:0,daysNoCamp:0,comment:"New client. First creative batch ready 12 Feb",churn:"",signals:["NEW"],action:"New client. Activate campaigns with first batch."},
-  {rank:34,name:"Moniker Man",csm:"Martin",plan:"Enterprise",health:3,arr:21000,shopify:51646,roas:0,atdRoas:8.33,retention:0.60,growth:1.6,ltv:58590,priority:37800,tier:3,campaigns:0,daysNoCamp:8,comment:"Integration errors. Escalate to engineering. C-suite? Creatives for own brands",churn:"",signals:["ROAS\u2605","INT.ERR"],action:"Same Moniker integration block. 8.3x ROAS when running."},
-  {rank:35,name:"PolyBiotics",csm:"Martin",plan:"Pro",health:2,arr:30590,shopify:16734,roas:1.04,atdRoas:1.15,retention:0.40,growth:1.4,ltv:51391,priority:35442,tier:3,campaigns:2,daysNoCamp:0,comment:"CSM sees LTV potential if given time. FE needed. C-suite meeting with JM to schedule",churn:"",signals:["LTV UP"],action:"CSM flags high LTV potential (Time=ROAS). Needs FE time + C-suite meeting."},
-  {rank:36,name:"Bonpatch AU",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:4536,roas:0.75,atdRoas:0.59,retention:0.53,growth:0.8,ltv:34388,priority:34388,tier:3,campaigns:1,daysNoCamp:0,comment:"Churn Risk. Gave us 30 days to prove results",churn:"",signals:["CHURN"],action:"30-day ultimatum. Focus on quick ROAS wins or prepare for offboarding."},
-  {rank:37,name:"MCB Sportswear",csm:"Martin",plan:"Enterprise",health:3,arr:21000,shopify:9807,roas:3.96,atdRoas:2.2,retention:0.60,growth:1.3,ltv:49140,priority:33890,tier:3,campaigns:1,daysNoCamp:0,comment:"Integration errors. Escalate to engineering. C-suite?",churn:"",signals:["ROAS\u2713","INT.ERR"],action:"Part of Moniker integration issue. Decent ROAS when working."},
-  {rank:38,name:"Moniker",csm:"Martin",plan:"Enterprise",health:3,arr:21000,shopify:416694,roas:0,atdRoas:19.28,retention:0.50,growth:1.8,ltv:56700,priority:32400,tier:3,campaigns:0,daysNoCamp:2,comment:"Integration errors. Escalate to engineering. C-suite? Creatives for own brands",churn:"Cancelled / overdue",signals:["CHURN","ROAS\u2605","INT.ERR"],action:"HIGHEST IMPACT FIX: $417K Shopify, 19.3x ROAS. Integration fix is #1 technical priority."},
-  {rank:39,name:"Aigi",csm:"Marcus",plan:"Growth",health:null,arr:9000,shopify:40259,roas:5.6,atdRoas:7.46,retention:0.65,growth:1.5,ltv:26325,priority:26325,tier:3,campaigns:3,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2605"],action:"Strong ROAS on Growth plan. Upsell candidate when ready."},
-  {rank:40,name:"Marianella",csm:"Marcus",plan:"Pro",health:null,arr:25444,shopify:12543,roas:0,atdRoas:1.82,retention:0.42,growth:1.0,ltv:32059,priority:24661,tier:3,campaigns:0,daysNoCamp:34,comment:"Paused. Helping with Klaviyo. Good relationship",churn:"Cancelled / overdue",signals:["CHURN","IDLE"],action:"Paused 34 days. Helping with Klaviyo to maintain relationship. Good vibes."},
-  {rank:41,name:"HLTH+",csm:"Martin",plan:"Pro",health:2,arr:30590,shopify:292,roas:0.19,atdRoas:0.09,retention:0.40,growth:0.8,ltv:31202,priority:24001,tier:3,campaigns:2,daysNoCamp:0,comment:"FE needed. New client, cautious. Revise creative Batch 1",churn:"",signals:[],action:"Very early stage, poor ROAS. Revise creatives. FE needed."},
-  {rank:42,name:"\u00c1IGI Nordic",csm:"Marcus",plan:"Growth",health:null,arr:9000,shopify:5279,roas:0,atdRoas:4.4,retention:0.65,growth:1.3,ltv:22815,priority:22815,tier:3,campaigns:1,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2713"],action:"Small Growth client. Decent lifetime ROAS. Low effort, maintain."},
-  {rank:43,name:"Mi Tesoro",csm:"Martin",plan:"Pro",health:1,arr:30590,shopify:7167,roas:0,atdRoas:3.64,retention:0.25,growth:1.3,ltv:29825,priority:21304,tier:3,campaigns:0,daysNoCamp:7,comment:"FE needed (Seb already has lead)",churn:"",signals:[],action:"Health 1 but 3.6x lifetime ROAS. FE intervention needed. Seb leading."},
-  {rank:44,name:"Company of Michael Nem",csm:"Martin",plan:"Pro",health:1,arr:30590,shopify:637,roas:0,atdRoas:0.06,retention:0.25,growth:1.2,ltv:28678,priority:20484,tier:3,campaigns:0,daysNoCamp:14,comment:"Get results. CSM uncertain if time investment will pay off",churn:"",signals:["LTV UP"],action:"Health 1, near-zero ROAS. CSM unsure about LTV potential. Evaluate effort vs return."},
-  {rank:45,name:"Maurten",csm:"Marcus",plan:"Growth",health:null,arr:9000,shopify:17601,roas:1.74,atdRoas:2.74,retention:0.65,growth:1.1,ltv:20182,priority:20182,tier:3,campaigns:1,daysNoCamp:0,comment:"",churn:"",signals:["ROAS\u2713"],action:"Small Growth client. Decent performance. Low effort."},
-
-  {rank:46,name:"KAIA Swimwear",csm:"Martin",plan:"Pro",health:2,arr:30590,shopify:null,roas:0,atdRoas:0.24,retention:0.30,growth:0.8,ltv:23401,priority:13372,tier:4,campaigns:0,daysNoCamp:4,comment:"New plan. C-suite JM to join meeting",churn:"Cancelled / overdue",signals:["CHURN"],action:"Health 2, overdue, 0.24x ROAS. Needs C-suite intervention or offboard."},
-  {rank:47,name:"Eklexic Jewelry",csm:"Marcus",plan:"Growth",health:2,arr:9000,shopify:19349,roas:1.2,atdRoas:1.03,retention:0.40,growth:1.0,ltv:10800,priority:8308,tier:4,campaigns:1,daysNoCamp:0,comment:"Won them back. Growth client",churn:"",signals:[],action:"Recently recovered. Minimal investment to prevent re-churn."}
+const D=[
+{r:1,n:'softmoc.com',c:'Marcus',p:'Marcus+Martin',pl:'Enterprise',h:null,a:186000,sh:0,ro:0,ar:0,ret:0.65,g:1.0,l:362700,pi:329727,t:1,s:["NEW"],act:'Rate health immediately. Largest account in pod at 12.5% of total ARR.',w:'',ri:'',ca:0,d:0},
+{r:2,n:'R1 Industries',c:'Marcus',p:'Marcus+Martin',pl:'Performance',h:null,a:53988,sh:217000,ro:8.92,ar:11.08,ret:0.65,g:1.8,l:189498,pi:189498,t:1,s:["ROAS\u2605"],act:'Rate health. Star performer with 11x lifetime ROAS.',w:'sub_1Sui5fFopWoUwtLcdqUNAz85',ri:'1effe47b-ad56-407f-9736-dcd6bf279863',ca:2,d:0},
+{r:3,n:'Broken Oslo',c:'Martin',p:'Marcus+Martin',pl:'Performance',h:null,a:47988,sh:56080,ro:19.71,ar:14.71,ret:0.65,g:1.6,l:145044,pi:145044,t:1,s:["ROAS\u2605"],act:'Rate health. Exceptional ROAS (14.7x lifetime).',w:'',ri:'',ca:2,d:0},
+{r:4,n:'Katia Designs',c:'Marcus',p:'Marcus+Martin',pl:'Performance',h:null,a:53988,sh:433147,ro:1.53,ar:1.86,ret:0.65,g:1.3,l:136860,pi:136860,t:1,s:[],act:'Rate health. Largest Shopify store in pod ($433K/mo).',w:'',ri:'',ca:1,d:0},
+{r:5,n:'Test My Food Sensitivity',c:'Marcus',p:'Marcus+Martin',pl:'Performance',h:4,a:53988,sh:29583,ro:1.15,ar:0.97,ret:0.72,g:1.4,l:163260,pi:136050,t:1,s:["LTV UP", "CHURN"],act:'CSM sees untapped LTV potential. Resolve overdue invoice, then dedicate time to improve ROAS.',w:'',ri:'',ca:3,d:0},
+{r:6,n:'Savvy Touch',c:'Marcus',p:'Marcus+Martin',pl:'Performance',h:null,a:53988,sh:198803,ro:1.26,ar:1.4,ret:0.65,g:1.2,l:131596,pi:131596,t:1,s:[],act:'Rate health. Current ROAS (1.3x) has room for optimization.',w:'',ri:'',ca:5,d:0},
+{r:7,n:'Neven Eyewear',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:4,a:30590,sh:1177281,ro:2.14,ar:2.14,ret:0.82,g:1.4,l:109115,pi:109115,t:1,s:["ROAS\u2713", "UPSELL"],act:'$1.2M/mo Shopify on Pro plan. Upsell to Performance/Enterprise.',w:'',ri:'',ca:1,d:0},
+{r:8,n:'A. PUTNAM',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:183346,ro:15.25,ar:10.48,ret:0.65,g:1.6,l:81866,pi:102333,t:1,s:["ROAS\u2605", "UPSELL"],act:'Rate health. 10.5x ROAS + $183K Shopify on Pro. Upsell candidate.',w:'',ri:'',ca:1,d:0},
+{r:9,n:'Coutr',c:'Marcus',p:'Marcus+Martin',pl:'Performance',h:null,a:53988,sh:68843,ro:0,ar:2.58,ret:0.57,g:1.2,l:110783,pi:100712,t:1,s:["ROAS\u2713", "IDLE"],act:'Rate health. 28 days inactive but proven 2.6x ROAS. Re-engage.',w:'',ri:'',ca:0,d:28},
+{r:10,n:'Revoderm',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:5,a:30590,sh:42897,ro:1.34,ar:2.9,ret:0.92,g:1.1,l:97093,pi:97093,t:2,s:["ROAS\u2713"],act:'Healthy & performing. Update creatives as planned.',w:'',ri:'',ca:3,d:0},
+{r:11,n:'Azura New York',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:null,a:30590,sh:85282,ro:4.56,ar:8.37,ret:0.65,g:1.6,l:92458,pi:92458,t:2,s:["ROAS\u2605"],act:'Rate health. Strong 8.4x lifetime ROAS.',w:'',ri:'',ca:1,d:0},
+{r:12,n:'Laserlab',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:5,a:30590,sh:87686,ro:1.99,ar:1.06,ret:0.92,g:1.1,l:88650,pi:88650,t:2,s:[],act:'Fix tracking issue. Health 5 but needs tracking resolved.',w:'',ri:'',ca:1,d:0},
+{r:13,n:'Breathewave',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:3,a:30590,sh:207251,ro:1.89,ar:2.05,ret:0.6,g:1.6,l:85346,pi:85346,t:2,s:["ROAS\u2713"],act:'Scaling client. Hit $15 CPA target. Get FE access to agency contact.',w:'',ri:'',ca:6,d:0},
+{r:14,n:'Green Goddess webshop',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:3,a:30590,sh:162797,ro:2.95,ar:5.58,ret:0.6,g:1.8,l:96358,pi:83790,t:2,s:["ROAS\u2605"],act:'High potential (5.6x ROAS). Demanding on creatives. Jakob manages solo.',w:'',ri:'',ca:5,d:0},
+{r:15,n:'The Urban Geek',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:4,a:30590,sh:21120,ro:1.18,ar:1.37,ret:0.82,g:1.1,l:82777,pi:82777,t:2,s:[],act:'Re-activate Google campaigns alongside Meta.',w:'',ri:'',ca:6,d:0},
+{r:16,n:'Pearson Cycles',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:4,a:30590,sh:82578,ro:0,ar:0,ret:0.82,g:1.1,l:79014,pi:79014,t:2,s:[],act:'Post campaigns. Good Shopify volume ($83K/mo). Watch ROAS.',w:'',ri:'',ca:1,d:0},
+{r:17,n:'SHEILA',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:4,a:30590,sh:52031,ro:1.44,ar:1.83,ret:0.82,g:1.1,l:79014,pi:79014,t:2,s:[],act:'Maintain. Post new creatives as planned.',w:'',ri:'',ca:4,d:0},
+{r:18,n:'Frame It All',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:64871,ro:3.01,ar:2.28,ret:0.65,g:1.5,l:71943,pi:71943,t:2,s:["ROAS\u2713"],act:'Rate health. Solid 3x ROAS. Maintain.',w:'sub_1ST4uuFopWoUwtLcoPZ01aqW',ri:'0e4eb09f-babb-41a0-9d2f-82dea420f554',ca:5,d:0},
+{r:19,n:'Wolfi\'s',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:155578,ro:1.99,ar:4.31,ret:0.65,g:1.4,l:71943,pi:71943,t:2,s:["ROAS\u2713"],act:'Rate health. $156K Shopify, 4.3x lifetime ROAS.',w:'sub_1Sd6QhFopWoUwtLc6XacOFcT',ri:'2e1c3d9f-ddfc-49d2-979e-c53479048e53',ca:4,d:0},
+{r:20,n:'Huckle Bee Farms',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:274427,ro:2.51,ar:2.96,ret:0.65,g:1.4,l:71943,pi:71943,t:2,s:["ROAS\u2713", "REVSHARE"],act:'Rate health. Rev-share deal needs volume. $274K Shopify = big potential.',w:'',ri:'',ca:3,d:0},
+{r:21,n:'Goode Rider',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:3,a:30590,sh:93122,ro:1.49,ar:1.81,ret:0.6,g:1.3,l:71581,pi:71581,t:2,s:["UPSELL"],act:'Stabilize results, then pursue upsell. FE managing spam issue.',w:'',ri:'',ca:3,d:0},
+{r:22,n:'XOMD Skincare',c:'Marcus',p:'Marcus+Martin',pl:'Performance',h:null,a:53988,sh:0,ro:0,ar:0,ret:0.55,g:1.0,l:89080,pi:68523,t:2,s:["CHURN", "NEW"],act:'Rate health urgently. Cancelled/overdue with no campaigns.',w:'',ri:'',ca:0,d:0},
+{r:23,n:'Elevex Labs',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:4,a:30590,sh:356,ro:0,ar:0.03,ret:0.82,g:0.8,l:63964,pi:63964,t:2,s:[],act:'Health 4 but near-zero ROAS. Must deliver results to maintain health.',w:'',ri:'',ca:1,d:0},
+{r:24,n:'Lavender Life Company',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:4,a:30590,sh:77780,ro:2.15,ar:1.83,ret:0.67,g:1.2,l:73783,pi:61486,t:2,s:["CHURN"],act:'Overdue but health 4. New creatives needed to reactivate.',w:'',ri:'',ca:2,d:0},
+{r:25,n:'At Present',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:124041,ro:1.0,ar:1.48,ret:0.65,g:1.1,l:57058,pi:57058,t:2,s:[],act:'Rate health. Breakeven ROAS (1.0x) needs improvement.',w:'',ri:'',ca:2,d:0},
+{r:26,n:'Livefit Nutrition',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:null,a:30590,sh:113335,ro:0,ar:8.13,ret:0.47,g:1.6,l:71168,pi:54744,t:2,s:["ROAS\u2605", "IDLE", "CHURN"],act:'71 days idle but 8.1x lifetime ROAS. High re-engagement potential. CSM says \'Wait\'.',w:'',ri:'',ca:0,d:71},
+{r:27,n:'Ellis Works',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:3,a:30590,sh:1054,ro:0,ar:0,ret:0.6,g:1.0,l:55062,pi:47880,t:3,s:[],act:'Watch campaign performance. Consider Google. C-suite escalation later.',w:'',ri:'',ca:2,d:0},
+{r:28,n:'Folds Wear Inc.',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:10149,ro:2.2,ar:1.98,ret:0.65,g:1.1,l:57058,pi:47548,t:3,s:["ROAS\u2713"],act:'New client. Good early ROAS (2.2x). Rate health after settling.',w:'',ri:'',ca:4,d:0},
+{r:29,n:'Trendzio Jewelry',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:0,ro:0,ar:0,ret:0.65,g:1.0,l:49616,pi:45105,t:3,s:["NEW"],act:'Rate health. No campaign data yet.',w:'',ri:'',ca:0,d:0},
+{r:30,n:'Glam Box',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:3,a:30590,sh:74656,ro:2.76,ar:2.5,ret:0.5,g:1.3,l:59650,pi:44186,t:3,s:["CHURN", "ROAS\u2713"],act:'Unpredictable but loyal (keeps renewing, 14 campaigns). C-suite meeting with JM to stabilize.',w:'',ri:'',ca:14,d:0},
+{r:31,n:'Pet Planet Toronto',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:3,a:30590,sh:19590,ro:0.51,ar:0.41,ret:0.6,g:0.8,l:46803,pi:40698,t:3,s:[],act:'ROAS suffering from Toronto-only geo restriction. C-suite to persuade broader targeting.',w:'',ri:'',ca:2,d:0},
+{r:32,n:'Moniker Sport',c:'Martin',p:'Marcus+Martin',pl:'Enterprise',h:3,a:21000,sh:154062,ro:0,ar:13.39,ret:0.6,g:1.6,l:62370,pi:40239,t:3,s:["ROAS\u2605", "INT.ERR"],act:'Blocked by integration error. 13.4x lifetime ROAS. Fix unblocks $154K Shopify client.',w:'',ri:'',ca:0,d:7},
+{r:33,n:'Company of Mike Alidadi',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:0,ro:0,ar:0,ret:0.65,g:1.0,l:49616,pi:38166,t:3,s:["NEW"],act:'New client. Activate campaigns with first batch.',w:'',ri:'',ca:0,d:0},
+{r:34,n:'Moniker Man',c:'Martin',p:'Marcus+Martin',pl:'Enterprise',h:3,a:21000,sh:51646,ro:0,ar:8.33,ret:0.6,g:1.6,l:58590,pi:37800,t:3,s:["ROAS\u2605", "INT.ERR"],act:'Same Moniker integration block. 8.3x ROAS when running.',w:'',ri:'',ca:0,d:8},
+{r:35,n:'PolyBiotics',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:2,a:30590,sh:16734,ro:1.04,ar:1.15,ret:0.4,g:1.4,l:51391,pi:35442,t:3,s:["LTV UP"],act:'CSM flags high LTV potential (Time=ROAS). Needs FE time + C-suite meeting.',w:'',ri:'',ca:2,d:0},
+{r:36,n:'Bonpatch AU',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:4536,ro:0.75,ar:0.59,ret:0.53,g:0.8,l:34388,pi:34388,t:3,s:["CHURN"],act:'30-day ultimatum. Focus on quick ROAS wins or prepare for offboarding.',w:'',ri:'',ca:1,d:0},
+{r:37,n:'MCB Sportswear',c:'Martin',p:'Marcus+Martin',pl:'Enterprise',h:3,a:21000,sh:9807,ro:3.96,ar:2.2,ret:0.6,g:1.3,l:49140,pi:33890,t:3,s:["ROAS\u2713", "INT.ERR"],act:'Part of Moniker integration issue. Decent ROAS when working.',w:'',ri:'',ca:1,d:0},
+{r:38,n:'Moniker',c:'Martin',p:'Marcus+Martin',pl:'Enterprise',h:3,a:21000,sh:416694,ro:0,ar:19.28,ret:0.5,g:1.8,l:56700,pi:32400,t:3,s:["CHURN", "ROAS\u2605", "INT.ERR"],act:'HIGHEST IMPACT FIX: $417K Shopify, 19.3x ROAS. Integration fix is #1 technical priority.',w:'',ri:'',ca:0,d:2},
+{r:39,n:'Aigi',c:'Marcus',p:'Marcus+Martin',pl:'Growth',h:null,a:9000,sh:40259,ro:5.6,ar:7.46,ret:0.65,g:1.5,l:26325,pi:26325,t:3,s:["ROAS\u2605"],act:'Strong ROAS on Growth plan. Upsell candidate when ready.',w:'sub_1SDNf4FopWoUwtLcPryS0O0S',ri:'221dc08a-1674-43c4-b64f-db6c9b5fdf7e',ca:3,d:0},
+{r:40,n:'Marianella',c:'Marcus',p:'Marcus+Martin',pl:'Pro',h:null,a:25444,sh:12543,ro:0,ar:1.82,ret:0.42,g:1.0,l:32059,pi:24661,t:3,s:["CHURN", "IDLE"],act:'Paused 34 days. Helping with Klaviyo to maintain relationship. Good vibes.',w:'',ri:'',ca:0,d:34},
+{r:41,n:'HLTH+',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:2,a:30590,sh:292,ro:0.19,ar:0.09,ret:0.4,g:0.8,l:31202,pi:24001,t:3,s:[],act:'Very early stage, poor ROAS. Revise creatives. FE needed.',w:'',ri:'',ca:2,d:0},
+{r:42,n:'ÁIGI Nordic',c:'Marcus',p:'Marcus+Martin',pl:'Growth',h:null,a:9000,sh:5279,ro:0,ar:4.4,ret:0.65,g:1.3,l:22815,pi:22815,t:3,s:["ROAS\u2713"],act:'Small Growth client. Decent lifetime ROAS. Low effort, maintain.',w:'',ri:'',ca:1,d:0},
+{r:43,n:'Mi Tesoro',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:1,a:30590,sh:7167,ro:0,ar:3.64,ret:0.25,g:1.3,l:29825,pi:21304,t:3,s:[],act:'Health 1 but 3.6x lifetime ROAS. FE intervention needed. Seb leading.',w:'',ri:'',ca:0,d:7},
+{r:44,n:'Company of Michael Nem',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:1,a:30590,sh:637,ro:0,ar:0.06,ret:0.25,g:1.2,l:28678,pi:20484,t:3,s:["LTV UP"],act:'Health 1, near-zero ROAS. CSM unsure about LTV potential. Evaluate effort vs return.',w:'',ri:'',ca:0,d:14},
+{r:45,n:'Maurten',c:'Marcus',p:'Marcus+Martin',pl:'Growth',h:null,a:9000,sh:17601,ro:1.74,ar:2.74,ret:0.65,g:1.1,l:20182,pi:20182,t:3,s:["ROAS\u2713"],act:'Small Growth client. Decent performance. Low effort.',w:'',ri:'',ca:1,d:0},
+{r:46,n:'KAIA Swimwear',c:'Martin',p:'Marcus+Martin',pl:'Pro',h:2,a:30590,sh:0,ro:0,ar:0.24,ret:0.3,g:0.8,l:23401,pi:13372,t:4,s:["CHURN"],act:'Health 2, overdue, 0.24x ROAS. Needs C-suite intervention or offboard.',w:'',ri:'',ca:0,d:4},
+{r:47,n:'Eklexic Jewelry',c:'Marcus',p:'Marcus+Martin',pl:'Growth',h:2,a:9000,sh:19349,ro:1.2,ar:1.03,ret:0.4,g:1.0,l:10800,pi:8308,t:4,s:[],act:'Recently recovered. Minimal investment to prevent re-churn.',w:'',ri:'',ca:1,d:0},
+{r:1,n:'Nearly New Cashmere Co.',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:4,a:48000,sh:310498,ro:4.03,ar:4.04,ret:0.82,g:1.6,l:188928,pi:188928,t:1,s:["ROAS\u2713"],act:'Good 4.04x ROAS. $310K Shopify.',w:'sub_1SppqWFopWoUwtLci3j3j0oJ',ri:'079c35e0-3982-47d5-b1b3-6ca7277d2c89',ca:5,d:0},
+{r:2,n:'Isomers Skincare',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:4,a:48000,sh:92813,ro:5.07,ar:5.06,ret:0.82,g:1.6,l:188928,pi:188928,t:1,s:["ROAS\u2713"],act:'Good 5.06x ROAS.',w:'sub_1Ss3VWFopWoUwtLcGzjaDss0',ri:'61bbf4dd-12c7-4022-abe7-9c455ede4166',ca:2,d:0},
+{r:3,n:'Eroma Store',c:'Sebastian',p:'Sebastian+Daniel',pl:'Performance',h:null,a:48000,sh:259748,ro:5.06,ar:14.81,ret:0.65,g:2.0,l:187200,pi:187200,t:1,s:["ROAS\u2605"],act:'Rate health. Strong 14.81x ROAS. $259K Shopify.',w:'sub_1RwDtGFopWoUwtLcct1zsapp',ri:'83e4ddec-ac78-4d2b-8b90-56370ca518bc',ca:3,d:0},
+{r:4,n:'Luxaroma',c:'Sebastian',p:'Sebastian+Daniel',pl:'Performance',h:null,a:48000,sh:116930,ro:11.83,ar:31.9,ret:0.65,g:2.0,l:187200,pi:187200,t:1,s:["ROAS\u2605"],act:'Rate health. Strong 31.9x ROAS. $116K Shopify.',w:'sub_1RiuIMFopWoUwtLcz8eKfbJN',ri:'e1bb4c16-27cc-5749-807a-6c4bec22794e',ca:3,d:0},
+{r:5,n:'Never Fully Dressed',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:null,a:48000,sh:2388666,ro:2.67,ar:2.67,ret:0.65,g:1.7,l:159120,pi:159120,t:1,s:["ROAS\u2713"],act:'Rate health. Good 2.67x ROAS. $2388K Shopify.',w:'sub_1Sx7h6FopWoUwtLc3TGLg8WZ',ri:'1b0839e8-fb35-40f5-b45f-c8b381fc5ba4',ca:1,d:0},
+{r:6,n:'Gems and Juniper',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:3,a:48000,sh:162415,ro:6.29,ar:5.66,ret:0.6,g:1.8,l:155520,pi:155520,t:1,s:["ROAS\u2713"],act:'Good 5.66x ROAS. $162K Shopify. Dargo FE-good vibes',w:'sub_1SvMCBFopWoUwtLcVIIDqRx4',ri:'569632d0-923c-407d-b036-6827608b7ca4',ca:4,d:0},
+{r:7,n:'VKW',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:3,a:48000,sh:134857,ro:6.59,ar:6.7,ret:0.6,g:1.8,l:155520,pi:155520,t:1,s:["ROAS\u2713"],act:'Good 6.7x ROAS. $134K Shopify. Seb FE&Svala',w:'sub_1Sv0LnFopWoUwtLc1sWx2wZH',ri:'bb5ff8e6-30d0-436b-b2fa-ff2d974e300f',ca:6,d:0},
+{r:8,n:'Momentum Shake',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:3,a:48000,sh:422580,ro:1.63,ar:2.03,ret:0.6,g:1.5,l:129600,pi:129600,t:1,s:["ROAS\u2713"],act:'Good 2.03x ROAS. $422K Shopify. Victor H har tatt over -> Longhorn',w:'sub_1SlyaTFopWoUwtLc69ALhwax',ri:'c37f3d46-5617-48a3-8165-b1801103ec28',ca:2,d:0},
+{r:9,n:'Biomega',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:4,a:48000,sh:4500,ro:1.24,ar:1.24,ret:0.82,g:1.0,l:118080,pi:118080,t:1,s:[],act:'Monitor.',w:'sub_1SlHTNFopWoUwtLcyiX9HiaG',ri:'673f8b30-b9fc-4a08-9cc2-ae61734a7cef',ca:2,d:0},
+{r:10,n:'Matte Collection',c:'Sebastian',p:'Sebastian+Daniel',pl:'Performance',h:null,a:48000,sh:1116234,ro:0,ar:0,ret:0.65,g:1.2,l:112320,pi:112320,t:1,s:["NEW"],act:'Rate health. $1116K Shopify.',w:'sub_1SmxtlFopWoUwtLcmw0RqGcK',ri:'3489af95-28fe-4577-8091-180d64be6fa3',ca:0,d:0},
+{r:11,n:'Safety Vests and More',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:5,a:25000,sh:537467,ro:0.75,ar:1.86,ret:0.92,g:1.5,l:103500,pi:103500,t:1,s:["UPSELL"],act:'$537K Shopify. Upsell candidate. Seb',w:'sub_1SucfIFopWoUwtLc8SD7Q9Kf',ri:'78470b79-c607-4957-aaae-697b8a00d0f8',ca:0,d:1},
+{r:12,n:'PEAK 4x4',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:155022,ro:11.39,ar:10.05,ret:0.65,g:2.0,l:97500,pi:97500,t:2,s:["ROAS\u2605"],act:'Rate health. Strong 10.05x ROAS. $155K Shopify.',w:'sub_1RfwiIFopWoUwtLcUHD1GGEZ',ri:'b3841cd3-d576-4848-9a33-632ed11ed736',ca:5,d:0},
+{r:13,n:'Charlie\'s Drawings',c:'Sebastian',p:'Sebastian+Daniel',pl:'Performance',h:null,a:48000,sh:4967,ro:0.0,ar:0.57,ret:0.65,g:1.0,l:93600,pi:93600,t:2,s:[],act:'Rate health.',w:'sub_1SLqNDFopWoUwtLctPBJIoee',ri:'18864213-3fd5-5087-af7b-59147c5eac3d',ca:0,d:1},
+{r:14,n:'Company of Charlies Drawings AU',c:'Sebastian',p:'Sebastian+Daniel',pl:'Performance',h:null,a:48000,sh:995,ro:0.0,ar:0.03,ret:0.65,g:1.0,l:93600,pi:93600,t:2,s:[],act:'Rate health.',w:'sub_1SSk2rFopWoUwtLc3guCI3Qj',ri:'b8d7d472-9b1f-5f3f-96f9-a2b336adce60',ca:0,d:1},
+{r:15,n:'Oudware Perfume Store',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:null,a:48000,sh:0,ro:0.0,ar:0.0,ret:0.65,g:1.0,l:93600,pi:93600,t:2,s:[],act:'Rate health.',w:'sub_1SvQaWFopWoUwtLc5pFMFjc3',ri:'2d986baf-1bb9-4717-b9d2-78eec6587acc',ca:1,d:0},
+{r:16,n:'Karen Kane',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:1367006,ro:2.77,ar:7.54,ret:0.65,g:1.9,l:92625,pi:92625,t:2,s:["ROAS\u2713", "UPSELL"],act:'Rate health. Good 7.54x ROAS. $1367K Shopify. Upsell candidate.',w:'sub_1RG7JSFopWoUwtLcBnttUrzf',ri:'634ceb38-35ed-5490-ba13-5f7e2de208ca',ca:6,d:0},
+{r:17,n:'The Solist',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:592691,ro:4.55,ar:4.71,ret:0.65,g:1.8,l:87750,pi:87750,t:2,s:["ROAS\u2713", "UPSELL"],act:'Rate health. Good 4.71x ROAS. $592K Shopify. Upsell candidate.',w:'sub_1SrgtYFopWoUwtLcDv23wvGP',ri:'c1dd5920-50c1-4765-9405-35bd8a918a38',ca:1,d:0},
+{r:18,n:'SuperiorSkin',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:44029,ro:8.17,ar:8.21,ret:0.65,g:1.7,l:82875,pi:82875,t:2,s:["ROAS\u2605"],act:'Rate health. Strong 8.21x ROAS. get to renew, not Nicklas - Has not answered 4 mails.',w:'sub_1R6YRfFopWoUwtLcnBpkmQ07',ri:'391f43bc-93bf-5f74-a0d2-af2dded79d59',ca:4,d:0},
+{r:19,n:'Bow Buddy LLC',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:20062,ro:10.85,ar:9.56,ret:0.65,g:1.7,l:82875,pi:82875,t:2,s:["ROAS\u2605"],act:'Rate health. Strong 9.56x ROAS.',w:'sub_1SnP8EFopWoUwtLceRKjG5dc',ri:'be1ec787-7f36-4274-b402-8d48197e393f',ca:0,d:1},
+{r:20,n:'AlphaCell Labs',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:null,a:48000,sh:106391,ro:0,ar:0,ret:0.55,g:1.0,l:82742,pi:75220,t:2,s:["CHURN"],act:'Rate health. Overdue/cancelled. $106K Shopify. Will pay',w:'sub_1SpDNKFopWoUwtLcAXbHD47R',ri:'739e4efd-1208-4e01-bb68-fecbd2948bf6',ca:0,d:0},
+{r:21,n:'by Bente',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:4,a:25000,sh:72039,ro:4.19,ar:4.32,ret:0.7,g:1.4,l:73185,pi:73185,t:2,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 4.32x ROAS. Really slow start. To keep them happy, we should push their payment by one week ...',w:'sub_1SYNKeFopWoUwtLco3isg3bG',ri:'5d6f9a14-6a3c-45aa-a98e-a85723485b04',ca:3,d:0},
+{r:22,n:'The Skin Store by ICLS',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:19358,ro:1.47,ar:7.22,ret:0.65,g:1.4,l:68250,pi:68250,t:2,s:["ROAS\u2713"],act:'Rate health. Good 7.22x ROAS.',w:'sub_1SEF5OFopWoUwtLc3S0XQB1e',ri:'9bc35f73-0f0d-5bb0-aa83-354c387d11c5',ca:1,d:0},
+{r:23,n:'Beacon Dermatology Skincare',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:141251,ro:5.81,ar:2.89,ret:0.55,g:1.6,l:66300,pi:66300,t:2,s:["CHURN", "ROAS\u2713"],act:'Rate health. Overdue/cancelled. Good 2.89x ROAS. $141K Shopify. Slack - channel',w:'sub_1RaRN1FopWoUwtLcEoXMHmhH',ri:'c1fe7c3b-143e-4443-81b2-7ecf1db2733e',ca:3,d:0},
+{r:24,n:'Clothes Doctor',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:2,a:48000,sh:166858,ro:1.25,ar:0.73,ret:0.34,g:1.3,l:63648,pi:63648,t:2,s:["CHURN"],act:'Overdue/cancelled. $166K Shopify. Seb FE',w:'sub_1Spr3tFopWoUwtLciMltMiMq',ri:'5dd4af64-6cd6-4be4-84ee-57f08542479e',ca:5,d:0},
+{r:25,n:'SANA',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:51295,ro:2.52,ar:2.46,ret:0.65,g:1.3,l:63375,pi:63375,t:2,s:["ROAS\u2713"],act:'Rate health. Good 2.46x ROAS.',w:'sub_1SoXy8FopWoUwtLcszKtgynh',ri:'5fc6d7c9-e9a8-452b-8043-ef5879b24aef',ca:0,d:1},
+{r:26,n:'Bestaroo',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:21471,ro:1.91,ar:2.5,ret:0.65,g:1.2,l:58500,pi:58500,t:2,s:["ROAS\u2713"],act:'Rate health. Good 2.5x ROAS.',w:'sub_1S8lgZFopWoUwtLcezrdGvl1',ri:'14d85c86-ad4f-49ce-9f3d-c6062f3ea9ca',ca:0,d:1},
+{r:27,n:'Fashioned by Faith',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:2,a:48000,sh:23805,ro:0.44,ar:0.75,ret:0.4,g:1.0,l:57600,pi:57600,t:2,s:[],act:'Wants 1000 creatives=Tore replit. Seb FE',w:'sub_1SuzaOFopWoUwtLcM9i3sbsh',ri:'dfdda6e3-9e3d-40f3-8b60-a5c24ed9f167',ca:1,d:0},
+{r:28,n:'LeCouture-Nova',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:1350,ro:0.56,ar:2.12,ret:0.55,g:1.2,l:49725,pi:49725,t:3,s:["CHURN", "ROAS\u2713"],act:'Rate health. Overdue/cancelled. Good 2.12x ROAS. Seb',w:'sub_1RZGt0FopWoUwtLcAesP3pg1',ri:'3bf59165-d9f3-40a4-aaca-89fc5f920de2',ca:0,d:1},
+{r:29,n:'Ice and Gold',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:19664,ro:2.43,ar:2.06,ret:0.55,g:1.2,l:49725,pi:49725,t:3,s:["CHURN", "ROAS\u2713"],act:'Rate health. Overdue/cancelled. Good 2.06x ROAS.',w:'sub_1SptoTFopWoUwtLc6TXdzL5I',ri:'f145e736-cf7f-483f-99b4-f223c1f38480',ca:2,d:0},
+{r:30,n:'Oysters XO',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:4,a:25000,sh:0,ro:0,ar:0,ret:0.82,g:0.8,l:49200,pi:49200,t:3,s:["NEW"],act:'Handover complete : Preben --> Abhishek\r\nWe are running leads campaigns for th...',w:'sub_1QdDpwFopWoUwtLcCsHb7jos',ri:'d54429cb-b2ce-5178-9e81-34912e625172',ca:0,d:0},
+{r:31,n:'Stickmadly',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:1467,ro:0.83,ar:0.24,ret:0.65,g:1.0,l:48750,pi:48750,t:3,s:[],act:'Rate health. Aimy',w:'sub_1SqGjqFopWoUwtLceM0boTsc',ri:'540aa8c2-5ad1-4d4e-b798-14eb3e378052',ca:0,d:1},
+{r:32,n:'+ Beryll',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:25054,ro:0.83,ar:0.32,ret:0.65,g:1.0,l:48750,pi:48750,t:3,s:[],act:'Rate health.',w:'sub_1SmIdWFopWoUwtLck1lWoBNo',ri:'ce8db794-c1d7-4b7c-9852-1f10350a08dc',ca:0,d:1},
+{r:33,n:'Company of Ted Bergner',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:3,a:25000,sh:254407,ro:0.0,ar:1.84,ret:0.6,g:1.3,l:58500,pi:48750,t:3,s:["UPSELL"],act:'$254K Shopify. Upsell candidate. Dargo FE-good vibes. BE-ppl. Founder has founded peak performance -> C-suite lat...',w:'sub_1SqCOyFopWoUwtLcrZ9wBpBy',ri:'a5af67a1-e9a3-4cd8-90d9-432a0d98b153',ca:1,d:0},
+{r:34,n:'trieye.com',c:'Daniel',p:'Sebastian+Daniel',pl:'Performance',h:2,a:48000,sh:0,ro:0,ar:0,ret:0.4,g:0.8,l:46080,pi:46080,t:3,s:["NEW"],act:'Tore&Daniel FE. Customer is design&BE-savvy',w:'sub_1SegWwFopWoUwtLcmy0C8aM3',ri:'5e56ba23-313d-48ad-9e5d-15b59a20e02e',ca:0,d:0},
+{r:35,n:'Sweet Bamboo',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:86741,ro:2.3,ar:1.01,ret:0.55,g:1.1,l:45581,pi:45581,t:3,s:["CHURN"],act:'Rate health. Overdue/cancelled.',w:'sub_1RToO1FopWoUwtLchocj9XQC',ri:'06192110-dc16-5804-8c73-9ddf22567bf3',ca:0,d:1},
+{r:36,n:'YUMIYU Jewelry',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:64629,ro:1.81,ar:1.79,ret:0.55,g:1.1,l:45581,pi:45581,t:3,s:["CHURN"],act:'Rate health. Overdue/cancelled.',w:'sub_1SkvP5FopWoUwtLcPijcgD3t',ri:'6ec6ce0e-ac37-4143-a79e-65e60ee96de1',ca:4,d:0},
+{r:37,n:'Dorne Jewelry',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:3870,ro:0.42,ar:0.68,ret:0.55,g:1.0,l:41438,pi:41438,t:3,s:["CHURN"],act:'Rate health. Overdue/cancelled.',w:'sub_1SnKNCFopWoUwtLcBRtM8qLf',ri:'42eab383-dcaa-4104-9a67-970955bc2715',ca:1,d:0},
+{r:38,n:'Hairfinity',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:6945,ro:2.78,ar:1.98,ret:0.55,g:1.0,l:41438,pi:41438,t:3,s:["CHURN"],act:'Rate health. Overdue/cancelled. Needs onboarding',w:'sub_1Sn3vPFopWoUwtLc9EW4Y8q9',ri:'9cffcd97-013a-41e7-8915-a705bf262a5b',ca:0,d:1},
+{r:39,n:'Aluzi',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:1055,ro:0.0,ar:0.19,ret:0.55,g:1.0,l:41438,pi:41438,t:3,s:["CHURN"],act:'Rate health. Overdue/cancelled. whatsapp communication',w:'sub_1SKTGjFopWoUwtLc22d5K7mY',ri:'d23d0215-0ee8-415c-89df-567310996c64',ca:2,d:0},
+{r:40,n:'Q Diamonds',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:0,ro:0.0,ar:0.03,ret:0.55,g:1.0,l:41438,pi:41438,t:3,s:["CHURN"],act:'Rate health. Overdue/cancelled. Hand over to Sebastian',w:'sub_1SMmXkFopWoUwtLcO1Tsb2ME',ri:'f12354b8-f560-4dbc-b657-d48ecec50551',ca:1,d:0},
+{r:41,n:'Romega Sweden',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:3,a:25000,sh:122,ro:0,ar:0.01,ret:0.54,g:1.0,l:40500,pi:40500,t:3,s:["IDLE"],act:'35d inactive. Almost fixed website. Seb FE',w:'sub_1RggX2FopWoUwtLcxxchWwzf',ri:'55db9b0e-1d66-4fe0-8624-d19c73359c01',ca:0,d:35},
+{r:42,n:'Zellige Home',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:34854,ro:0,ar:0.0,ret:0.65,g:0.8,l:39000,pi:39000,t:3,s:["NEW"],act:'Rate health.',w:'sub_1SpvwzFopWoUwtLcRQUgXOtj',ri:'6f35174e-dbd9-4693-a305-779c5dd9cb43',ca:0,d:1},
+{r:43,n:'Flavent Relief',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:2733,ro:0,ar:0,ret:0.65,g:0.8,l:39000,pi:39000,t:3,s:["NEW"],act:'Rate health.',w:'sub_1Sv6qwFopWoUwtLcttwOF2o1',ri:'c0e80ce3-7878-4764-9148-409983bbdfb9',ca:0,d:0},
+{r:44,n:'Diamond Tool Store',c:'Sebastian',p:'Sebastian+Daniel',pl:'Growth',h:null,a:9000,sh:1381143,ro:26.06,ar:23.54,ret:0.65,g:2.2,l:38610,pi:38610,t:3,s:["ROAS\u2605", "UPSELL"],act:'Rate health. Strong 23.54x ROAS. $1381K Shopify. Upsell candidate.',w:'sub_1S2wCEFopWoUwtLcsTOMR4WV',ri:'39801cf1-e39b-420d-bfc4-bf626c134ee1',ca:6,d:0},
+{r:45,n:'Neil Capital Digital',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:0,ro:0,ar:0.41,ret:0.5,g:1.0,l:37294,pi:37294,t:3,s:["CHURN", "IDLE"],act:'Rate health. Overdue/cancelled. 95d inactive. Duplicate',w:'sub_1RxVRTFopWoUwtLccUbS8w1U',ri:'53ef4f81-9dbe-507d-b92d-5c96bb012883',ca:0,d:95},
+{r:46,n:'Lougheed Laser & Skin Centre',c:'Sebastian',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:5217,ro:0,ar:1.87,ret:0.5,g:1.0,l:37294,pi:37294,t:3,s:["CHURN", "IDLE"],act:'Rate health. Overdue/cancelled. 71d inactive. Churn',w:'sub_1SGQ9LFopWoUwtLcxFDpTG0M',ri:'b130003f-bbba-5006-b059-6ebebf5bc577',ca:0,d:71},
+{r:47,n:'Lagenio',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:2,a:25000,sh:4032,ro:2.13,ar:1.22,ret:0.34,g:1.4,l:35700,pi:35700,t:3,s:["LTV UP", "CHURN"],act:'Overdue/cancelled. Creatives-picky. Urmaker Larsen play. Not sure if time=ROAS. Longhorn',w:'sub_1Sg2nHFopWoUwtLcBlJh51xw',ri:'2c82e18c-e261-4e52-8c1a-2a6ca5289874',ca:2,d:0},
+{r:48,n:'The Final Chapter',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:13338,ro:0,ar:0,ret:0.65,g:0.8,l:39000,pi:35455,t:3,s:["NEW"],act:'Rate health.',w:'sub_1SxIjKFopWoUwtLcfDH0iQG2',ri:'caab7146-d7b9-4b81-85fd-4e9a4eceb2fc',ca:0,d:0},
+{r:49,n:'Busi Company AB',c:'Daniel',p:'Sebastian+Daniel',pl:'Growth',h:4,a:9000,sh:26667,ro:6.21,ar:6.52,ret:0.82,g:1.5,l:33210,pi:33210,t:3,s:["ROAS\u2713"],act:'Good 6.52x ROAS.',w:'sub_1SpZb0FopWoUwtLcuqvv93hx',ri:'8c48eb7a-e23f-414d-b9fe-d2d65280807f',ca:1,d:0},
+{r:50,n:'Ting',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:null,a:25000,sh:0,ro:0,ar:0,ret:0.55,g:0.8,l:33150,pi:33150,t:3,s:["CHURN"],act:'Rate health. Overdue/cancelled.',w:'sub_1SokcQFopWoUwtLc0nYNdJSa',ri:'404c1548-50cc-48c7-ba39-c790dccb6066',ca:0,d:0},
+{r:51,n:'InkeshDTF',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:3,a:25000,sh:7480,ro:0,ar:0,ret:0.51,g:0.8,l:30600,pi:30600,t:3,s:["CHURN"],act:'Overdue/cancelled. Paused. Seb to nudge them',w:'sub_1SXSodFopWoUwtLcvHl11a4T',ri:'51948dba-646a-42d6-b0dc-aa6e2e435e15',ca:0,d:0},
+{r:52,n:'Trousseau of Dallas',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:2,a:25000,sh:23424,ro:0,ar:0.78,ret:0.36,g:1.0,l:27000,pi:27000,t:3,s:["IDLE"],act:'64d inactive. imessage communication. Iranian so Keep FE. Low ROAS hopes. LTV uncertain',w:'sub_1ST7l0FopWoUwtLcxsucGYU6',ri:'51fc4707-abf9-429e-9cca-1fe34710ce24',ca:0,d:64},
+{r:53,n:'Horse.com',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:1,a:25000,sh:285560,ro:0.44,ar:0.74,ret:0.25,g:1.3,l:24375,pi:24375,t:3,s:["UPSELL"],act:'$285K Shopify. Upsell candidate. Results. Let Seb think about comms',w:'sub_1SooHwFopWoUwtLccz5pTmUL',ri:'74d8ead9-0f1a-4ccd-ae67-9297b1e2f4df',ca:1,d:0},
+{r:54,n:'Chérie',c:'Daniel',p:'Sebastian+Daniel',pl:'Pro',h:1,a:25000,sh:1993,ro:0.14,ar:0.55,ret:0.25,g:1.0,l:18750,pi:18750,t:3,s:[],act:'0.2 ROAS. Just wants creative volume. Tore replit? Joachim / christian helps w s...',w:'sub_1Sv7EQFopWoUwtLcEpMCqyvT',ri:'0b97c2a2-c5c4-438b-8105-2581212bf510',ca:3,d:0},
+{r:55,n:'NicoleHD Jewelry',c:'Sebastian',p:'Sebastian+Daniel',pl:'Growth',h:null,a:9000,sh:8643,ro:0.0,ar:1.87,ret:0.65,g:1.0,l:17550,pi:17550,t:3,s:[],act:'Rate health. Aimy',w:'sub_1S8QIzFopWoUwtLcz26NuJtB',ri:'6a3f6c23-e6e1-4d8b-8130-11c8465242f2',ca:1,d:0},
+{r:56,n:'SolarEnergyLightingUS',c:'Daniel',p:'Sebastian+Daniel',pl:'Growth',h:4,a:9000,sh:0,ro:0,ar:0,ret:0.82,g:0.8,l:17712,pi:16102,t:3,s:["NEW"],act:'Monitor.',w:'sub_1SsPNGFopWoUwtLcKnIDt6lC',ri:'661926df-b314-4cff-9e15-34f29f38b84f',ca:0,d:0},
+{r:57,n:'botanéco.com',c:'Daniel',p:'Sebastian+Daniel',pl:'Growth',h:4,a:9000,sh:0,ro:0,ar:0,ret:0.82,g:0.8,l:17712,pi:16102,t:3,s:["NEW"],act:'Monitor.',w:'sub_1Ss9mNFopWoUwtLcXSLi05Ar',ri:'d8f9e40a-08b8-4cf4-8379-8401f5a88a5b',ca:0,d:0},
+{r:58,n:'Lpgmuscle',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:11089,ro:3.92,ar:3.52,ret:0.65,g:1.3,l:15210,pi:15210,t:3,s:["ROAS\u2713"],act:'Rate health. Good 3.52x ROAS. Nicklas',w:'sub_1RCT6ZFopWoUwtLcR1zPIhaa',ri:'6568e231-6b1a-5fb1-90f6-2df29f31337b',ca:0,d:1},
+{r:59,n:'Daily Scrubs',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:25711,ro:5.43,ar:4.97,ret:0.65,g:1.3,l:15210,pi:15210,t:3,s:["ROAS\u2713"],act:'Rate health. Good 4.97x ROAS. Aimy',w:'sub_1QtvQXFopWoUwtLcTHN8bhR7',ri:'9b0f8ff3-d7a2-56a1-98b6-d249b62a0084',ca:0,d:2},
+{r:60,n:'Class Mathematics',c:'Sebastian',p:'Sebastian+Daniel',pl:'Growth',h:null,a:9000,sh:2967,ro:0.23,ar:1.06,ret:0.55,g:1.0,l:14918,pi:14918,t:4,s:["CHURN"],act:'Rate health. Overdue/cancelled.',w:'sub_1S5x8LFopWoUwtLctys9lUBP',ri:'5d06ed74-a247-45e7-9442-ffe0711a6764',ca:2,d:0},
+{r:61,n:'Sweet P Baby Co.',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:11554,ro:2.32,ar:3.45,ret:0.65,g:1.2,l:14040,pi:14040,t:4,s:["ROAS\u2713"],act:'Rate health. Good 3.45x ROAS. Aimy',w:'sub_1R2ai4FopWoUwtLcn3E630kx',ri:'98036081-2ca7-55fe-9c34-4669cb013f6f',ca:1,d:0},
+{r:62,n:'rajanimd.com',c:'Sebastian',p:'Sebastian+Daniel',pl:'Growth',h:null,a:9000,sh:0,ro:0,ar:0,ret:0.65,g:0.8,l:14040,pi:14040,t:4,s:["NEW"],act:'Rate health.',w:'sub_1SnojJFopWoUwtLclK25MPgM',ri:'f823fdc5-b7a8-48eb-969c-f8329477ce67',ca:0,d:0},
+{r:63,n:'Www.kastelshoes.com',c:'Daniel',p:'Sebastian+Daniel',pl:'Growth',h:3,a:9000,sh:0,ro:0,ar:0,ret:0.6,g:0.8,l:12960,pi:12960,t:4,s:["NEW"],act:'Seb FE',w:'sub_1Suf9VFopWoUwtLcVfs1hxiX',ri:'8915ee97-f7ca-4756-af0d-25ac7bd48a4c',ca:0,d:0},
+{r:64,n:'Nightollie',c:'Sebastian',p:'Sebastian+Daniel',pl:'Growth',h:null,a:9000,sh:8691,ro:0,ar:0.0,ret:0.59,g:0.8,l:12636,pi:12636,t:4,s:["IDLE"],act:'Rate health. 69d inactive. Aimy / Sebastian',w:'sub_1RlNj3FopWoUwtLcZyYGJMjp',ri:'d108acd6-e1da-4b27-b11d-4a8596478766',ca:0,d:69},
+{r:65,n:'bathroomsalesdirect.com.au',c:'Daniel',p:'Sebastian+Daniel',pl:'Growth',h:3,a:9000,sh:0,ro:0,ar:0,ret:0.6,g:0.8,l:12960,pi:11782,t:4,s:["NEW"],act:'Seb FE',w:'sub_1SssSeFopWoUwtLcOrc6NW40',ri:'b691abee-1673-4605-8f1a-69a15935447f',ca:0,d:0},
+{r:66,n:'J.Ciro Watches',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:2053,ro:2.54,ar:1.44,ret:0.65,g:1.0,l:11700,pi:11700,t:4,s:[],act:'Rate health. Nicklas',w:'sub_1RMsl9FopWoUwtLcB6T1UXxe',ri:'65e8448a-2f28-5c2a-92e0-63766568f391',ca:0,d:1},
+{r:67,n:'CLR Los Angeles',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:2454,ro:0,ar:0.43,ret:0.55,g:1.0,l:9945,pi:9945,t:4,s:["CHURN"],act:'Rate health. Overdue/cancelled. Churn',w:'sub_1RX3eBFopWoUwtLcQC7ceR4l',ri:'65d4ba42-b82f-47ba-8c29-28295c63dca9',ca:0,d:15},
+{r:68,n:'Bentalia Homes',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:1527,ro:0.25,ar:0.56,ret:0.55,g:1.0,l:9945,pi:9945,t:4,s:["CHURN"],act:'Rate health. Overdue/cancelled. Aimy',w:'sub_1Qrm8jFopWoUwtLc5Vhpphyi',ri:'69da19ef-c6ac-5c60-b3aa-3ec7c8858891',ca:1,d:0},
+{r:69,n:'Lone Tree Designs',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:2449,ro:0,ar:0.45,ret:0.55,g:1.0,l:9945,pi:9945,t:4,s:["CHURN"],act:'Rate health. Overdue/cancelled. Don\'t touch (aimy)',w:'sub_1RJljLFopWoUwtLcSYh812ud',ri:'d335e454-cb0e-5f30-85ce-aad7fa50a38a',ca:0,d:14},
+{r:70,n:'Dog.Dog.Cat.',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:84129,ro:0,ar:0.8,ret:0.5,g:1.1,l:9846,pi:9846,t:4,s:["CHURN", "IDLE"],act:'Rate health. Overdue/cancelled. 35d inactive. Churn',w:'sub_1QrQjrFopWoUwtLcFpCDbm3r',ri:'f4e5d497-f2a4-5dd1-a1f0-a92c871ba64f',ca:0,d:35},
+{r:71,n:'No Tops Nation',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:84,ro:0,ar:1.29,ret:0.5,g:1.0,l:8950,pi:8950,t:4,s:["CHURN", "IDLE"],act:'Rate health. Overdue/cancelled. 57d inactive. Churn',w:'sub_1R6cDjFopWoUwtLc9ImcRX0Z',ri:'14869dea-01ec-5c4f-9cfb-19040fb5ec03',ca:0,d:57},
+{r:72,n:'MXTology',c:'Sebastian',p:'Sebastian+Daniel',pl:'Lite',h:null,a:6000,sh:1797,ro:0.0,ar:0.56,ret:0.47,g:1.0,l:8453,pi:8453,t:4,s:["CHURN"],act:'Rate health. Overdue/cancelled. Aimy',w:'sub_1QzQS9FopWoUwtLc2aOk6euW',ri:'7b0e0a0d-73ec-5710-97cd-29ce467311d3',ca:1,d:0},
+{r:1,n:'the friend of Pablo óptica',c:'Aimy',p:'Aimy+Espen',pl:'Pro',h:5,a:25000,sh:1510,ro:0.0,ar:0.0,ret:0.92,g:1.0,l:69000,pi:69000,t:2,s:[],act:'Testing phase for campaigns',w:'sub_1SvFG4FopWoUwtLcWYc29Uf4',ri:'6ea04561-67f6-4091-8196-6f128cc1465b',ca:4,d:0},
+{r:2,n:'Duralex USA',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:5,a:9000,sh:125828,ro:7.67,ar:12.65,ret:0.92,g:2.0,l:49680,pi:49680,t:3,s:["ROAS\u2605"],act:'Strong 12.65x ROAS. $125K Shopify. Good as it is',w:'sub_1RyDoIFopWoUwtLct4g9SoYo',ri:'60634c40-ab4a-4d14-abd3-67895e2d08e0',ca:1,d:0},
+{r:3,n:'Cavvalure',c:'Aimy',p:'Aimy+Espen',pl:'Pro',h:3,a:25000,sh:0,ro:0.0,ar:0.0,ret:0.6,g:1.0,l:45000,pi:40909,t:3,s:[],act:'Monitor.',w:'sub_1SzwErFopWoUwtLcPiFgJ1oq',ri:'d920fb32-f0a7-4948-ba70-7fac9859dfec',ca:1,d:0},
+{r:4,n:'motocross4u.com',c:'Aimy',p:'Aimy+Espen',pl:'Pro',h:null,a:25000,sh:0,ro:0.0,ar:0.0,ret:0.65,g:0.8,l:39000,pi:35455,t:3,s:["NEW"],act:'Rate health.',w:'sub_1SuBGiFopWoUwtLcxgVF01C5',ri:'dbd807b7-1077-4e84-92b6-726b2b089c04',ca:0,d:0},
+{r:5,n:'LATRAVLA',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:4,a:9000,sh:0,ro:0.0,ar:0.0,ret:0.82,g:1.0,l:22140,pi:22140,t:3,s:[],act:'Good as it is | Creatives ordered',w:'sub_1SwvZnFopWoUwtLcipwqo0zE',ri:'b16642f5-d93c-51fd-a910-495e954fda3b',ca:2,d:0},
+{r:6,n:'Artamine',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:5,a:9000,sh:0,ro:0.0,ar:0.0,ret:0.92,g:0.8,l:19872,pi:19872,t:3,s:["NEW"],act:'Good as it is for now',w:'sub_1SzZ4bFopWoUwtLcDtCpWGZY',ri:'c3ed605d-8c77-5dd3-ad9c-9f465e3be28f',ca:0,d:2},
+{r:7,n:'Innovative Pet Lab',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:3,a:9000,sh:8340,ro:0.05,ar:0.05,ret:0.6,g:1.0,l:16200,pi:16200,t:3,s:[],act:'Too early to tell what they need',w:'sub_1SxBw3FopWoUwtLcUfOImyUa',ri:'f58ed4b7-d252-4d3c-a423-e7f43177026f',ca:1,d:0},
+{r:8,n:'Cheekbone Beauty',c:'Aimy',p:'Aimy+Espen',pl:'Lite',h:null,a:6000,sh:100596,ro:0.0,ar:2.6,ret:0.55,g:1.5,l:14918,pi:14918,t:4,s:["CHURN", "ROAS\u2713"],act:'Rate health. Overdue/cancelled. Good 2.6x ROAS. $100K Shopify. Need to top up waller',w:'sub_1Rb1ixFopWoUwtLcWkMeZN4o',ri:'5538ff2d-e66e-4fb8-8268-e9e1cd3719aa',ca:0,d:15},
+{r:9,n:'fjorda.com',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:null,a:9000,sh:0,ro:0.0,ar:0.0,ret:0.65,g:0.8,l:14040,pi:12764,t:4,s:["NEW"],act:'Rate health.',w:'sub_1T1OLXFopWoUwtLcaZmdtIDJ',ri:'a11461e3-41d3-4852-9bde-10b82085dc14',ca:0,d:0},
+{r:10,n:'Peonie Collection',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:null,a:9000,sh:200,ro:0.0,ar:0.0,ret:0.65,g:0.8,l:14040,pi:12764,t:4,s:["NEW"],act:'Rate health.',w:'sub_1Szz8OFopWoUwtLcG5hC2rNZ',ri:'b1c3db34-db0c-4211-ba06-2c15e8dfad5b',ca:0,d:0},
+{r:11,n:'Nightollie',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:null,a:9000,sh:8691,ro:0.0,ar:0.0,ret:0.59,g:0.8,l:12636,pi:12636,t:4,s:["IDLE"],act:'Rate health. 69d inactive. Aimy / Sebastian',w:'sub_1RlNj3FopWoUwtLcZyYGJMjp',ri:'d108acd6-e1da-4b27-b11d-4a8596478766',ca:0,d:69},
+{r:12,n:'House of Walton',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:2,a:9000,sh:2408,ro:3.2,ar:1.11,ret:0.4,g:1.1,l:11880,pi:11880,t:4,s:[],act:'Intro call planned',w:'sub_1RsCT7FopWoUwtLcL13BvRgx',ri:'132747be-d0a8-4194-8e1c-6f6c12abc989',ca:3,d:0},
+{r:13,n:'Yah Cha',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:2,a:9000,sh:1468,ro:0.62,ar:0.36,ret:0.4,g:1.0,l:10800,pi:10800,t:4,s:[],act:'Really need to turn this account around!',w:'sub_1SAhJuFopWoUwtLchgNaXFxQ',ri:'bc585cab-54c5-4ce6-a4a7-65f725fc28d0',ca:5,d:0},
+{r:14,n:'AmericUrn',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:1,a:9000,sh:43375,ro:0.0,ar:0.0,ret:0.25,g:1.0,l:6750,pi:6136,t:4,s:[],act:'Victor is jumping in. Need someone that can fix his pixel tracking issue. But gh...',w:'sub_1StH49FopWoUwtLcEOi7WvEw',ri:'e0b7539c-dc24-43e6-8d48-0cf544e62890',ca:1,d:0},
+{r:15,n:'MXTology',c:'Aimy',p:'Aimy+Espen',pl:'Lite',h:2,a:6000,sh:1797,ro:0.0,ar:0.56,ret:0.34,g:1.0,l:6120,pi:6120,t:4,s:["CHURN"],act:'Waiting for his email with details about what he wants for the new visuals',w:'sub_1QzQS9FopWoUwtLc2aOk6euW',ri:'7b0e0a0d-73ec-5710-97cd-29ce467311d3',ca:1,d:0},
+{r:16,n:'DearlyDone',c:'Aimy',p:'Aimy+Espen',pl:'Growth',h:1,a:9000,sh:0,ro:0.0,ar:0.0,ret:0.25,g:0.8,l:5400,pi:4909,t:4,s:["NEW"],act:'Victor is jumping in. Need someone that can fix his pixel tracking issue. But gh...',w:'sub_1StH53FopWoUwtLcTBMf7mrz',ri:'c1cc9697-0ce1-4053-93d9-62cb555852e9',ca:0,d:0},
+{r:1,n:'UTV Mountain Accessories',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:5,a:25000,sh:123349,ro:4.86,ar:9.07,ret:0.92,g:2.0,l:138000,pi:138000,t:1,s:["ROAS\u2605"],act:'Strong 9.07x ROAS. $123K Shopify.',w:'sub_1RpvMgFopWoUwtLcXM8FfUn9',ri:'75fd100a-91ba-5fca-ac85-644546b0536f',ca:5,d:0},
+{r:2,n:'Pierced By Ash',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:5,a:25000,sh:31899,ro:3.2,ar:3.05,ret:0.92,g:1.3,l:89700,pi:89700,t:2,s:["ROAS\u2713"],act:'Good 3.05x ROAS.',w:'sub_1RHDcGFopWoUwtLcRe1XB8C7',ri:'b54dafd1-0a58-5924-8528-07e480397801',ca:2,d:0},
+{r:3,n:'Kids Glasses Online',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:5,a:25000,sh:6546,ro:0.89,ar:2.35,ret:0.78,g:1.2,l:70380,pi:70380,t:2,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 2.35x ROAS. ?',w:'sub_1SGOaAFopWoUwtLcqcK7pvHK',ri:'b9f71517-1787-4821-9396-5f2e4d10a038',ca:2,d:0},
+{r:4,n:'Bactose',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:5,a:25000,sh:32681,ro:0.47,ar:0.63,ret:0.92,g:1.0,l:69000,pi:69000,t:2,s:[],act:'Monitor.',w:'sub_1S1gGqFopWoUwtLcTHkzfrq3',ri:'21e5ce04-c9ad-437b-8bab-01a20147d7f7',ca:3,d:0},
+{r:5,n:'Dribz Wear',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:5,a:25000,sh:4592,ro:1.14,ar:1.06,ret:0.92,g:1.0,l:69000,pi:69000,t:2,s:[],act:'Monitor.',w:'sub_1RRhKRFopWoUwtLcBmCQC3Pa',ri:'7f871a43-457f-50b9-b46a-3bbc7e0ee7c0',ca:0,d:1},
+{r:6,n:'Organic Living',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:5,a:25000,sh:20284,ro:1.49,ar:1.57,ret:0.92,g:1.0,l:69000,pi:69000,t:2,s:[],act:'Monitor.',w:'sub_1So6wSFopWoUwtLcjs6hZz7I',ri:'84a8350f-5e33-45bc-941f-cf40cb071786',ca:0,d:1},
+{r:7,n:'FullyHealthy.com',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:5,a:25000,sh:21283,ro:0.36,ar:0.25,ret:0.78,g:1.0,l:58650,pi:58650,t:2,s:["CHURN"],act:'Monitor.',w:'sub_1SrjLRFopWoUwtLcaqLQ5Aah',ri:'a52545dc-5311-5343-9d1c-023fe413bebe',ca:0,d:1},
+{r:8,n:'Investment Watches',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:1821513,ro:50.0,ar:131.9,ret:0.92,g:2.2,l:54648,pi:54648,t:2,s:["ROAS\u2605", "UPSELL"],act:'Strong 131.9x ROAS. $1821K Shopify. Upsell candidate.',w:'sub_1Rw2tmFopWoUwtLcTP7K0Ib3',ri:'afbb270a-739f-4c3d-ba6a-83886703da44',ca:5,d:0},
+{r:9,n:'Jing Soda®',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:4,a:25000,sh:43908,ro:0.66,ar:1.1,ret:0.7,g:1.0,l:52275,pi:52275,t:2,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1RZZq8FopWoUwtLcli2CMG9b',ri:'6f0916cf-a1fa-40ca-9548-2a2c7c18717f',ca:0,d:1},
+{r:10,n:'Eleganté',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:3,a:25000,sh:9108,ro:3.37,ar:1.98,ret:0.51,g:1.1,l:42075,pi:42075,t:3,s:["CHURN"],act:'Overdue/cancelled. Lex - handover',w:'sub_1RyNGTFopWoUwtLcc7oR2409',ri:'e643dbd9-e9ad-56bf-9e1a-bc7d6ad9cb76',ca:2,d:0},
+{r:11,n:'Vita Diet',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Pro',h:3,a:25000,sh:11941,ro:0,ar:2.24,ret:0.43,g:1.2,l:39015,pi:39015,t:3,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 2.24x ROAS. Lex - handover',w:'sub_1RyNIAFopWoUwtLcOFrJom3P',ri:'d2d66e3d-615b-5690-be34-36783a9fc066',ca:0,d:17},
+{r:12,n:'VB Insulation',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:47157,ro:6.19,ar:5.6,ret:0.92,g:1.5,l:37260,pi:37260,t:3,s:["ROAS\u2713"],act:'Good 5.6x ROAS.',w:'sub_1S02SQFopWoUwtLcTUxjncpv',ri:'5d4ec3df-4284-5a16-b674-dc06605ed785',ca:2,d:0},
+{r:13,n:'Bombay Hair Canada',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:5,a:6000,sh:216406,ro:6.36,ar:9.21,ret:0.92,g:2.0,l:33120,pi:33120,t:3,s:["ROAS\u2605", "UPSELL"],act:'Strong 9.21x ROAS. $216K Shopify. Upsell candidate.',w:'sub_1RTwYwFopWoUwtLc7oIl6kJz',ri:'9de4386d-be89-5f42-9d8e-8cf1c11f3fcd',ca:0,d:1},
+{r:14,n:'Nostalgem',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:22605,ro:2.61,ar:2.24,ret:0.78,g:1.2,l:25337,pi:25337,t:3,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 2.24x ROAS.',w:'sub_1SnAZfFopWoUwtLcHVz70AV9',ri:'7ced3ae8-e0d5-4bf5-af89-6deee4d261ef',ca:1,d:0},
+{r:15,n:'Bombay Hair',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:5,a:6000,sh:188774,ro:0,ar:6.79,ret:0.83,g:1.7,l:25337,pi:25337,t:3,s:["IDLE", "ROAS\u2713"],act:'35d inactive. Good 6.79x ROAS. $188K Shopify.',w:'sub_1RgXOKFopWoUwtLcYMR1AUqE',ri:'abf776d3-cdbc-440d-9a1f-12f830d3ac3f',ca:0,d:35},
+{r:16,n:'Simplifi Fabric',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:5,a:6000,sh:42366,ro:4.17,ar:6.03,ret:0.92,g:1.5,l:24840,pi:24840,t:3,s:["ROAS\u2713"],act:'Good 6.03x ROAS.',w:'sub_1QPp1rFopWoUwtLccR2NPlpQ',ri:'2103173f-7a5d-5d4d-bdae-8c63cbbd3eb1',ca:0,d:1},
+{r:17,n:'SMD Fashion Group',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:210,ro:2.37,ar:0.98,ret:0.92,g:1.0,l:24840,pi:24840,t:3,s:[],act:'Monitor.',w:'sub_1SnWk6FopWoUwtLcwF1AmdHE',ri:'8e7e7c73-bcf3-45d5-8b03-8679c65a14f1',ca:1,d:0},
+{r:18,n:'Olivino Life',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:710,ro:1.11,ar:0.81,ret:0.92,g:1.0,l:24840,pi:24840,t:3,s:[],act:'Monitor.',w:'sub_1SrmjPFopWoUwtLc0tszZi8j',ri:'a0cca945-971e-409f-afe1-a57919e14965',ca:0,d:1},
+{r:19,n:'Atlan Helsekost',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:11481,ro:0,ar:1.4,ret:0.92,g:1.0,l:24840,pi:24840,t:3,s:[],act:'Monitor.',w:'sub_1SnMdEFopWoUwtLcj3mrlzh9',ri:'b6d57771-3b75-4040-b6da-3d35ee49760f',ca:0,d:8},
+{r:20,n:'Rockstar Sealing',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:4829,ro:0.76,ar:1.28,ret:0.92,g:1.0,l:24840,pi:24840,t:3,s:[],act:'Monitor.',w:'sub_1RfkEwFopWoUwtLco0py0nos',ri:'d590dffa-bfd3-4e3f-979c-d10d735b04a0',ca:0,d:1},
+{r:21,n:'Cossino',c:'Hamsa',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:2837,ro:1.02,ar:0.37,ret:0.92,g:1.0,l:24840,pi:24840,t:3,s:[],act:'Monitor.',w:'sub_1Srk9MFopWoUwtLcyWXrJ4TX',ri:'b5bc95c7-e965-5dec-b479-7ace6dea8a5f',ca:3,d:0},
+{r:22,n:'Goldi',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:1226,ro:4.32,ar:0.98,ret:0.82,g:1.1,l:24354,pi:24354,t:3,s:[],act:'Monitor.',w:'sub_1SnMTEFopWoUwtLcKUW7KH0Y',ri:'278dbd96-9e0a-4c5e-8ec7-ad265b72be0d',ca:0,d:1},
+{r:23,n:'DeemedFit',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:38898,ro:2.46,ar:3.36,ret:0.7,g:1.2,l:22583,pi:22583,t:3,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 3.36x ROAS.',w:'sub_1SnLJzFopWoUwtLcygJwPvmM',ri:'7a9768ef-929b-4a20-85af-22f80fde3833',ca:3,d:0},
+{r:24,n:'Modern Mexico',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:9257,ro:1.0,ar:1.35,ret:0.82,g:1.0,l:22140,pi:22140,t:3,s:[],act:'Monitor.',w:'sub_1Ssr1OFopWoUwtLcqnMiUrja',ri:'4d2e15df-5aa5-43ae-81a7-ed8c28d00200',ca:0,d:1},
+{r:25,n:'Breez',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:2340,ro:0.66,ar:0.6,ret:0.82,g:1.0,l:22140,pi:22140,t:3,s:[],act:'Monitor.',w:'sub_1SorkfFopWoUwtLc4AepdKXx',ri:'889ebb17-a6da-4ba4-9001-b960a9452ffc',ca:6,d:0},
+{r:26,n:'Layo G',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:3986,ro:0.0,ar:0.57,ret:0.82,g:1.0,l:22140,pi:22140,t:3,s:[],act:'Monitor.',w:'sub_1SZckbFopWoUwtLcd0iHpzHw',ri:'a46b81e7-fc2c-44d9-afc1-72590becb903',ca:0,d:1},
+{r:27,n:'Korean Vegan Beauty, LLC',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:13038,ro:1.76,ar:1.6,ret:0.78,g:1.0,l:21114,pi:21114,t:3,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1SB2kbFopWoUwtLc4EjYsZut',ri:'2b868dd1-a717-5107-b7e8-2072bacf923a',ca:0,d:1},
+{r:28,n:'Elite Thread Co',c:'Hamsa',p:'Nicklas+Hamsa',pl:'Growth',h:3,a:9000,sh:8735,ro:4.35,ar:3.47,ret:0.6,g:1.3,l:21060,pi:21060,t:3,s:["ROAS\u2713"],act:'Good 3.47x ROAS.',w:'sub_1Ss0CBFopWoUwtLcsYmSmYII',ri:'92120151-2a90-405a-bf39-c122abe1efe1',ca:1,d:0},
+{r:29,n:'The A Fragrance',c:'Hamsa',p:'Nicklas+Hamsa',pl:'Growth',h:3,a:9000,sh:6812,ro:2.01,ar:2.01,ret:0.6,g:1.2,l:19440,pi:19440,t:3,s:["ROAS\u2713"],act:'Good 2.01x ROAS.',w:'sub_1StXtxFopWoUwtLcP8cFv1zV',ri:'ec2325e8-a474-4400-9e0a-6638cde68719',ca:1,d:0},
+{r:30,n:'Rockin Bettie',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:3,a:9000,sh:51628,ro:4.62,ar:2.86,ret:0.51,g:1.4,l:19278,pi:19278,t:3,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 2.86x ROAS.',w:'sub_1Rg66ZFopWoUwtLc2EG1a2TR',ri:'c0a78e37-290e-5944-92bf-c111142259d8',ca:0,d:1},
+{r:31,n:'Kandyway',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:12198,ro:1.82,ar:2.28,ret:0.59,g:1.2,l:19195,pi:19195,t:3,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 2.28x ROAS. handover',w:'sub_1RhEJNFopWoUwtLcLL2zs25d',ri:'d0b19c41-416b-42d7-afb8-618d6d6d00a5',ca:1,d:0},
+{r:32,n:'Stallion Gear',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:38,ro:0.0,ar:0.0,ret:0.7,g:1.0,l:18819,pi:18819,t:3,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1SlG2nFopWoUwtLcc9oMbXMs',ri:'20c76219-660e-4784-a8ef-96858e03c93f',ca:1,d:0},
+{r:33,n:'Company of Caesar Supps',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:9372,ro:1.79,ar:1.25,ret:0.7,g:1.0,l:18819,pi:18819,t:3,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1SkEr6FopWoUwtLcbmgfaQK6',ri:'7db79f3a-9724-41fd-9dae-29924146b4b4',ca:4,d:0},
+{r:34,n:'Petra Fragrances',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:4,a:9000,sh:814,ro:1.25,ar:0.88,ret:0.7,g:1.0,l:18819,pi:18819,t:3,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1SdVOJFopWoUwtLcYpRlmdir',ri:'a9d9140b-ffca-44c3-bf2b-164db3bc8586',ca:0,d:1},
+{r:35,n:'Artisanal Australia',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:5,a:6000,sh:70978,ro:0,ar:3.28,ret:0.78,g:1.3,l:18299,pi:18299,t:3,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 3.28x ROAS. Handover to Alex, emails not syncing?',w:'sub_1RfzDhFopWoUwtLcLdIENjLz',ri:'a5692202-8e4c-53eb-b587-51750f571280',ca:0,d:14},
+{r:36,n:'Jules Frazier',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:3,a:9000,sh:7597,ro:11.07,ar:2.0,ret:0.51,g:1.3,l:17901,pi:17901,t:3,s:["CHURN", "ROAS\u2713"],act:'Overdue/cancelled. Good 2.0x ROAS.',w:'sub_1Sb6cJFopWoUwtLc8iPS99mJ',ri:'e1c36b36-2581-46ea-8da6-eb4589ab9573',ca:0,d:1},
+{r:37,n:'Master Playbook',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:146,ro:0,ar:0.0,ret:0.78,g:0.8,l:16891,pi:16891,t:3,s:["CHURN"],act:'Overdue/cancelled. churn',w:'sub_1SojZcFopWoUwtLcm7FTRW6G',ri:'33923598-86b8-4e52-b0c8-3ae5c2eb0f4b',ca:0,d:11},
+{r:38,n:'Monday Motorbikes',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:5,a:9000,sh:1447,ro:0.0,ar:0.0,ret:0.78,g:0.8,l:16891,pi:16891,t:3,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1SpuVlFopWoUwtLccZnOMfKM',ri:'66de285a-3c0c-4e2e-a89f-d55e0528efc5',ca:0,d:1},
+{r:39,n:'Jade May',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:null,a:6000,sh:0,ro:2.0,ar:2.0,ret:0.65,g:1.2,l:14040,pi:14040,t:4,s:["ROAS\u2713"],act:'Rate health. Good 2.0x ROAS.',w:'sub_1SpErqFopWoUwtLcAhIWQS1p',ri:'9baa9d9f-41fe-4be4-b77d-fdb4a7c37517',ca:3,d:0},
+{r:40,n:'Bean Bros',c:'Hamsa',p:'Nicklas+Hamsa',pl:'Growth',h:null,a:9000,sh:55784,ro:0.0,ar:0.0,ret:0.65,g:0.9,l:15444,pi:14040,t:4,s:["NEW"],act:'Rate health.',w:'sub_1SsL64FopWoUwtLcbRUHqr1J',ri:'b6ba0f85-9344-4168-8b7d-1088809e2543',ca:0,d:0},
+{r:41,n:'LASHGAME',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:4,a:6000,sh:8732,ro:0,ar:1.22,ret:0.74,g:1.0,l:13284,pi:13284,t:4,s:["IDLE"],act:'56d inactive.',w:'sub_1RUGQHFopWoUwtLceBA1p4Nl',ri:'7f3a9922-a159-54fb-8ffb-130c1caef632',ca:0,d:56},
+{r:42,n:'ELIKO GLOW',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:3,a:9000,sh:15500,ro:0,ar:0.0,ret:0.6,g:0.8,l:12960,pi:12960,t:4,s:["NEW"],act:'Monitor.',w:'sub_1SlE7vFopWoUwtLcuTSgnDtM',ri:'07d3a163-e8e8-49c5-a53c-6e0f0a3e3415',ca:0,d:12},
+{r:43,n:'Barisi International',c:'Hamsa',p:'Nicklas+Hamsa',pl:'Growth',h:null,a:9000,sh:0,ro:0.0,ar:0.0,ret:0.65,g:0.8,l:14040,pi:12764,t:4,s:["NEW"],act:'Rate health.',w:'sub_1Sx31qFopWoUwtLcpBuFD3z2',ri:'65d3e7c3-431c-4bb2-85fd-df8487b6c344',ca:0,d:0},
+{r:44,n:'X NIHILO',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Starter',h:4,a:5000,sh:552,ro:0.0,ar:0.85,ret:0.82,g:1.0,l:12300,pi:12300,t:4,s:[],act:'Monitor.',w:'sub_1RJsM2FopWoUwtLcE9RmkTiH',ri:'0cef3c21-f933-5f3a-a4ee-1b8102823722',ca:1,d:0},
+{r:45,n:'POLAR Lab Diamonds',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:null,a:9000,sh:0,ro:0.0,ar:0.0,ret:0.55,g:0.8,l:11934,pi:11934,t:4,s:["CHURN"],act:'Rate health. Overdue/cancelled. handover - leads',w:'sub_1Sr47gFopWoUwtLcD3KKIf7Z',ri:'459db1ac-dff6-4e53-999e-de6b390d1b98',ca:0,d:1},
+{r:46,n:'Zindiak',c:'Hamsa',p:'Nicklas+Hamsa',pl:'Lite',h:5,a:6000,sh:56163,ro:0.0,ar:0.0,ret:0.7,g:0.9,l:11148,pi:11148,t:4,s:["CHURN", "IDLE"],act:'Overdue/cancelled. 75d inactive. Handed over to nicklas',w:'sub_1QnPCOFopWoUwtLcbE923LQa',ri:'c086cad9-9176-5c70-aef6-12fbad9eba2d',ca:0,d:75},
+{r:47,n:'Vesalix',c:'Hamsa',p:'Nicklas+Hamsa',pl:'Growth',h:3,a:9000,sh:110,ro:0.0,ar:0.0,ret:0.51,g:0.8,l:11016,pi:11016,t:4,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1SsFmvFopWoUwtLcTFttyVdu',ri:'8e9df40a-15d6-430b-9032-8e00b0b0c89b',ca:0,d:8},
+{r:48,n:'goodphyte',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:3,a:6000,sh:18420,ro:0,ar:2.84,ret:0.46,g:1.2,l:9914,pi:9914,t:4,s:["CHURN", "IDLE", "ROAS\u2713"],act:'Overdue/cancelled. 59d inactive. Good 2.84x ROAS. churn',w:'sub_1R6gaEFopWoUwtLc2VNI4jEc',ri:'3ea69c1b-325b-54fc-a56c-2858148eaa73',ca:0,d:59},
+{r:49,n:'Parken Jewelry',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:2,a:9000,sh:10305,ro:1.29,ar:1.26,ret:0.34,g:1.0,l:9180,pi:9180,t:4,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1S8PbhFopWoUwtLcrJWWXZFj',ri:'686b3476-4e8f-4a29-93ff-577949ccb041',ca:1,d:0},
+{r:50,n:'BOLD SWAGPACK',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:2,a:9000,sh:50,ro:0.14,ar:0.07,ret:0.34,g:1.0,l:9180,pi:9180,t:4,s:["CHURN"],act:'Overdue/cancelled.',w:'sub_1SqJ71FopWoUwtLcXtdUDjWS',ri:'ae12aedc-b630-4a2d-ac14-11bfee836ccc',ca:0,d:2},
+{r:51,n:'VitaLab',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:2,a:9000,sh:125,ro:0,ar:0.21,ret:0.34,g:1.0,l:9180,pi:9180,t:4,s:["CHURN"],act:'Overdue/cancelled. Handover, overdue I cant save',w:'sub_1S2aVzFopWoUwtLc2VCz91uP',ri:'c8ea8a91-ff29-4d4b-9cad-57186bd183c8',ca:0,d:9},
+{r:52,n:'Vibe Box',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:2,a:9000,sh:23917,ro:1.24,ar:0.97,ret:0.34,g:1.0,l:9180,pi:9180,t:4,s:["CHURN"],act:'Monitor.',w:'sub_1RiMW8FopWoUwtLcA5gTNDY5',ri:'d2f753fd-aa64-4a3c-a686-2e1f6791d519',ca:0,d:1},
+{r:53,n:'Lil BUB - THE BUB STORE',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:null,a:6000,sh:11310,ro:0,ar:2.52,ret:0.42,g:1.2,l:9130,pi:9130,t:4,s:["CHURN", "IDLE", "ROAS\u2713"],act:'Rate health. Overdue/cancelled. 112d inactive. Good 2.52x ROAS. churn',w:'sub_1RFKp1FopWoUwtLcDp7ce9NZ',ri:'94278191-ceab-5ac7-89e0-9977f26ca53f',ca:0,d:112},
+{r:54,n:'Chaz LaRue',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:3,a:6000,sh:1217,ro:0,ar:0.4,ret:0.46,g:1.0,l:8262,pi:8262,t:4,s:["CHURN", "IDLE"],act:'Overdue/cancelled. 55d inactive. churn',w:'sub_1QwAWmFopWoUwtLcE3dS9VKR',ri:'22ca0030-5958-51d1-a4a8-79d5f7e95660',ca:0,d:55},
+{r:55,n:'Plantraw.com',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Lite',h:2,a:6000,sh:7238,ro:1.82,ar:0.87,ret:0.34,g:1.0,l:6120,pi:6120,t:4,s:["CHURN"],act:'Overdue/cancelled. In conversation about overdue payments, likely churn',w:'sub_1RgvdxFopWoUwtLcOKgBfQp0',ri:'bca5dd88-1506-4740-89c2-36302d37ec17',ca:1,d:0},
+{r:56,n:'My City Doors',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:1,a:9000,sh:13908,ro:0.0,ar:1.24,ret:0.21,g:1.0,l:5738,pi:5738,t:4,s:["CHURN"],act:'Overdue/cancelled. Handed Over',w:'sub_1QxHcRFopWoUwtLcztLuK95J',ri:'be4793ad-9024-550d-8295-3b4d7e9bbe14',ca:1,d:0},
+{r:57,n:'Saved American',c:'Nicklas',p:'Nicklas+Hamsa',pl:'Growth',h:1,a:9000,sh:0,ro:0,ar:0.18,ret:0.19,g:1.0,l:5164,pi:5164,t:4,s:["CHURN", "IDLE"],act:'Overdue/cancelled. 118d inactive. churn',w:'sub_1S7jjMFopWoUwtLcfSLOJTb5',ri:'89fa8434-eb17-4877-8d78-209937c9e4ee',ca:0,d:118}
 ];
+const PM={'Marcus+Martin':{cnt:47,arr:1574746,ltv:3629566,rated:25,risk:16,t1:9,t2:17,t3:19,t4:2,csms:[{n:'Marcus',role:'FE',cl:'blue',cnt:21,arr:800368,unr:19},{n:'Martin',role:'BE',cl:'purple',cnt:26,arr:774378,unr:3}]},'Sebastian+Daniel':{cnt:72,arr:1841000,ltv:4258800,rated:24,risk:15,t1:11,t2:16,t3:32,t4:13,csms:[{n:'Daniel',role:'BE',cl:'purple',cnt:29,arr:921000,unr:6},{n:'Sebastian',role:'FE',cl:'blue',cnt:43,arr:920000,unr:42}]},'Aimy+Espen':{cnt:16,arr:186000,ltv:357476,rated:11,risk:7,t1:0,t2:1,t3:6,t4:9,csms:[{n:'Aimy',role:'FE',cl:'blue',cnt:16,arr:186000,unr:5}]},'Nicklas+Hamsa':{cnt:57,arr:636000,ltv:1558934,rated:52,risk:17,t1:1,t2:8,t3:29,t4:19,csms:[{n:'Nicklas',role:'FE',cl:'blue',cnt:50,arr:576000,unr:3},{n:'Hamsa',role:'BE',cl:'purple',cnt:7,arr:60000,unr:2}]}};
+const TOTAL={ws:192,arr:4237746,ltv:9804776,risk:55};
 
-let currentTier = 'all';
-let currentCSM = 'all';
+let curPod='all',curTier='all',curCSM='all';
 
-function formatCurrency(val) {
-  if (!val) return '<span class="text-dark-600">\u2014</span>';
-  if (val >= 1000000) return '$' + (val/1000000).toFixed(1) + 'M';
-  if (val >= 1000) return '$' + (val/1000).toFixed(0) + 'K';
-  return '$' + val;
+function fmt(v){if(!v)return'<span class="text-dark-600">&mdash;</span>';if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}
+function fmtSh(v){if(!v)return'<span class="text-dark-600">&mdash;</span>';if(v>=1e6)return'<span class="text-emerald-400 font-600">$'+(v/1e6).toFixed(1)+'M</span>';if(v>=1e5)return'<span class="text-emerald-400">$'+(v/1e3).toFixed(0)+'K</span>';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}
+function stars(h){if(h===null||h===undefined)return'<span class="text-dark-600 text-xs">Not rated</span>';const c={1:'text-red-400',2:'text-orange-400',3:'text-amber-400',4:'text-emerald-400',5:'text-emerald-300'};let s='';for(let i=1;i<=5;i++)s+=i<=h?`<span class="${...c}[h]">\u2605</span>`:'<span class="text-dark-700">\u2605</span>';return s;}
+function retBadge(r){const p=Math.round(r*100);let c='text-red-400 bg-red-500/10';if(p>=80)c='text-emerald-400 bg-emerald-500/10';else if(p>=60)c='text-amber-400 bg-amber-500/10';else if(p>=40)c='text-orange-400 bg-orange-500/10';return`<span class="signal-tag ${c}">${p}%</span>`;}
+function sigTags(sigs){const cm={'LTV UP':'bg-emerald-500/10 text-emerald-400','CHURN':'bg-red-500/10 text-red-400','IDLE':'bg-amber-500/10 text-amber-400','INT.ERR':'bg-orange-500/10 text-orange-400','UPSELL':'bg-cyan-500/10 text-cyan-400','REVSHARE':'bg-teal-500/10 text-teal-400','NEW':'bg-dark-700 text-dark-300'};return sigs.map(s=>{let c='bg-dark-700 text-dark-300';for(const[k,v]of Object.entries(cm))if(s.includes(k)){c=v;break;};if(s.includes('ROAS'))c=s.includes('\u2605')?'bg-emerald-500/10 text-emerald-400':s.includes('\u2713')?'bg-blue-500/10 text-blue-400':'bg-amber-500/10 text-amber-400';return`<span class="signal-tag ${c}">${s}</span>`;}).join(' ');}
+function tierCls(t){return{1:'tier-1-row',2:'tier-2-row',3:'tier-3-row',4:'tier-4-row'}[t]||'';}
+function podLabel(p){return p.split('+').map(x=>x[0]).join('');}
+function podColor(p){const m={'Marcus+Martin':'blue','Sebastian+Daniel':'purple','Aimy+Espen':'pink','Nicklas+Hamsa':'teal'};return m[p]||'blue';}
+function stripeLink(wsId){if(!wsId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://dashboard.stripe.com/subscriptions/${wsId}" target="_blank" rel="noopener" class="link-icon text-dark-400 hover:text-blue-400" title="Open in Stripe">\u21D7</a>`;}
+function attioLink(recId){if(!recId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://app.attio.com/workspaces/${recId}" target="_blank" rel="noopener" class="link-icon text-dark-400 hover:text-purple-400" title="Open in Attio">\u21D7</a>`;}
+
+function updateKPIs(){
+  const el=document.getElementById('kpiCards');
+  let ws,arr,ltv,risk,rated,total;
+  if(curPod==='all'){ws=TOTAL.ws;arr=TOTAL.arr;ltv=TOTAL.ltv;risk=TOTAL.risk;rated=D.filter(w=>w.h!==null).length;total=TOTAL.ws;}
+  else{const pm=PM[curPod];ws=pm.cnt;arr=pm.arr;ltv=pm.ltv;risk=pm.risk;rated=pm.rated;total=pm.cnt;}
+  el.innerHTML=`
+    <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Pod ARR</p><p class="text-2xl sm:text-3xl font-800 text-white">${fmt(arr)}</p><p class="text-dark-500 text-xs mt-1">${ws} active workspaces</p></div>
+    <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Est. 3-Year LTV</p><p class="text-2xl sm:text-3xl font-800 text-emerald-400">${fmt(ltv)}</p><p class="text-dark-500 text-xs mt-1">Based on current signals</p></div>
+    <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">Health Rated</p><p class="text-2xl sm:text-3xl font-800 text-amber-400">${rated} <span class="text-lg text-dark-500">/ ${total}</span></p><p class="text-dark-500 text-xs mt-1">${total-rated} unrated (blind spot)</p></div>
+    <div class="glass rounded-xl p-4 sm:p-5"><p class="text-dark-500 text-xs font-medium uppercase tracking-wider mb-1">At Risk (Health 1-3)</p><p class="text-2xl sm:text-3xl font-800 text-red-400">${risk}</p><p class="text-dark-500 text-xs mt-1">Documented retention plans</p></div>`;
 }
 
-function formatShopify(val) {
-  if (!val) return '<span class="text-dark-600">\u2014</span>';
-  if (val >= 1000000) return '<span class="text-emerald-400 font-600">$' + (val/1000000).toFixed(1) + 'M</span>';
-  if (val >= 100000) return '<span class="text-emerald-400">$' + (val/1000).toFixed(0) + 'K</span>';
-  if (val >= 1000) return '$' + (val/1000).toFixed(0) + 'K';
-  return '$' + val;
+function updateCSMSplit(){
+  const el=document.getElementById('csmSplit');
+  if(curPod==='all'){el.innerHTML='';return;}
+  const pm=PM[curPod];
+  el.innerHTML=pm.csms.map(c=>`
+    <div class="glass rounded-xl p-4 sm:p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-8 h-8 rounded-full bg-${c.cl}-500/20 flex items-center justify-center text-${c.cl}-400 text-sm font-bold">${c.n[0]}</div>
+        <div><p class="text-white font-600">${c.n} <span class="text-dark-400 font-400 text-sm">${c.role}</span></p></div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div><p class="text-lg font-700 text-white">${c.cnt}</p><p class="text-dark-500 text-xs">Workspaces</p></div>
+        <div><p class="text-lg font-700 text-white">${fmt(c.arr)}</p><p class="text-dark-500 text-xs">ARR</p></div>
+        <div><p class="text-lg font-700 ${c.unr>5?'text-amber-400':'text-emerald-400'}">${c.unr} unrated</p><p class="text-dark-500 text-xs">Health gap</p></div>
+      </div>
+    </div>`).join('');
 }
 
-function healthStars(h) {
-  if (h === null || h === undefined) return '<span class="text-dark-600 text-xs">Not rated</span>';
-  const colors = {1:'text-red-400',2:'text-orange-400',3:'text-amber-400',4:'text-emerald-400',5:'text-emerald-300'};
-  let s = '';
-  for (let i = 1; i <= 5; i++) {
-    s += i <= h ? `<span class="${colors[h]}">\u2605</span>` : '<span class="text-dark-700">\u2605</span>';
-  }
+function updateTierFilters(){
+  const el=document.getElementById('tierFilters');
+  let filtered=D;
+  if(curPod!=='all')filtered=D.filter(w=>w.p===curPod);
+  const tiers={1:0,2:0,3:0,4:0};
+  filtered.forEach(w=>tiers[w.t]++);
+  const total=filtered.length;
+  el.innerHTML=`
+    <button onclick="filterTier('all')" class="filter-btn ${curTier==='all'?'bg-dark-800 text-dark-200':'bg-dark-800/50 text-dark-400'} px-3 py-1.5 rounded-lg text-xs font-600 hover:bg-dark-700 transition" data-tier="all">All (${total})</button>
+    <button onclick="filterTier(1)" class="filter-btn ${curTier===1?'bg-dark-800 text-dark-200':'bg-dark-800/50 text-dark-400'} px-3 py-1.5 rounded-lg text-xs font-600 hover:bg-dark-700 transition" data-tier="1">T1 (${tiers[1]})</button>
+    <button onclick="filterTier(2)" class="filter-btn ${curTier===2?'bg-dark-800 text-dark-200':'bg-dark-800/50 text-dark-400'} px-3 py-1.5 rounded-lg text-xs font-600 hover:bg-dark-700 transition" data-tier="2">T2 (${tiers[2]})</button>
+    <button onclick="filterTier(3)" class="filter-btn ${curTier===3?'bg-dark-800 text-dark-200':'bg-dark-800/50 text-dark-400'} px-3 py-1.5 rounded-lg text-xs font-600 hover:bg-dark-700 transition" data-tier="3">T3 (${tiers[3]})</button>
+    <button onclick="filterTier(4)" class="filter-btn ${curTier===4?'bg-dark-800 text-dark-200':'bg-dark-800/50 text-dark-400'} px-3 py-1.5 rounded-lg text-xs font-600 hover:bg-dark-700 transition" data-tier="4">T4 (${tiers[4]})</button>`;
+}
+
+function updateCSMFilters(){
+  const el=document.getElementById('csmFilters');
+  if(curPod==='all'){el.innerHTML='';return;}
+  const pm=PM[curPod];
+  let html=`<button onclick="filterCSM('all')" class="csm-btn ${curCSM==='all'?'bg-dark-800 text-dark-200':'bg-dark-800/50 text-dark-400'} px-3 py-1.5 rounded-lg text-xs font-600 hover:bg-dark-700 transition" data-csm="all">Both</button>`;
+  pm.csms.forEach(c=>{html+=`<button onclick="filterCSM('${c.n}')" class="csm-btn ${curCSM===c.n?'bg-dark-800 text-dark-200':'bg-dark-800/50 text-dark-400'} px-3 py-1.5 rounded-lg text-xs font-600 hover:bg-dark-700 transition" data-csm="${c.n}">${c.n}</button>`;});
+  el.innerHTML=html;
+}
+
+function renderTable(){
+  const search=document.getElementById('searchInput').value.toLowerCase();
+  let filtered=D.filter(w=>{
+    if(curPod!=='all'&&w.p!==curPod)return false;
+    if(curTier!=='all'&&w.t!==curTier)return false;
+    if(curCSM!=='all'&&w.c!==curCSM)return false;
+    if(search&&!w.n.toLowerCase().includes(search))return false;
+    return true;
+  });
+  filtered.sort((a,b)=>b.pi-a.pi);
+  const tbody=document.getElementById('tableBody');
+  tbody.innerHTML=filtered.map((w,i)=>`
+    <tr class="workspace-row border-b border-dark-800/50 ${tierCls(w.t)}">
+      <td class="px-3 py-2.5 text-dark-500 text-xs font-500">${i+1}</td>
+      <td class="px-3 py-2.5 font-600 text-white text-sm whitespace-nowrap">${w.n}</td>
+      <td class="px-3 py-2.5 text-xs"><span class="text-dark-400">${w.p.split('+')[0].slice(0,3)}</span></td>
+      <td class="px-3 py-2.5 text-xs"><span class="px-2 py-0.5 rounded bg-${podColor(w.p)}-500/10 text-${podColor(w.p)}-400">${w.c}</span></td>
+      <td class="px-3 py-2.5 text-xs text-dark-300">${w.pl}</td>
+      <td class="px-3 py-2.5 text-center text-xs">${stars(w.h)}</td>
+      <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${fmt(w.a)}</td>
+      <td class="px-3 py-2.5 text-right text-sm">${fmtSh(w.sh)}</td>
+      <td class="px-3 py-2.5 text-right text-xs ${w.ar>=5?'text-emerald-400 font-600':w.ar>=2?'text-blue-400':w.ar>0?'text-dark-400':'text-dark-600'}">${w.ar?w.ar.toFixed(1)+'x':'&mdash;'}</td>
+      <td class="px-3 py-2.5 text-center">${retBadge(w.ret)}</td>
+      <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${fmt(w.l)}</td>
+      <td class="px-3 py-2.5"><div class="flex gap-1 flex-wrap">${sigTags(w.s)}</div></td>
+      <td class="px-3 py-2.5 text-xs text-dark-400 max-w-[240px]">${w.act}</td>
+      <td class="px-2 py-2.5 text-center">${stripeLink(w.w)}</td>
+      <td class="px-2 py-2.5 text-center">${attioLink(w.ri)}</td>
+    </tr>`).join('');
+}
+
+function selectPod(p){
+  curPod=p;curTier='all';curCSM='all';
+  document.querySelectorAll('.pod-tab').forEach(b=>{
+    const active=b.dataset.pod===p;
+    b.classList.toggle('active',active);
+    b.classList.toggle('bg-dark-800/50',active);
+    b.classList.toggle('text-dark-400',active);
+    b.classList.toggle('bg-dark-800/30',!active);
+    b.classList.toggle('text-dark-500',!active);
+  });
+  updateKPIs();updateCSMSplit();updateTierFilters();updateCSMFilters();renderTable();
+}
+
+function filterTier(t){curTier=t;updateTierFilters();renderTable();}
+function filterCSM(c){curCSM=c;updateCSMFilters();renderTable();}
+function applyFilters(){renderTable();}
+
+// Health stars fix
+function stars(h){
+  if(h===null||h===undefined)return'<span class="text-dark-600 text-xs">Not rated</span>';
+  const colors={1:'text-red-400',2:'text-orange-400',3:'text-amber-400',4:'text-emerald-400',5:'text-emerald-300'};
+  let s='';for(let i=1;i<=5;i++)s+=i<=h?'<span class="'+colors[h]+'">\u2605</span>':'<span class="text-dark-700">\u2605</span>';
   return s;
 }
 
-function retentionBadge(r) {
-  const pct = Math.round(r * 100);
-  let color = 'text-red-400 bg-red-500/10';
-  if (pct >= 80) color = 'text-emerald-400 bg-emerald-500/10';
-  else if (pct >= 60) color = 'text-amber-400 bg-amber-500/10';
-  else if (pct >= 40) color = 'text-orange-400 bg-orange-500/10';
-  return `<span class="signal-tag ${color}">${pct}%</span>`;
-}
-
-function signalTags(signals) {
-  const colorMap = {
-    'LTV UP': 'bg-emerald-500/10 text-emerald-400',
-    'CHURN': 'bg-red-500/10 text-red-400',
-    'IDLE': 'bg-amber-500/10 text-amber-400',
-    'INT.ERR': 'bg-orange-500/10 text-orange-400',
-    'UPSELL': 'bg-cyan-500/10 text-cyan-400',
-    'REVSHARE': 'bg-teal-500/10 text-teal-400',
-    'NEW': 'bg-dark-700 text-dark-300',
-  };
-  return signals.map(s => {
-    let c = 'bg-dark-700 text-dark-300';
-    for (const [key, val] of Object.entries(colorMap)) {
-      if (s.includes(key) || s === key) { c = val; break; }
-    }
-    if (s.includes('ROAS')) c = s.includes('\u2605') ? 'bg-emerald-500/10 text-emerald-400' : s.includes('\u2713') ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400';
-    return `<span class="signal-tag ${c}">${s}</span>`;
-  }).join(' ');
-}
-
-function tierClass(t) {
-  return {1:'tier-1-row',2:'tier-2-row',3:'tier-3-row',4:'tier-4-row'}[t] || '';
-}
-
-function renderTable(data) {
-  const tbody = document.getElementById('tableBody');
-  tbody.innerHTML = data.map(w => `
-    <tr class="workspace-row border-b border-dark-800/50 ${tierClass(w.tier)}">
-      <td class="px-4 py-3 text-dark-500 text-xs font-500">${w.rank}</td>
-      <td class="px-4 py-3 font-600 text-white text-sm whitespace-nowrap">${w.name}</td>
-      <td class="px-4 py-3 text-xs"><span class="px-2 py-0.5 rounded ${w.csm==='Marcus'?'bg-blue-500/10 text-blue-400':'bg-purple-500/10 text-purple-400'}">${w.csm}</span></td>
-      <td class="px-4 py-3 text-xs text-dark-300">${w.plan}</td>
-      <td class="px-4 py-3 text-center text-xs">${healthStars(w.health)}</td>
-      <td class="px-4 py-3 text-right text-sm font-500 text-white">${formatCurrency(w.arr)}</td>
-      <td class="px-4 py-3 text-right text-sm">${formatShopify(w.shopify)}</td>
-      <td class="px-4 py-3 text-right text-xs ${w.atdRoas >= 5 ? 'text-emerald-400 font-600' : w.atdRoas >= 2 ? 'text-blue-400' : w.atdRoas > 0 ? 'text-dark-400' : 'text-dark-600'}">${w.atdRoas ? w.atdRoas.toFixed(1)+'x' : '\u2014'}</td>
-      <td class="px-4 py-3 text-center">${retentionBadge(w.retention)}</td>
-      <td class="px-4 py-3 text-right text-sm font-500 text-white">${formatCurrency(w.ltv)}</td>
-      <td class="px-4 py-3"><div class="flex gap-1 flex-wrap">${signalTags(w.signals)}</div></td>
-      <td class="px-4 py-3 text-xs text-dark-400 max-w-[280px]">${w.action}</td>
-    </tr>
-  `).join('');
-}
-
-function applyFilters() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  let filtered = workspaces.filter(w => {
-    if (currentTier !== 'all' && w.tier !== currentTier) return false;
-    if (currentCSM !== 'all' && w.csm !== currentCSM) return false;
-    if (search && !w.name.toLowerCase().includes(search)) return false;
-    return true;
-  });
-  renderTable(filtered);
-}
-
-function filterTier(t) {
-  currentTier = t;
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('bg-dark-800', b.dataset.tier == t);
-    b.classList.toggle('text-dark-200', b.dataset.tier == t);
-    b.classList.toggle('bg-dark-800/50', b.dataset.tier != t);
-    b.classList.toggle('text-dark-400', b.dataset.tier != t);
-  });
-  applyFilters();
-}
-
-function filterCSM(c) {
-  currentCSM = c;
-  document.querySelectorAll('.csm-btn').forEach(b => {
-    b.classList.toggle('bg-dark-800', b.dataset.csm == c);
-    b.classList.toggle('text-dark-200', b.dataset.csm == c);
-    b.classList.toggle('bg-dark-800/50', b.dataset.csm != c);
-    b.classList.toggle('text-dark-400', b.dataset.csm != c);
-  });
-  applyFilters();
-}
-
-// Initial render
-renderTable(workspaces);
+// Init
+selectPod('all');
 </script>
 </body>
 </html>
