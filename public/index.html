@@ -41,6 +41,17 @@ tailwind.config = {
   .tip .tip-text { visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; padding: 8px 12px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #cbd5e1; font-size: 0.75rem; font-weight: 400; text-transform: none; letter-spacing: 0; line-height: 1.5; white-space: normal; width: 240px; z-index: 50; transition: opacity 0.15s, visibility 0.15s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }
   .tip:hover .tip-text { visibility: visible; opacity: 1; }
   .tip .tip-text::before { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-bottom-color: #1e293b; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: #e2e8f0; }
+  .sort-arrow { font-size: 0.6rem; margin-left: 2px; opacity: 0.3; }
+  th.sortable.asc .sort-arrow, th.sortable.desc .sort-arrow { opacity: 1; color: #38bdf8; }
+  .col-filter { display: inline-block; position: relative; }
+  .col-filter-btn { font-size: 0.55rem; margin-left: 3px; padding: 1px 3px; border-radius: 3px; opacity: 0.4; cursor: pointer; vertical-align: middle; }
+  .col-filter-btn:hover, .col-filter-btn.active { opacity: 1; background: rgba(255,255,255,0.08); }
+  .col-dropdown { display: none; position: absolute; top: 100%; left: 0; margin-top: 6px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 0; min-width: 160px; z-index: 60; box-shadow: 0 4px 12px rgba(0,0,0,0.4); max-height: 240px; overflow-y: auto; }
+  .col-dropdown.show { display: block; }
+  .col-dropdown label { display: flex; align-items: center; gap: 6px; padding: 4px 12px; font-size: 0.75rem; font-weight: 400; text-transform: none; letter-spacing: 0; color: #94a3b8; cursor: pointer; white-space: nowrap; }
+  .col-dropdown label:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
   #authGate { position: fixed; inset: 0; z-index: 999; background: #020617; display: flex; align-items: center; justify-content: center; }
   #authGate.hidden { display: none; }
   #dashboard.locked { display: none; }
@@ -256,22 +267,22 @@ tailwind.config = {
     <div class="overflow-x-auto scrollbar-thin">
       <table class="w-full text-sm">
         <thead>
-          <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800">
-            <th class="text-left px-3 py-3 font-600"><span class="tip">#<span class="tip-text">Priority rank within the selected pod. #1 is the highest-value workspace based on our scoring model.</span></span></th>
-            <th class="text-left px-3 py-3 font-600"><span class="tip">Workspace<span class="tip-text">The client's workspace name in our platform.</span></span></th>
-            <th class="text-left px-3 py-3 font-600"><span class="tip">Pod<span class="tip-text">Which CSM pod manages this client. Each pod has a front-end CSM (client-facing) and a back-end CSM (operations).</span></span></th>
-            <th class="text-left px-3 py-3 font-600"><span class="tip">CSM<span class="tip-text">The Customer Success Manager responsible for this workspace.</span></span></th>
-            <th class="text-left px-3 py-3 font-600"><span class="tip">Plan<span class="tip-text">The client's subscription plan: Starter, Lite, Growth, Pro, Performance, or Enterprise.</span></span></th>
-            <th class="text-center px-3 py-3 font-600"><span class="tip">Health<span class="tip-text">CSM's health rating (1-5 stars). How well the client relationship is going. 5 = thriving, 1 = at serious risk. "Not rated" means the CSM hasn't assessed yet.</span></span></th>
-            <th class="text-right px-3 py-3 font-600"><span class="tip">Est. ARR<span class="tip-text">Estimated Annual Recurring Revenue based on plan-level averages (e.g. Pro ~$25K/yr, Performance ~$48K/yr), not exact subscription amounts.</span></span></th>
-            <th class="text-right px-3 py-3 font-600"><span class="tip">Shopify/30d<span class="tip-text">The client's total Shopify store sales over the last 30 days. A proxy for how large their e-commerce business is &mdash; bigger stores have more to gain from our ads.</span></span></th>
-            <th class="text-right px-3 py-3 font-600"><span class="tip">ROAS (ATD)<span class="tip-text">All-Time Return on Ad Spend. For every $1 the client spent on ads through us, how many dollars of revenue did they earn &mdash; across their entire history. 2x+ is good, 8x+ is excellent.</span></span></th>
-            <th class="text-center px-3 py-3 font-600"><span class="tip">Ret. %<span class="tip-text">Estimated probability this client will still be paying us in a year. Based on health rating, churn flags, and activity. 92% for health 5, down to 25% for health 1.</span></span></th>
-            <th class="text-right px-3 py-3 font-600"><span class="tip">3yr LTV<span class="tip-text">Estimated 3-Year Lifetime Value. How much total revenue we expect from this client over 3 years, factoring in churn risk and growth potential. The main number driving prioritization.</span></span></th>
-            <th class="text-left px-3 py-3 font-600"><span class="tip">Signals<span class="tip-text">Quick-glance tags: CHURN = at risk, IDLE = no campaigns, ROAS = strong ad returns, UPSELL = should be on bigger plan, LTV UP = CSM sees high potential.</span></span></th>
-            <th class="text-left px-3 py-3 font-600"><span class="tip">Action / Note<span class="tip-text">Recommended next step for this client, or the CSM's latest note.</span></span></th>
-            <th class="text-center px-2 py-3 font-600"><span class="tip">S<span class="tip-text">Link to this client's subscription in Stripe (payment platform).</span></span></th>
-            <th class="text-center px-2 py-3 font-600"><span class="tip">A<span class="tip-text">Link to this client's workspace record in Attio (CRM).</span></span></th>
+          <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800" id="headerRow">
+            <th class="sortable text-left px-3 py-3 font-600" data-sort="pi" data-dir="desc" onclick="sortCol(this)"><span class="tip">#<span class="tip-text">Priority rank. #1 = highest-value workspace. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
+            <th class="sortable text-left px-3 py-3 font-600" data-sort="n" onclick="sortCol(this)"><span class="tip">Workspace<span class="tip-text">The client's workspace name. Click to sort A-Z.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Pod<span class="tip-text">Which CSM pod manages this client.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropPod')">&#9662;</span><div class="col-dropdown" id="dropPod"></div></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">CSM<span class="tip-text">The Customer Success Manager responsible.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCSM')">&#9662;</span><div class="col-dropdown" id="dropCSM"></div></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Plan<span class="tip-text">Subscription plan: Starter to Enterprise.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropPlan')">&#9662;</span><div class="col-dropdown" id="dropPlan"></div></span></th>
+            <th class="sortable text-center px-3 py-3 font-600" data-sort="h" onclick="sortCol(this)"><span class="tip">Health<span class="tip-text">CSM's 1-5 star rating. Click to sort.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropHealth');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropHealth"></div></span></th>
+            <th class="sortable text-right px-3 py-3 font-600" data-sort="a" onclick="sortCol(this)"><span class="tip">Est. ARR<span class="tip-text">Estimated annual revenue from plan averages. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-right px-3 py-3 font-600" data-sort="sh" onclick="sortCol(this)"><span class="tip">Shopify/30d<span class="tip-text">Client's Shopify store sales last 30 days. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-right px-3 py-3 font-600" data-sort="ar" onclick="sortCol(this)"><span class="tip">ROAS (ATD)<span class="tip-text">All-time return on ad spend. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-center px-3 py-3 font-600" data-sort="ret" onclick="sortCol(this)"><span class="tip">Ret. %<span class="tip-text">Estimated 1-year retention probability. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" onclick="sortCol(this)"><span class="tip">3yr LTV<span class="tip-text">Estimated 3-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Signals<span class="tip-text">Quick-glance tags. Use filter to find specific signals.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropSig')">&#9662;</span><div class="col-dropdown" id="dropSig"></div></span></th>
+            <th class="text-left px-3 py-3 font-600"><span class="tip">Action / Note<span class="tip-text">Recommended next step or CSM's latest note.</span></span></th>
+            <th class="text-center px-2 py-3 font-600"><span class="tip">S<span class="tip-text">Open in Stripe.</span></span></th>
+            <th class="text-center px-2 py-3 font-600"><span class="tip">A<span class="tip-text">Open in Attio.</span></span></th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -548,16 +559,48 @@ function updateCSMFilters(){
   el.innerHTML=html;
 }
 
-function renderTable(){
+// Sort state
+let sortKey='pi',sortDir='desc';
+// Column filters
+let colFilters={plan:new Set(),health:new Set(),pod:new Set(),csm:new Set(),sig:new Set()};
+
+function sortCol(th){
+  const key=th.dataset.sort;
+  if(!key)return;
+  if(sortKey===key){sortDir=sortDir==='asc'?'desc':'asc';}
+  else{sortKey=key;sortDir=(key==='n'?'asc':'desc');}
+  // Update header classes
+  document.querySelectorAll('#headerRow th.sortable').forEach(t=>{t.classList.remove('asc','desc');});
+  th.classList.add(sortDir);
+  th.querySelector('.sort-arrow').innerHTML=sortDir==='asc'?'&#9650;':'&#9660;';
+  renderTable();
+}
+
+function getFilteredData(){
   const search=document.getElementById('searchInput').value.toLowerCase();
-  let filtered=D.filter(w=>{
+  return D.filter(w=>{
     if(curPod!=='all'&&w.p!==curPod)return false;
     if(curTier!=='all'&&w.t!==curTier)return false;
     if(curCSM!=='all'&&w.c!==curCSM)return false;
     if(search&&!w.n.toLowerCase().includes(search))return false;
+    if(colFilters.plan.size&&!colFilters.plan.has(w.pl))return false;
+    if(colFilters.health.size){const hk=w.h===null?'Not rated':String(w.h);if(!colFilters.health.has(hk))return false;}
+    if(colFilters.pod.size&&!colFilters.pod.has(w.p))return false;
+    if(colFilters.csm.size&&!colFilters.csm.has(w.c))return false;
+    if(colFilters.sig.size&&!w.s.some(s=>colFilters.sig.has(s)))return false;
     return true;
   });
-  filtered.sort((a,b)=>b.pi-a.pi);
+}
+
+function renderTable(){
+  let filtered=getFilteredData();
+  filtered.sort((a,b)=>{
+    let va=a[sortKey],vb=b[sortKey];
+    if(sortKey==='h'){va=va===null?-1:va;vb=vb===null?-1:vb;}
+    if(sortKey==='n'){va=(va||'').toLowerCase();vb=(vb||'').toLowerCase();return sortDir==='asc'?va.localeCompare(vb):vb.localeCompare(va);}
+    if(typeof va==='number'||typeof vb==='number'){va=va||0;vb=vb||0;}
+    return sortDir==='asc'?(va-vb):(vb-va);
+  });
   const tbody=document.getElementById('tableBody');
   tbody.innerHTML=filtered.map((w,i)=>`
     <tr class="workspace-row border-b border-dark-800/50 ${tierCls(w.t)}">
@@ -579,8 +622,63 @@ function renderTable(){
     </tr>`).join('');
 }
 
+// Column filter dropdowns
+function buildDropdowns(){
+  const plans=[...new Set(D.map(w=>w.pl))].sort();
+  const healths=['5','4','3','2','1','Not rated'];
+  const pods=[...new Set(D.map(w=>w.p))].sort();
+  const csms=[...new Set(D.map(w=>w.c))].sort();
+  const sigs=[...new Set(D.flatMap(w=>w.s))].sort();
+  fillDrop('dropPlan',plans,'plan');
+  fillDrop('dropHealth',healths,'health');
+  fillDrop('dropPod',pods,'pod');
+  fillDrop('dropCSM',csms,'csm');
+  fillDrop('dropSig',sigs,'sig');
+}
+
+function fillDrop(id,items,filterKey){
+  const el=document.getElementById(id);
+  el.innerHTML='<label class="text-dark-500 font-600 text-xs px-3 py-1" style="cursor:pointer" onclick="clearColFilter(\''+filterKey+'\')">Clear all</label>'+
+    items.map(v=>'<label><input type="checkbox" value="'+v+'" onchange="onColFilter(\''+filterKey+'\',this)"> '+v+'</label>').join('');
+}
+
+function onColFilter(key,cb){
+  if(cb.checked)colFilters[key].add(cb.value);
+  else colFilters[key].delete(cb.value);
+  // Highlight filter button
+  const dropId={plan:'dropPlan',health:'dropHealth',pod:'dropPod',csm:'dropCSM',sig:'dropSig'}[key];
+  const btn=document.getElementById(dropId).previousElementSibling;
+  btn.classList.toggle('active',colFilters[key].size>0);
+  renderTable();
+}
+
+function clearColFilter(key){
+  colFilters[key].clear();
+  const dropId={plan:'dropPlan',health:'dropHealth',pod:'dropPod',csm:'dropCSM',sig:'dropSig'}[key];
+  document.getElementById(dropId).querySelectorAll('input').forEach(cb=>cb.checked=false);
+  const btn=document.getElementById(dropId).previousElementSibling;
+  btn.classList.remove('active');
+  renderTable();
+}
+
+function toggleDrop(ev,id){
+  ev.stopPropagation();
+  ev.preventDefault();
+  const el=document.getElementById(id);
+  // Close others
+  document.querySelectorAll('.col-dropdown.show').forEach(d=>{if(d.id!==id)d.classList.remove('show');});
+  el.classList.toggle('show');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click',()=>{document.querySelectorAll('.col-dropdown.show').forEach(d=>d.classList.remove('show'));});
+
 function selectPod(p){
   curPod=p;curTier='all';curCSM='all';
+  // Reset column filters when switching pods
+  Object.keys(colFilters).forEach(k=>colFilters[k].clear());
+  document.querySelectorAll('.col-dropdown input').forEach(cb=>cb.checked=false);
+  document.querySelectorAll('.col-filter-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.pod-tab').forEach(b=>{
     const active=b.dataset.pod===p;
     b.classList.toggle('active',active);
@@ -597,6 +695,7 @@ function filterCSM(c){curCSM=c;updateCSMFilters();renderTable();}
 function applyFilters(){renderTable();}
 
 // Init
+buildDropdowns();
 if(!document.getElementById('dashboard').classList.contains('locked'))selectPod('all');
 
 // Password auth
