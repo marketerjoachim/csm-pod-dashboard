@@ -9,11 +9,13 @@ import re
 import os
 import shutil
 from datetime import datetime, date
-from sub_start_dates import SUBSCRIPTION_START_DATES
+from sub_start_dates import SUBSCRIPTION_START_DATES, SUBSCRIPTION_CHURN_DATA
 
 # ─── Configuration ──────────────────────────────────────────────────────────────
 
 TODAY = date(2026, 2, 17)
+YESTERDAY = date(2026, 2, 16)
+YESTERDAY_STR = "2026-02-16"
 
 DATA_DIR = os.path.expanduser(
     "~/.claude/projects/-Users-jmow/7cbfc0d6-2d21-47cb-82df-71bfbe25e5da/tool-results/"
@@ -697,9 +699,74 @@ def compute_pod_meta(workspaces):
     }
 
 
+# ─── Daily Churn Data ────────────────────────────────────────────────────────────
+
+def compute_daily_churn(workspaces):
+    """Compute yesterday's churn data grouped by pod for the Daily Customer Update."""
+    # Build a lookup from record_id -> workspace info
+    ws_lookup = {}
+    for ws in workspaces:
+        ws_lookup[ws["record_id"]] = ws
+
+    pod_order = ["Marcus+Martin", "Sebastian+Daniel", "Aimy+Espen", "Nicklas+Hamsa"]
+
+    # Compute per-pod totals
+    pod_totals = {}
+    for pod_name in pod_order:
+        pod_ws = [w for w in workspaces if w["pod"] == pod_name]
+        pod_totals[pod_name] = {
+            "count": len(pod_ws),
+            "arr": sum(w["arr"] for w in pod_ws),
+        }
+
+    # Find churns from yesterday
+    pod_churns = {p: [] for p in pod_order}
+
+    for record_id, churn_entries in SUBSCRIPTION_CHURN_DATA.items():
+        for entry in churn_entries:
+            if entry.get("end_date") == YESTERDAY_STR:
+                # Find this workspace's pod
+                ws = ws_lookup.get(record_id)
+                pod = ws["pod"] if ws else "Unknown"
+                name = ws["name"] if ws else "Unknown"
+                if pod in pod_churns:
+                    pod_churns[pod].append({
+                        "record_id": record_id,
+                        "name": name,
+                        "plan": entry.get("plan", "Unknown"),
+                        "arr": entry.get("arr", 0),
+                        "sub_status": entry.get("sub_status", ""),
+                        "stripe_sub_id": entry.get("stripe_sub_id", ""),
+                    })
+
+    # Build JS constant
+    js_parts = []
+    for pod_name in pod_order:
+        churns = pod_churns[pod_name]
+        totals = pod_totals.get(pod_name, {"count": 0, "arr": 0})
+        churn_js_items = []
+        for c in churns:
+            name_esc = c["name"].replace("\\", "\\\\").replace("'", "\\'")
+            sub_status_esc = c["sub_status"].replace("\\", "\\\\").replace("'", "\\'")
+            churn_js_items.append(
+                f"{{ri:'{c['record_id']}',n:'{name_esc}',pl:'{c['plan']}',"
+                f"arr:{c['arr']},ss:'{sub_status_esc}',sid:'{c['stripe_sub_id']}'}}"
+            )
+        churns_str = ",".join(churn_js_items)
+        churn_count = len(churns)
+        churn_arr = sum(c["arr"] for c in churns)
+        js_parts.append(
+            f"'{pod_name}':{{cnt:{totals['count']},arr:{totals['arr']},"
+            f"churnCnt:{churn_count},churnArr:{churn_arr},"
+            f"churns:[{churns_str}]}}"
+        )
+
+    return "const DAILY={" + ",".join(js_parts) + "};"
+
+
 # ─── HTML Template ──────────────────────────────────────────────────────────────
 
-def generate_html(js_data, pm_js, total_js, stats):
+def generate_html(js_data, pm_js, total_js, daily_js, stats):
     """Generate the complete HTML dashboard."""
 
     total_ws = stats["ws"]
@@ -724,7 +791,7 @@ def generate_html(js_data, pm_js, total_js, stats):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSM Pod Dashboard &mdash; Marketer</title>
+<title>CSM Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {{
@@ -780,6 +847,16 @@ tailwind.config = {{
   #authGate {{ position: fixed; inset: 0; z-index: 999; background: #020617; display: flex; align-items: center; justify-content: center; }}
   #authGate.hidden {{ display: none; }}
   #dashboard.locked {{ display: none; }}
+  .top-tab {{ cursor: pointer; transition: all 0.2s; padding: 10px 24px; font-size: 0.875rem; font-weight: 600; border-bottom: 2px solid transparent; color: #64748b; }}
+  .top-tab.active {{ color: #e2e8f0; border-bottom-color: #38bdf8; }}
+  .top-tab:not(.active):hover {{ color: #94a3b8; }}
+  .tab-panel {{ display: none; }}
+  .tab-panel.active {{ display: block; }}
+  .churn-accordion {{ cursor: pointer; user-select: none; }}
+  .churn-accordion .chevron {{ transition: transform 0.2s; display: inline-block; }}
+  .churn-accordion.open .chevron {{ transform: rotate(90deg); }}
+  .churn-detail {{ display: none; }}
+  .churn-detail.open {{ display: block; }}
 </style>
 </head>
 <body class="bg-dark-950 text-dark-200 min-h-screen">
@@ -787,7 +864,7 @@ tailwind.config = {{
 <!-- Password Gate -->
 <div id="authGate">
   <div class="text-center px-6">
-    <p class="text-dark-400 text-sm font-medium uppercase tracking-wider mb-2">CSM Pod Dashboard</p>
+    <p class="text-dark-400 text-sm font-medium uppercase tracking-wider mb-2">CSM Dashboard</p>
     <h1 class="text-2xl font-800 text-white mb-6">Enter password to continue</h1>
     <form onsubmit="return checkPw()" class="flex flex-col items-center gap-3">
       <input type="password" id="pwInput" placeholder="Password" autofocus class="px-4 py-3 rounded-lg text-sm bg-dark-800/50 text-dark-200 border border-dark-700 focus:border-dark-500 focus:outline-none w-64 text-center" />
@@ -799,22 +876,48 @@ tailwind.config = {{
 
 <div id="dashboard" class="locked max-w-[1500px] mx-auto px-4 sm:px-6 py-8">
 
-  <!-- Header -->
-  <div class="fade-in mb-6">
+  <!-- Page Header -->
+  <div class="fade-in mb-2">
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-2">
       <div>
-        <p class="text-dark-400 text-sm font-medium uppercase tracking-wider mb-1">CSM Pod Dashboard</p>
-        <h1 class="text-3xl sm:text-4xl font-800 text-white">All Pods Overview</h1>
+        <p class="text-dark-400 text-sm font-medium uppercase tracking-wider mb-1">CSM Dashboard</p>
       </div>
       <div class="text-right">
         <p class="text-dark-500 text-sm">Updated Feb 17, 2026</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top-level Tab Bar -->
+  <div class="flex border-b border-dark-800 mb-6 fade-in">
+    <button class="top-tab active" data-toptab="daily" onclick="switchTopTab('daily')">Daily Customer Update</button>
+    <button class="top-tab" data-toptab="priority" onclick="switchTopTab('priority')">Customer Prioritization</button>
+  </div>
+
+  <!-- ============ DAILY CUSTOMER UPDATE TAB ============ -->
+  <div id="tabDaily" class="tab-panel active fade-in">
+    <div class="mb-6">
+      <h1 class="text-3xl sm:text-4xl font-800 text-white mb-1">Daily Customer Update</h1>
+      <p class="text-dark-400 text-sm">Feb 16, 2026 &mdash; Yesterday's churn summary across all pods</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="dailyCards"></div>
+  </div>
+
+  <!-- ============ CUSTOMER PRIORITIZATION TAB ============ -->
+  <div id="tabPriority" class="tab-panel fade-in">
+
+  <!-- Priority Header -->
+  <div class="mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-2">
+      <div class="flex items-center gap-4">
+        <h1 class="text-3xl sm:text-4xl font-800 text-white">All Pods Overview</h1>
+        <button onclick="document.getElementById('infoPage').classList.toggle('hidden')" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:bg-dark-700 hover:text-dark-200 transition">How This Works</button>
+      </div>
+      <div class="text-right">
         <p class="text-dark-600 text-xs">{total_ws} workspaces &middot; {fmt_m(total_arr)} ARR &middot; {fmt_m(total_ltv)} est. 2yr LTV</p>
       </div>
     </div>
-    <div class="flex items-center gap-4">
-      <p class="text-dark-400 text-sm max-w-3xl">LTV-based priority model for CSM resource allocation across all pods. Workspaces ranked by estimated 2-year lifetime value adjusted for retention probability, growth potential, and required CSM effort.</p>
-      <button onclick="document.getElementById('infoPage').classList.toggle('hidden')" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:bg-dark-700 hover:text-dark-200 transition">How This Works</button>
-    </div>
+    <p class="text-dark-400 text-sm max-w-3xl">LTV-based priority model for CSM resource allocation across all pods. Workspaces ranked by estimated 2-year lifetime value adjusted for retention probability, growth potential, and required CSM effort.</p>
   </div>
 
   <!-- Info Page (hidden by default) -->
@@ -1030,14 +1133,93 @@ tailwind.config = {{
 
 
   <p class="text-dark-600 text-xs text-center mt-8 mb-4">Data sourced from Attio CRM. Dashboard generated Feb 2026.</p>
+
+  </div><!-- /tabPriority -->
+
 </div>
 
 <script>
 {js_data}
 {pm_js}
 {total_js}
+{daily_js}
 
 let curPod='all',curTier='all',curCSM='all';
+let curTopTab='daily';
+
+function switchTopTab(tab){{
+  curTopTab=tab;
+  document.querySelectorAll('.top-tab').forEach(b=>{{
+    b.classList.toggle('active',b.dataset.toptab===tab);
+  }});
+  document.getElementById('tabDaily').classList.toggle('active',tab==='daily');
+  document.getElementById('tabPriority').classList.toggle('active',tab==='priority');
+  if(tab==='priority'){{selectPod(curPod);initColResize();}}
+  if(tab==='daily')renderDailyCards();
+}}
+
+function renderDailyCards(){{
+  const el=document.getElementById('dailyCards');
+  const podOrder=['Marcus+Martin','Sebastian+Daniel','Aimy+Espen','Nicklas+Hamsa'];
+  el.innerHTML=podOrder.map(pod=>{{
+    const d=DAILY[pod];
+    const hasCh=d.churnCnt>0;
+    const churnColor=hasCh?'text-red-400':'text-emerald-400';
+    const churnLabel=hasCh?d.churnCnt+' churned ('+fmtChurnArr(d.churnArr)+')':'No churns yesterday';
+    const accordionId='churn_'+pod.replace('+','_');
+    let churnRows='';
+    if(hasCh){{
+      churnRows=d.churns.map(c=>`
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-3 border-b border-dark-800/50 last:border-0">
+          <div class="flex-1 min-w-0">
+            <p class="text-white text-sm font-600 truncate">${{c.n}}</p>
+            <p class="text-dark-500 text-xs mt-0.5">${{c.ss}}</p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="text-xs text-dark-400">${{c.pl}}</span>
+            <span class="text-sm font-600 text-red-400">&minus;${{c.arr.toLocaleString()}}</span>
+            <span class="inline-flex gap-2">
+              ${{c.sid?'<a href="https://dashboard.stripe.com/subscriptions/'+c.sid+'" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>':''}}
+              <a href="https://app.attio.com/metric/workspaces/record/${{c.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>
+            </span>
+          </div>
+        </div>`).join('');
+    }}
+    return`
+    <div class="glass rounded-xl p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-700 text-white">${{pod.replace('+',' + ')}}</h3>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center mb-4">
+        <div><p class="text-lg font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Active Customers</p></div>
+        <div><p class="text-lg font-700 text-white">${{fmt(d.arr)}}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
+        <div><p class="text-lg font-700 ${{churnColor}}">${{hasCh?d.churnCnt:'0'}}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
+      </div>
+      ${{hasCh?`
+      <div class="border-t border-dark-800 pt-3">
+        <div class="churn-accordion" onclick="toggleChurn('${{accordionId}}',this)">
+          <span class="chevron text-dark-400 text-xs mr-2">&#9654;</span>
+          <span class="text-sm font-600 text-red-400">${{churnLabel}}</span>
+        </div>
+        <div class="churn-detail mt-3" id="${{accordionId}}">
+          ${{churnRows}}
+        </div>
+      </div>
+      `:`
+      <div class="border-t border-dark-800 pt-3">
+        <p class="text-emerald-400 text-sm font-500">&#10003; No churns yesterday</p>
+      </div>
+      `}}
+    </div>`;
+  }}).join('');
+}}
+
+function fmtChurnArr(v){{if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(1)+'K';return'$'+v;}}
+
+function toggleChurn(id,el){{
+  el.classList.toggle('open');
+  document.getElementById(id).classList.toggle('open');
+}}
 
 function fmt(v){{if(!v)return'<span class="text-dark-600">&mdash;</span>';if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}}
 function fmtSh(v){{if(!v)return'<span class="text-dark-600">&mdash;</span>';if(v>=1e6)return'<span class="text-emerald-400 font-600">$'+(v/1e6).toFixed(1)+'M</span>';if(v>=1e5)return'<span class="text-emerald-400">$'+(v/1e3).toFixed(0)+'K</span>';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}}
@@ -1249,7 +1431,7 @@ function applyFilters(){{renderTable();}}
 
 // Init
 buildDropdowns();
-if(!document.getElementById('dashboard').classList.contains('locked'))selectPod('all');
+if(!document.getElementById('dashboard').classList.contains('locked')){{selectPod('all');renderDailyCards();}}
 
 // Scroll hint — hide once user scrolls right
 const scrollEl=document.getElementById('tableScroll');
@@ -1325,6 +1507,7 @@ async function checkPw(){{
 function unlock(){{
   document.getElementById('authGate').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('locked');
+  renderDailyCards();
   selectPod('all');
   initColResize();
 }}
@@ -1395,7 +1578,8 @@ def main():
     print("\n[3/4] Generating HTML dashboard...")
     js_data = generate_js_data(workspaces)
     pm_js, total_js, stats = compute_pod_meta(workspaces)
-    html = generate_html(js_data, pm_js, total_js, stats)
+    daily_js = compute_daily_churn(workspaces)
+    html = generate_html(js_data, pm_js, total_js, daily_js, stats)
 
     # Write output
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
