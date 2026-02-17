@@ -41,10 +41,27 @@ tailwind.config = {
   .tip .tip-text { visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 8px; padding: 8px 12px; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #cbd5e1; font-size: 0.75rem; font-weight: 400; text-transform: none; letter-spacing: 0; line-height: 1.5; white-space: normal; width: 240px; z-index: 50; transition: opacity 0.15s, visibility 0.15s; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; }
   .tip:hover .tip-text { visibility: visible; opacity: 1; }
   .tip .tip-text::before { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-bottom-color: #1e293b; }
+  #authGate { position: fixed; inset: 0; z-index: 999; background: #020617; display: flex; align-items: center; justify-content: center; }
+  #authGate.hidden { display: none; }
+  #dashboard.locked { display: none; }
 </style>
 </head>
 <body class="bg-dark-950 text-dark-200 min-h-screen">
-<div class="max-w-[1500px] mx-auto px-4 sm:px-6 py-8">
+
+<!-- Password Gate -->
+<div id="authGate">
+  <div class="text-center px-6">
+    <p class="text-dark-400 text-sm font-medium uppercase tracking-wider mb-2">CSM Pod Dashboard</p>
+    <h1 class="text-2xl font-800 text-white mb-6">Enter password to continue</h1>
+    <form onsubmit="return checkPw()" class="flex flex-col items-center gap-3">
+      <input type="password" id="pwInput" placeholder="Password" autofocus class="px-4 py-3 rounded-lg text-sm bg-dark-800/50 text-dark-200 border border-dark-700 focus:border-dark-500 focus:outline-none w-64 text-center" />
+      <button type="submit" class="px-6 py-2.5 rounded-lg text-sm font-600 bg-white/10 text-white border border-white/10 hover:bg-white/15 transition w-64">Enter</button>
+      <p id="pwError" class="text-red-400 text-xs hidden">Incorrect password</p>
+    </form>
+  </div>
+</div>
+
+<div id="dashboard" class="locked max-w-[1500px] mx-auto px-4 sm:px-6 py-8">
 
   <!-- Header -->
   <div class="fade-in mb-6">
@@ -580,7 +597,30 @@ function filterCSM(c){curCSM=c;updateCSMFilters();renderTable();}
 function applyFilters(){renderTable();}
 
 // Init
-selectPod('all');
+if(!document.getElementById('dashboard').classList.contains('locked'))selectPod('all');
+
+// Password auth
+const PW_HASH='b83f9851aaf52cff85bd8b4e2c63a8c97fec407e8249d78cc27e1f8581915f61';
+async function sha256(msg){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+async function checkPw(){
+  const pw=document.getElementById('pwInput').value;
+  const h=await sha256(pw);
+  if(h===PW_HASH){
+    sessionStorage.setItem('csm_auth','1');
+    unlock();
+  }else{
+    document.getElementById('pwError').classList.remove('hidden');
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
+  return false;
+}
+function unlock(){
+  document.getElementById('authGate').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('locked');
+  selectPod('all');
+}
+if(sessionStorage.getItem('csm_auth')==='1')unlock();
 </script>
 </body>
 </html>
