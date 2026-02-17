@@ -782,6 +782,7 @@ function initColResize(){
     ths.forEach(function(th,i){
       let w=th.offsetWidth;
       if(i===0)w=Math.round(w*0.75); // shrink # col
+      if(i===1)w=Math.round(w*0.70); // shrink Workspace col
       th.style.minWidth=w+'px';
       th.style.maxWidth=w+'px';
     });
