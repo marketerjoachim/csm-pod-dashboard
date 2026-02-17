@@ -291,10 +291,10 @@ tailwind.config = {
   <!-- Pod Tabs -->
   <div class="flex flex-wrap gap-2 mb-6 fade-in" style="animation-delay:0.05s" id="podTabs">
     <button onclick="selectPod('all')" class="pod-tab active px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50" data-pod="all">All Pods (234)</button>
-    <button onclick="selectPod('Marcus+Martin')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Marcus+Martin">Marcus + Martin (82)</button>
-    <button onclick="selectPod('Sebastian+Daniel')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Sebastian+Daniel">Sebastian + Daniel (79)</button>
-    <button onclick="selectPod('Aimy+Espen')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Aimy+Espen">Aimy + Espen (16)</button>
-    <button onclick="selectPod('Nicklas+Hamsa')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Nicklas+Hamsa">Nicklas + Hamsa (57)</button>
+    <button onclick="selectPod('Marcus+Martin')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Marcus+Martin">Angus <span class="text-dark-600 text-xs">(Marcus &amp; Martin)</span> (82)</button>
+    <button onclick="selectPod('Sebastian+Daniel')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Sebastian+Daniel">Belgian Blue <span class="text-dark-600 text-xs">(Sebastian &amp; Daniel)</span> (79)</button>
+    <button onclick="selectPod('Aimy+Espen')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Aimy+Espen">Charolais <span class="text-dark-600 text-xs">(Aimy &amp; Espen)</span> (16)</button>
+    <button onclick="selectPod('Nicklas+Hamsa')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Nicklas+Hamsa">Buffalo <span class="text-dark-600 text-xs">(Nicklas &amp; Hamsa)</span> (57)</button>
   </div>
 
   <!-- KPI Cards (dynamic) -->
@@ -658,7 +658,10 @@ function renderDailyCards(){
         <div class="flex items-center gap-3">
           <span class="text-dark-500 text-sm font-600">#${rank}</span>
           ${medal?'<span class="text-2xl">'+medal+'</span>':''}
-          <h3 class="text-lg font-700 text-white">${pod.replace('+',' + ')}</h3>
+          <div>
+            <h3 class="text-lg font-700 text-white">${POD_DISPLAY[pod]||pod}</h3>
+            <p class="text-dark-500 text-xs">${POD_MEMBERS[pod]||pod.replace('+',' + ')}</p>
+          </div>
         </div>
       </div>
       <div class="grid grid-cols-3 gap-3 text-center mb-4">
@@ -700,7 +703,9 @@ function fmtDate(sd){if(!sd)return'<span class="text-dark-600">&mdash;</span>';c
 function retBadge(r){const p=Math.round(r*100);let c='text-red-400 bg-red-500/10';if(p>=80)c='text-emerald-400 bg-emerald-500/10';else if(p>=60)c='text-amber-400 bg-amber-500/10';else if(p>=40)c='text-orange-400 bg-orange-500/10';return`<span class="signal-tag ${c}">${p}%</span>`;}
 function sigTags(sigs){const cm={'LTV UP':'bg-emerald-500/10 text-emerald-400','CHURN':'bg-red-500/10 text-red-400','IDLE':'bg-amber-500/10 text-amber-400','INT.ERR':'bg-orange-500/10 text-orange-400','UPSELL':'bg-cyan-500/10 text-cyan-400','REVSHARE':'bg-teal-500/10 text-teal-400','NEW':'bg-dark-700 text-dark-300'};return sigs.map(s=>{let c='bg-dark-700 text-dark-300';for(const[k,v]of Object.entries(cm))if(s.includes(k)){c=v;break;};if(s.includes('ROAS'))c=s.includes('★')?'bg-emerald-500/10 text-emerald-400':s.includes('✓')?'bg-blue-500/10 text-blue-400':'bg-amber-500/10 text-amber-400';return`<span class="signal-tag ${c}">${s}</span>`;}).join(' ');}
 function tierCls(t){return{1:'tier-1-row',2:'tier-2-row',3:'tier-3-row',4:'tier-4-row'}[t]||'';}
-function podLabel(p){return p.split('+').map(x=>x[0]).join('');}
+function podLabel(p){return POD_DISPLAY[p]||p;}
+const POD_DISPLAY={'Marcus+Martin':'Angus','Sebastian+Daniel':'Belgian Blue','Aimy+Espen':'Charolais','Nicklas+Hamsa':'Buffalo'};
+const POD_MEMBERS={'Marcus+Martin':'Marcus & Martin','Sebastian+Daniel':'Sebastian & Daniel','Aimy+Espen':'Aimy & Espen','Nicklas+Hamsa':'Nicklas & Hamsa'};
 function podColor(p){const m={'Marcus+Martin':'blue','Sebastian+Daniel':'purple','Aimy+Espen':'pink','Nicklas+Hamsa':'teal'};return m[p]||'blue';}
 function stripeLink(wsId){if(!wsId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://dashboard.stripe.com/subscriptions/${wsId}" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>`;}
 function attioLink(recId){if(!recId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://app.attio.com/metric/workspaces/record/${recId}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>`;}
