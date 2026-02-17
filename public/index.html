@@ -54,7 +54,156 @@ tailwind.config = {
         <p class="text-dark-600 text-xs">192 workspaces &middot; $4.2M ARR &middot; $9.8M est. 3yr LTV</p>
       </div>
     </div>
-    <p class="text-dark-400 text-sm max-w-3xl">LTV-based priority model for CSM resource allocation across all pods. Workspaces ranked by estimated 3-year lifetime value adjusted for retention probability, growth potential, and required CSM effort.</p>
+    <div class="flex items-center gap-4">
+      <p class="text-dark-400 text-sm max-w-3xl">LTV-based priority model for CSM resource allocation across all pods. Workspaces ranked by estimated 3-year lifetime value adjusted for retention probability, growth potential, and required CSM effort.</p>
+      <button onclick="document.getElementById('infoPage').classList.toggle('hidden')" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:bg-dark-700 hover:text-dark-200 transition">How This Works</button>
+    </div>
+  </div>
+
+  <!-- Info Page (hidden by default) -->
+  <div id="infoPage" class="hidden glass rounded-xl p-6 sm:p-8 mb-8 fade-in">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-800 text-white">How This Dashboard Works</h2>
+      <button onclick="document.getElementById('infoPage').classList.add('hidden')" class="text-dark-400 hover:text-white text-xl px-2">&times;</button>
+    </div>
+
+    <div class="space-y-8 text-sm">
+
+      <!-- What is this? -->
+      <div>
+        <h3 class="text-base font-700 text-white mb-2">What is this dashboard?</h3>
+        <p class="text-dark-300 leading-relaxed">This dashboard helps CSM (Customer Success Manager) team leads decide <strong class="text-white">where to spend their team's time</strong>. We manage ~190 client workspaces across 4 pods. Each pod is a pair of CSMs: one &ldquo;front-end&rdquo; (client-facing, runs meetings) and one &ldquo;back-end&rdquo; (operations, campaign setup, creatives). Not every client deserves equal attention &mdash; this tool ranks them by how much long-term value they represent, so CSMs focus on the clients that matter most.</p>
+      </div>
+
+      <!-- The big idea -->
+      <div>
+        <h3 class="text-base font-700 text-white mb-2">The big idea: Priority = Lifetime Value &divide; Effort</h3>
+        <p class="text-dark-300 leading-relaxed mb-3">Every workspace gets a <strong class="text-white">Priority Index</strong> score. This is simply: <em>how much is this client worth to us over the next 3 years, divided by how much CSM time they need?</em> High-value, low-effort clients rank highest. At-risk clients that need heavy investment rank lower &mdash; unless saving them protects a lot of revenue.</p>
+        <p class="text-dark-300 leading-relaxed">Workspaces are grouped into 4 tiers based on this score:</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+          <div class="rounded-lg p-3 border-l-3 border-emerald-500 bg-emerald-500/5">
+            <p class="text-emerald-400 font-700">Tier 1</p>
+            <p class="text-dark-400 text-xs mt-1">Highest impact. Protect and grow these at all costs.</p>
+          </div>
+          <div class="rounded-lg p-3 border-l-3 border-blue-500 bg-blue-500/5">
+            <p class="text-blue-400 font-700">Tier 2</p>
+            <p class="text-dark-400 text-xs mt-1">Important. Steady attention, look for upsell opportunities.</p>
+          </div>
+          <div class="rounded-lg p-3 border-l-3 border-amber-500 bg-amber-500/5">
+            <p class="text-amber-400 font-700">Tier 3</p>
+            <p class="text-dark-400 text-xs mt-1">Moderate value. Maintain, but don't over-invest unless a clear signal appears.</p>
+          </div>
+          <div class="rounded-lg p-3 border-l-3 border-red-500 bg-red-500/5">
+            <p class="text-red-400 font-700">Tier 4</p>
+            <p class="text-dark-400 text-xs mt-1">Low priority. Minimal effort. Consider offboarding if failing.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- How LTV is calculated -->
+      <div>
+        <h3 class="text-base font-700 text-white mb-2">How we estimate 3-Year Lifetime Value</h3>
+        <p class="text-dark-300 leading-relaxed mb-3">The formula: <code class="bg-dark-800 px-2 py-0.5 rounded text-emerald-400">3yr LTV = Annual Revenue &times; Retention Chance &times; Growth Potential &times; 3</code></p>
+        <div class="space-y-3">
+          <div class="flex gap-3">
+            <span class="text-white font-600 shrink-0 w-36">Annual Revenue</span>
+            <p class="text-dark-400">Estimated from the client's plan level (e.g. Pro &asymp; $25K/yr, Performance &asymp; $48K/yr). This is an average, not the exact subscription price.</p>
+          </div>
+          <div class="flex gap-3">
+            <span class="text-white font-600 shrink-0 w-36">Retention Chance</span>
+            <p class="text-dark-400">How likely the client is to stay. Based on their health rating: a 5-star client has a 92% chance of renewing, a 1-star client only 25%. Clients with overdue invoices or long periods of inactivity get further penalties. Unrated clients default to 65%.</p>
+          </div>
+          <div class="flex gap-3">
+            <span class="text-white font-600 shrink-0 w-36">Growth Potential</span>
+            <p class="text-dark-400">A multiplier (0.5x to 2.5x) based on how much room there is to grow. Clients with strong ROAS (good ad returns), large Shopify stores, or CSM-flagged &ldquo;Time=ROAS&rdquo; potential score higher. Clients with zero campaigns and no data score lower.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- What the columns mean -->
+      <div>
+        <h3 class="text-base font-700 text-white mb-2">Column guide</h3>
+        <p class="text-dark-400 mb-3">Hover any column header in the table for a quick explanation. Here's the full breakdown:</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-dark-800/30 rounded-lg p-3">
+            <p class="text-white font-600">Health (1-5 stars)</p>
+            <p class="text-dark-400 text-xs mt-1">The CSM's gut-check rating of the client relationship. 5 = happy client, strong results. 3 = needs work. 1 = about to leave. &ldquo;Not rated&rdquo; means the CSM hasn't assessed this client yet &mdash; a blind spot.</p>
+          </div>
+          <div class="bg-dark-800/30 rounded-lg p-3">
+            <p class="text-white font-600">ROAS (ATD)</p>
+            <p class="text-dark-400 text-xs mt-1">All-Time-Data Return on Ad Spend. If a client spent $1,000 on ads through us and earned $5,000 in sales, their ROAS is 5.0x. Higher is better. This is the lifetime average, not just the last month.</p>
+          </div>
+          <div class="bg-dark-800/30 rounded-lg p-3">
+            <p class="text-white font-600">Shopify/30d</p>
+            <p class="text-dark-400 text-xs mt-1">Total sales through the client's Shopify store in the last 30 days. Tells us how big their business is. A client doing $500K/mo in sales has much more upside than one doing $2K/mo.</p>
+          </div>
+          <div class="bg-dark-800/30 rounded-lg p-3">
+            <p class="text-white font-600">Ret. %</p>
+            <p class="text-dark-400 text-xs mt-1">Estimated retention probability &mdash; the chance this client will still be with us in a year. Drives the LTV calculation. A client with 92% retention is worth almost 4x more over 3 years than one at 25%.</p>
+          </div>
+          <div class="bg-dark-800/30 rounded-lg p-3">
+            <p class="text-white font-600">3yr LTV</p>
+            <p class="text-dark-400 text-xs mt-1">The estimated total revenue from this client over 3 years. This is the single most important number. It factors in their plan price, how likely they are to stay, and how much they could grow.</p>
+          </div>
+          <div class="bg-dark-800/30 rounded-lg p-3">
+            <p class="text-white font-600">Est. ARR</p>
+            <p class="text-dark-400 text-xs mt-1">Estimated Annual Recurring Revenue. What we expect this client to pay per year based on their plan tier. Enterprise &asymp; $50K, Performance &asymp; $48K, Pro &asymp; $25K, Growth &asymp; $9K, Lite &asymp; $6K.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signals -->
+      <div>
+        <h3 class="text-base font-700 text-white mb-2">Signal tags explained</h3>
+        <p class="text-dark-400 mb-3">Quick-glance labels that flag important things about a client:</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-red-500/10 text-red-400 shrink-0">CHURN</span><p class="text-dark-400">Client is at risk of leaving. Their subscription is cancelled or overdue, or they've been explicitly flagged as a churn risk.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-amber-500/10 text-amber-400 shrink-0">IDLE</span><p class="text-dark-400">No active ad campaigns for 20+ days. If a client isn't running ads, they're not seeing value from our service &mdash; churn risk increases.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-orange-500/10 text-orange-400 shrink-0">INT.ERR</span><p class="text-dark-400">A technical integration with the client's store is broken. Until this is fixed, we can't deliver value. Needs engineering attention.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">ROAS&#9733;</span><p class="text-dark-400">Excellent all-time ROAS (8x+). This client's ads are performing very well. A star performer worth protecting.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-blue-500/10 text-blue-400 shrink-0">ROAS&#10003;</span><p class="text-dark-400">Good all-time ROAS (2x-8x). Ads are working, client should be seeing value. Solid performer.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">LTV UP</span><p class="text-dark-400">The CSM believes this client has untapped potential. Given more time and attention, the return could be significant. Prioritize.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-cyan-500/10 text-cyan-400 shrink-0">UPSELL</span><p class="text-dark-400">Client's usage or business size suggests they should be on a higher plan. E.g. a $500K/mo Shopify store on a $9K Growth plan.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-teal-500/10 text-teal-400 shrink-0">REVSHARE</span><p class="text-dark-400">We have a revenue-share agreement with this client &mdash; we earn a % of their ad-driven revenue. Aligned incentives: the better they do, the more we earn.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-dark-700 text-dark-300 shrink-0">NEW</span><p class="text-dark-400">New client still in onboarding or with very limited data. Too early to judge performance &mdash; needs time to ramp up.</p></div>
+        </div>
+      </div>
+
+      <!-- Pod structure -->
+      <div>
+        <h3 class="text-base font-700 text-white mb-2">Pod structure</h3>
+        <p class="text-dark-300 leading-relaxed mb-3">The CSM team is organized into 4 pods. Each pod has two people:</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="bg-dark-800/30 rounded-lg p-3">
+            <p class="text-white font-600">Front-End CSM (FE)</p>
+            <p class="text-dark-400 text-xs mt-1">The team lead. Client-facing: runs meetings, manages the relationship, handles escalations. The face the client sees.</p>
+          </div>
+          <div class="bg-dark-800/30 rounded-lg p-3">
+            <p class="text-white font-600">Back-End CSM (BE)</p>
+            <p class="text-dark-400 text-xs mt-1">Operations: sets up campaigns, manages creatives, handles technical setup. Does the behind-the-scenes work that delivers results.</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 text-center">
+          <div class="bg-dark-800/30 rounded-lg p-3"><p class="text-blue-400 font-600 text-xs">Marcus (FE)</p><p class="text-purple-400 font-600 text-xs">Martin (BE)</p><p class="text-dark-500 text-xs mt-1">47 workspaces</p></div>
+          <div class="bg-dark-800/30 rounded-lg p-3"><p class="text-blue-400 font-600 text-xs">Sebastian (FE)</p><p class="text-purple-400 font-600 text-xs">Daniel (BE)</p><p class="text-dark-500 text-xs mt-1">72 workspaces</p></div>
+          <div class="bg-dark-800/30 rounded-lg p-3"><p class="text-blue-400 font-600 text-xs">Aimy (FE)</p><p class="text-purple-400 font-600 text-xs">Espen (BE)</p><p class="text-dark-500 text-xs mt-1">16 workspaces</p></div>
+          <div class="bg-dark-800/30 rounded-lg p-3"><p class="text-blue-400 font-600 text-xs">Nicklas (FE)</p><p class="text-purple-400 font-600 text-xs">Hamsa (BE)</p><p class="text-dark-500 text-xs mt-1">57 workspaces</p></div>
+        </div>
+      </div>
+
+      <!-- Important caveats -->
+      <div>
+        <h3 class="text-base font-700 text-white mb-2">Important caveats</h3>
+        <ul class="text-dark-400 space-y-2 list-disc list-inside">
+          <li><strong class="text-dark-300">ARR is estimated, not exact.</strong> We use plan-level averages, not actual subscription amounts. Individual pricing deals may differ.</li>
+          <li><strong class="text-dark-300">Unrated clients are a blind spot.</strong> Workspaces without a health rating default to 65% retention &mdash; this may overstate weak clients or understate strong ones. Rating all clients is the single highest-impact action any CSM can take.</li>
+          <li><strong class="text-dark-300">Shopify sales are a 30-day snapshot.</strong> Seasonal businesses may look artificially high or low depending on the time of year.</li>
+          <li><strong class="text-dark-300">The model is directional, not exact.</strong> Use it to guide priorities and spot patterns, not as the final word. CSM judgment and context always matter.</li>
+          <li><strong class="text-dark-300">Data comes from Attio CRM.</strong> If CRM records are out of date, the dashboard will reflect stale information. Keep Attio up to date.</li>
+        </ul>
+      </div>
+
+    </div>
   </div>
 
   <!-- Pod Tabs -->
@@ -87,21 +236,21 @@ tailwind.config = {
       <table class="w-full text-sm">
         <thead>
           <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800">
-            <th class="text-left px-3 py-3 font-600">#</th>
-            <th class="text-left px-3 py-3 font-600">Workspace</th>
-            <th class="text-left px-3 py-3 font-600">Pod</th>
-            <th class="text-left px-3 py-3 font-600">CSM</th>
-            <th class="text-left px-3 py-3 font-600">Plan</th>
-            <th class="text-center px-3 py-3 font-600">Health</th>
-            <th class="text-right px-3 py-3 font-600">Est. ARR</th>
-            <th class="text-right px-3 py-3 font-600">Shopify/30d</th>
-            <th class="text-right px-3 py-3 font-600">ROAS (ATD)</th>
-            <th class="text-center px-3 py-3 font-600">Ret. %</th>
-            <th class="text-right px-3 py-3 font-600">3yr LTV</th>
-            <th class="text-left px-3 py-3 font-600">Signals</th>
-            <th class="text-left px-3 py-3 font-600">Action / Note</th>
-            <th class="text-center px-2 py-3 font-600" title="Stripe">S</th>
-            <th class="text-center px-2 py-3 font-600" title="Attio">A</th>
+            <th class="text-left px-3 py-3 font-600 cursor-help" title="Priority rank within the selected pod. #1 is the highest-value workspace based on our scoring model.">#</th>
+            <th class="text-left px-3 py-3 font-600 cursor-help" title="The client's workspace name in our platform.">Workspace</th>
+            <th class="text-left px-3 py-3 font-600 cursor-help" title="Which CSM pod manages this client. Each pod has a front-end CSM (client-facing) and a back-end CSM (operations).">Pod</th>
+            <th class="text-left px-3 py-3 font-600 cursor-help" title="The Customer Success Manager responsible for this workspace.">CSM</th>
+            <th class="text-left px-3 py-3 font-600 cursor-help" title="The client's subscription plan: Starter, Lite, Growth, Pro, Performance, or Enterprise.">Plan</th>
+            <th class="text-center px-3 py-3 font-600 cursor-help" title="CSM's health rating (1-5 stars). How well the client relationship is going. 5 = thriving, 1 = at serious risk. 'Not rated' means the CSM hasn't assessed this client yet.">Health</th>
+            <th class="text-right px-3 py-3 font-600 cursor-help" title="Estimated Annual Recurring Revenue. Based on plan-level averages (e.g. Pro ~$25K/yr, Performance ~$48K/yr), not exact subscription amounts.">Est. ARR</th>
+            <th class="text-right px-3 py-3 font-600 cursor-help" title="The client's total Shopify store sales over the last 30 days. A proxy for how large their e-commerce business is — bigger stores = more to gain from our ads.">Shopify/30d</th>
+            <th class="text-right px-3 py-3 font-600 cursor-help" title="All-Time-Data Return on Ad Spend. For every $1 the client spent on ads through us, how many dollars of revenue did they earn — across their entire history. Higher = better. 2x+ is good, 8x+ is excellent.">ROAS (ATD)</th>
+            <th class="text-center px-3 py-3 font-600 cursor-help" title="Estimated probability that this client will still be paying us in a year. Based on their health rating, churn flags, and activity levels. 92% for health 5, down to 25% for health 1.">Ret. %</th>
+            <th class="text-right px-3 py-3 font-600 cursor-help" title="Estimated 3-Year Lifetime Value. How much total revenue we expect from this client over 3 years, accounting for their chance of churning and growth potential. This is the main number driving prioritization.">3yr LTV</th>
+            <th class="text-left px-3 py-3 font-600 cursor-help" title="Quick-glance tags highlighting important characteristics: CHURN = at risk, IDLE = no campaigns running, ROAS = strong ad performance, UPSELL = should be on a bigger plan, LTV UP = CSM sees high potential.">Signals</th>
+            <th class="text-left px-3 py-3 font-600 cursor-help" title="Recommended next step for this client, or the CSM's latest note. This tells you what needs to happen.">Action / Note</th>
+            <th class="text-center px-2 py-3 font-600 cursor-help" title="Link to this client's subscription in Stripe (our payment platform).">S</th>
+            <th class="text-center px-2 py-3 font-600 cursor-help" title="Link to this client's workspace record in Attio (our CRM).">A</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -109,34 +258,6 @@ tailwind.config = {
     </div>
   </div>
 
-  <!-- Glossary -->
-  <div class="glass rounded-xl p-5 sm:p-6 mt-8 fade-in" style="animation-delay:0.3s">
-    <h2 class="text-lg font-700 text-white mb-4">Glossary</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
-      <div class="flex gap-3"><span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">LTV UP</span><p class="text-dark-400"><strong class="text-dark-300">Time = ROAS:</strong> CSM believes investing dedicated time in this client will produce strong ad return, indicating high LTV potential.</p></div>
-      <div class="flex gap-3"><span class="signal-tag bg-red-500/10 text-red-400 shrink-0">CHURN</span><p class="text-dark-400"><strong class="text-dark-300">Churn Risk:</strong> Cancelled/overdue status or explicit churn risk indicators.</p></div>
-      <div class="flex gap-3"><span class="signal-tag bg-amber-500/10 text-amber-400 shrink-0">IDLE</span><p class="text-dark-400"><strong class="text-dark-300">Inactive:</strong> No active ad campaigns for 20+ days. Risk of disengagement.</p></div>
-      <div class="flex gap-3"><span class="signal-tag bg-orange-500/10 text-orange-400 shrink-0">INT.ERR</span><p class="text-dark-400"><strong class="text-dark-300">Integration Error:</strong> Technical integration with client's store is broken.</p></div>
-      <div class="flex gap-3"><span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">ROAS&#9733;</span><p class="text-dark-400"><strong class="text-dark-300">Excellent ROAS:</strong> All-time ROAS above 8x — star performer.</p></div>
-      <div class="flex gap-3"><span class="signal-tag bg-blue-500/10 text-blue-400 shrink-0">ROAS&#10003;</span><p class="text-dark-400"><strong class="text-dark-300">Good ROAS:</strong> All-time ROAS between 2x-8x — solid performer.</p></div>
-      <div class="flex gap-3"><span class="signal-tag bg-cyan-500/10 text-cyan-400 shrink-0">UPSELL</span><p class="text-dark-400"><strong class="text-dark-300">Upsell Candidate:</strong> Usage or business size suggests they should be on a higher plan.</p></div>
-      <div class="flex gap-3"><span class="signal-tag bg-teal-500/10 text-teal-400 shrink-0">REVSHARE</span><p class="text-dark-400"><strong class="text-dark-300">Revenue Share:</strong> Company earns a % of client's profit/revenue.</p></div>
-      <div class="flex gap-3"><span class="signal-tag bg-dark-700 text-dark-300 shrink-0">NEW</span><p class="text-dark-400"><strong class="text-dark-300">New/Onboarding:</strong> Recently started, limited data available.</p></div>
-    </div>
-  </div>
-
-  <!-- Methodology -->
-  <div class="glass rounded-xl p-5 sm:p-6 mt-4 fade-in" style="animation-delay:0.35s">
-    <h2 class="text-lg font-700 text-white mb-3">Methodology</h2>
-    <div class="text-dark-400 text-sm space-y-2">
-      <p><strong class="text-dark-300">Priority Index = 3-Year LTV / CSM Effort</strong>, where LTV = ARR &times; Retention Probability &times; Growth Multiplier &times; 3 years.</p>
-      <p><strong class="text-dark-300">Retention Probability</strong> is derived from health rating (1-5 stars maps to 25%-92%), adjusted down for churn flags, prolonged campaign inactivity, or explicit churn risk.</p>
-      <p><strong class="text-dark-300">Growth Multiplier (0.5x-2.5x)</strong> factors in current and lifetime ROAS performance, Shopify sales volume, CSM-flagged &quot;Time=ROAS&quot; signals, and upsell indicators.</p>
-      <p><strong class="text-dark-300">CSM Effort (0.5x-2.0x)</strong> estimates relative time investment based on integration issues, C-suite escalation needs, and onboarding overhead.</p>
-      <p><strong class="text-dark-300">Tier Thresholds:</strong> T1 = Priority &ge;100K (highest impact), T2 = &ge;50K, T3 = &ge;15K, T4 = &lt;15K (lowest priority).</p>
-      <p class="text-dark-500 text-xs mt-3">Note: ARR is estimated from plan-level averages, not individual subscription data. Unrated workspaces default to 65% retention. Shopify sales are a 30-day snapshot.</p>
-    </div>
-  </div>
 
   <p class="text-dark-600 text-xs text-center mt-8 mb-4">Data sourced from Attio CRM. Dashboard generated Feb 2026.</p>
 </div>
