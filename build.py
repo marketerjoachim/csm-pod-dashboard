@@ -897,9 +897,43 @@ tailwind.config = {{
   <!-- ============ DAILY CUSTOMER UPDATE TAB ============ -->
   <div id="tabDaily" class="tab-panel active fade-in">
     <div class="mb-6">
-      <h1 class="text-3xl sm:text-4xl font-800 text-white mb-1">Daily Customer Update</h1>
+      <div class="flex items-center gap-4 mb-1">
+        <h1 class="text-3xl sm:text-4xl font-800 text-white">Daily Customer Update</h1>
+        <button onclick="document.getElementById('infoDailyPage').classList.toggle('hidden')" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:bg-dark-700 hover:text-dark-200 transition">How This Works</button>
+      </div>
       <p class="text-dark-400 text-sm">Feb 16, 2026 &mdash; Yesterday's churn summary across all pods</p>
     </div>
+
+    <!-- Daily Info Page (hidden by default) -->
+    <div id="infoDailyPage" class="hidden glass rounded-xl p-6 sm:p-8 mb-6 fade-in">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-800 text-white">How This Page Works</h2>
+        <button onclick="document.getElementById('infoDailyPage').classList.add('hidden')" class="text-dark-400 hover:text-white text-xl px-2">&times;</button>
+      </div>
+      <div class="space-y-5 text-sm">
+        <div>
+          <h3 class="text-base font-700 text-white mb-2">What is this page?</h3>
+          <p class="text-dark-300 leading-relaxed">A daily snapshot of customer churn across all 4 CSM pods. It shows how many customers and how much ARR each pod lost yesterday, so leadership can spot problems quickly and follow up same-day.</p>
+        </div>
+        <div>
+          <h3 class="text-base font-700 text-white mb-2">How pods are ranked</h3>
+          <p class="text-dark-300 leading-relaxed">Pods are ranked best-to-worst each day using two simple rules:</p>
+          <ol class="text-dark-300 leading-relaxed list-decimal list-inside mt-2 space-y-1">
+            <li><strong class="text-white">Least MRR churned</strong> &mdash; the pod that lost the least revenue ranks highest.</li>
+            <li><strong class="text-white">Most ARR under management</strong> &mdash; if two pods tied on churn, the one managing more total ARR ranks higher.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 class="text-base font-700 text-white mb-2">Medals</h3>
+          <p class="text-dark-300 leading-relaxed">The top 3 pods receive gold, silver, and bronze medals. This resets every day &mdash; yesterday's winner starts fresh today.</p>
+        </div>
+        <div>
+          <h3 class="text-base font-700 text-white mb-2">Churn details</h3>
+          <p class="text-dark-300 leading-relaxed">Click the churn row on any pod card to expand and see which customers cancelled, their plan, lost ARR, cancellation reason from Stripe, and direct links to Stripe and Attio.</p>
+        </div>
+      </div>
+    </div>
+
     <div class="glass rounded-xl p-5 mb-6" id="dailyAggregate"></div>
     <div class="grid grid-cols-1 gap-4" id="dailyCards"></div>
   </div>
