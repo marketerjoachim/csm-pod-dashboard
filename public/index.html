@@ -624,7 +624,7 @@ const D=[
 ];
 const PM={'Marcus+Martin':{cnt:82,arr:2204000,ltv:4381147,rated:26,risk:13,t1:11,t2:23,t3:31,t4:17,csms:[{n:'Marcus',role:'FE',cl:'blue',cnt:32,arr:868000,unr:30},{n:'Martin',role:'BE',cl:'purple',cnt:50,arr:1336000,unr:26}]},'Sebastian+Daniel':{cnt:79,arr:1723000,ltv:3564199,rated:26,risk:17,t1:11,t2:11,t3:21,t4:36,csms:[{n:'Sebastian',role:'FE',cl:'blue',cnt:50,arr:802000,unr:49},{n:'Daniel',role:'BE',cl:'purple',cnt:29,arr:921000,unr:4}]},'Aimy+Espen':{cnt:16,arr:186000,ltv:303944,rated:11,risk:7,t1:0,t2:1,t3:6,t4:9,csms:[{n:'Aimy',role:'FE',cl:'blue',cnt:16,arr:186000,unr:5}]},'Nicklas+Hamsa':{cnt:57,arr:536000,ltv:771086,rated:32,risk:9,t1:0,t2:4,t3:12,t4:41,csms:[{n:'Nicklas',role:'FE',cl:'blue',cnt:50,arr:476000,unr:23},{n:'Hamsa',role:'BE',cl:'purple',cnt:7,arr:60000,unr:2}]}};
 const TOTAL={ws:234,arr:4649000,ltv:9020376,risk:46};
-const DAILY={'Marcus+Martin':{cnt:82,arr:2204000,churnCnt:0,churnArr:0,churns:[]},'Sebastian+Daniel':{cnt:79,arr:1723000,churnCnt:0,churnArr:0,churns:[]},'Aimy+Espen':{cnt:16,arr:186000,churnCnt:0,churnArr:0,churns:[]},'Nicklas+Hamsa':{cnt:57,arr:536000,churnCnt:1,churnArr:12000,churns:[{ri:'686b3476-4e8f-4a29-93ff-577949ccb041',n:'Parken Jewelry',pl:'Growth',arr:12000,ss:'Cancelled - ended at Feb 16, 2026',sid:'sub_1S8PbhFopWoUwtLcrJWWXZFj',lr:'',cc:''}]}};
+const DAILY={'Marcus+Martin':{cnt:82,arr:2204000,s3:16,s2:30,s1:6,sna:30,churnCnt:0,churnArr:0,churns:[]},'Sebastian+Daniel':{cnt:79,arr:1723000,s3:16,s2:19,s1:6,sna:38,churnCnt:0,churnArr:0,churns:[]},'Aimy+Espen':{cnt:16,arr:186000,s3:0,s2:6,s1:8,sna:2,churnCnt:0,churnArr:0,churns:[]},'Nicklas+Hamsa':{cnt:57,arr:536000,s3:0,s2:9,s1:16,sna:32,churnCnt:1,churnArr:12000,churns:[{ri:'686b3476-4e8f-4a29-93ff-577949ccb041',n:'Parken Jewelry',pl:'Growth',arr:12000,ss:'Cancelled - ended at Feb 16, 2026',sid:'sub_1S8PbhFopWoUwtLcrJWWXZFj',lr:'',cc:''}]}};
 
 let curPod='all',curTier='all',curCSM='all';
 let curTopTab='daily';
@@ -643,14 +643,14 @@ function switchTopTab(tab){
 function renderDailyCards(){
   const el=document.getElementById('dailyCards');
   const pods=['Marcus+Martin','Sebastian+Daniel','Aimy+Espen','Nicklas+Hamsa'];
-  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0;
-  pods.forEach(p=>{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;});
+  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0,totS3=0,totS2=0,totS1=0,totSna=0;
+  pods.forEach(p=>{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;totS3+=d.s3;totS2+=d.s2;totS1+=d.s1;totSna+=d.sna;});
   const agEl=document.getElementById('dailyAggregate');
   const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
   agEl.innerHTML=`
     <h3 class="text-lg font-700 text-white mb-3">All Teams</h3>
     <div class="grid grid-cols-3 gap-3 text-center">
-      <div><p class="text-2xl font-700 text-white">${totCnt}</p><p class="text-dark-500 text-xs">Total Customers</p></div>
+      <div><p class="text-2xl font-700 text-white">${totCnt}</p><p class="text-dark-500 text-xs">Total Customers</p><p class="text-dark-500 text-xs mt-1"><span class="text-amber-400">&#9733;${totS3}</span> <span class="text-dark-300">&#9733;${totS2}</span> <span class="text-dark-500">&#9733;${totS1}</span> <span class="text-dark-600">${totSna} n/a</span></p></div>
       <div><p class="text-2xl font-700 text-white">${fmt(totArr)}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
       <div><p class="text-2xl font-700 ${agChurnColor}">${totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
     </div>`;
@@ -703,7 +703,7 @@ function renderDailyCards(){
         </div>
       </div>
       <div class="grid grid-cols-3 gap-3 text-center mb-4">
-        <div><p class="text-lg font-700 text-white">${d.cnt}</p><p class="text-dark-500 text-xs">Active Customers</p></div>
+        <div><p class="text-lg font-700 text-white">${d.cnt}</p><p class="text-dark-500 text-xs">Active Customers</p><p class="text-dark-500 text-xs mt-1"><span class="text-amber-400">&#9733;${d.s3}</span> <span class="text-dark-300">&#9733;${d.s2}</span> <span class="text-dark-500">&#9733;${d.s1}</span> <span class="text-dark-600">${d.sna} n/a</span></p></div>
         <div><p class="text-lg font-700 text-white">${fmt(d.arr)}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
         <div><p class="text-lg font-700 ${churnColor}">${hasCh?d.churnCnt:'0'}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
       </div>

@@ -719,9 +719,14 @@ def compute_daily_churn(workspaces):
     pod_totals = {}
     for pod_name in pod_order:
         pod_ws = [w for w in workspaces if w["pod"] == pod_name]
+        s3 = sum(1 for w in pod_ws if w.get("est_ltv") == 3)
+        s2 = sum(1 for w in pod_ws if w.get("est_ltv") == 2)
+        s1 = sum(1 for w in pod_ws if w.get("est_ltv") == 1)
+        sna = len(pod_ws) - s3 - s2 - s1
         pod_totals[pod_name] = {
             "count": len(pod_ws),
             "arr": sum(w["arr"] for w in pod_ws),
+            "s3": s3, "s2": s2, "s1": s1, "sna": sna,
         }
 
     # Find churns from yesterday
@@ -769,6 +774,7 @@ def compute_daily_churn(workspaces):
         churn_arr = sum(c["arr"] for c in churns)
         js_parts.append(
             f"'{pod_name}':{{cnt:{totals['count']},arr:{totals['arr']},"
+            f"s3:{totals['s3']},s2:{totals['s2']},s1:{totals['s1']},sna:{totals['sna']},"
             f"churnCnt:{churn_count},churnArr:{churn_arr},"
             f"churns:[{churns_str}]}}"
         )
@@ -1208,14 +1214,14 @@ function switchTopTab(tab){{
 function renderDailyCards(){{
   const el=document.getElementById('dailyCards');
   const pods=['Marcus+Martin','Sebastian+Daniel','Aimy+Espen','Nicklas+Hamsa'];
-  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0;
-  pods.forEach(p=>{{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;}});
+  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0,totS3=0,totS2=0,totS1=0,totSna=0;
+  pods.forEach(p=>{{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;totS3+=d.s3;totS2+=d.s2;totS1+=d.s1;totSna+=d.sna;}});
   const agEl=document.getElementById('dailyAggregate');
   const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
   agEl.innerHTML=`
     <h3 class="text-lg font-700 text-white mb-3">All Teams</h3>
     <div class="grid grid-cols-3 gap-3 text-center">
-      <div><p class="text-2xl font-700 text-white">${{totCnt}}</p><p class="text-dark-500 text-xs">Total Customers</p></div>
+      <div><p class="text-2xl font-700 text-white">${{totCnt}}</p><p class="text-dark-500 text-xs">Total Customers</p><p class="text-dark-500 text-xs mt-1"><span class="text-amber-400">&#9733;${{totS3}}</span> <span class="text-dark-300">&#9733;${{totS2}}</span> <span class="text-dark-500">&#9733;${{totS1}}</span> <span class="text-dark-600">${{totSna}} n/a</span></p></div>
       <div><p class="text-2xl font-700 text-white">${{fmt(totArr)}}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
       <div><p class="text-2xl font-700 ${{agChurnColor}}">${{totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
     </div>`;
@@ -1268,7 +1274,7 @@ function renderDailyCards(){{
         </div>
       </div>
       <div class="grid grid-cols-3 gap-3 text-center mb-4">
-        <div><p class="text-lg font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Active Customers</p></div>
+        <div><p class="text-lg font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Active Customers</p><p class="text-dark-500 text-xs mt-1"><span class="text-amber-400">&#9733;${{d.s3}}</span> <span class="text-dark-300">&#9733;${{d.s2}}</span> <span class="text-dark-500">&#9733;${{d.s1}}</span> <span class="text-dark-600">${{d.sna}} n/a</span></p></div>
         <div><p class="text-lg font-700 text-white">${{fmt(d.arr)}}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
         <div><p class="text-lg font-700 ${{churnColor}}">${{hasCh?d.churnCnt:'0'}}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
       </div>
