@@ -11,6 +11,27 @@ import shutil
 from datetime import datetime, date
 from sub_start_dates import SUBSCRIPTION_START_DATES, SUBSCRIPTION_CHURN_DATA
 
+# ─── Churn Context (extracted from Attio calls/emails/CSM fields) ────────────
+# record_id -> {summary, source}
+CHURN_CONTEXT = {
+    "31f36ad0-1ee1-53ba-bb70-884b70900da9": {
+        "summary": "Ghosted — unable to reach client, no campaigns running, doesn't open emails",
+        "source": "csm_field",
+    },
+    "3d95ba46-68d0-5e96-99e7-36ab16f57f9b": {
+        "summary": "Persistent issues integrating Meta/Google ad accounts, never got campaigns live",
+        "source": "csm_field",
+    },
+    "47da0b32-b1d9-5bdf-a8d9-5d45c85813fe": {
+        "summary": "Severe capital constraints (partner health crisis), unable to fund ad spend despite wanting to continue",
+        "source": "call",
+    },
+    "686b3476-4e8f-4a29-93ff-577949ccb041": {
+        "summary": "Pausing due to budget constraints, wants to rebuild website first; plans to return mid-March",
+        "source": "call",
+    },
+}
+
 # ─── Configuration ──────────────────────────────────────────────────────────────
 
 TODAY = date(2026, 2, 17)
@@ -741,6 +762,9 @@ def compute_daily_churn(workspaces):
                 name = ws["name"] if ws else "Unknown"
                 lost_reason = ws.get("lost_reason", "") if ws else ""
                 churn_comment = ws.get("churn_comment", "") if ws else ""
+                ctx = CHURN_CONTEXT.get(record_id, {})
+                churn_summary = ctx.get("summary", "")
+                churn_source = ctx.get("source", "")
                 if pod in pod_churns:
                     pod_churns[pod].append({
                         "record_id": record_id,
@@ -751,6 +775,8 @@ def compute_daily_churn(workspaces):
                         "stripe_sub_id": entry.get("stripe_sub_id", ""),
                         "lost_reason": lost_reason,
                         "churn_comment": churn_comment,
+                        "churn_summary": churn_summary,
+                        "churn_source": churn_source,
                     })
 
     # Build JS constant
@@ -764,10 +790,12 @@ def compute_daily_churn(workspaces):
             sub_status_esc = c["sub_status"].replace("\\", "\\\\").replace("'", "\\'")
             lr_esc = c["lost_reason"].replace("\\", "\\\\").replace("'", "\\'")
             cc_esc = c["churn_comment"].replace("\\", "\\\\").replace("'", "\\'")
+            cs_esc = c["churn_summary"].replace("\\", "\\\\").replace("'", "\\'")
+            csrc = c["churn_source"]
             churn_js_items.append(
                 f"{{ri:'{c['record_id']}',n:'{name_esc}',pl:'{c['plan']}',"
                 f"arr:{c['arr']},ss:'{sub_status_esc}',sid:'{c['stripe_sub_id']}',"
-                f"lr:'{lr_esc}',cc:'{cc_esc}'}}"
+                f"lr:'{lr_esc}',cc:'{cc_esc}',cs:'{cs_esc}',csrc:'{csrc}'}}"
             )
         churns_str = ",".join(churn_js_items)
         churn_count = len(churns)
@@ -1258,6 +1286,7 @@ function renderDailyCards(){{
               </span>
             </div>
           </div>
+          ${{c.cs?'<p class="text-xs mt-2 px-2 py-1.5 rounded bg-dark-800/50 border border-dark-700/30"><span class="text-dark-400">'+({{'call':'&#128222;','email':'&#9993;','csm_field':'&#128221;'}}[c.csrc]||'&#8226;')+' </span><span class="text-dark-200">'+c.cs+'</span> <span class="text-dark-600 ml-1">via '+c.csrc.replace('_',' ')+'</span></p>':''}}
           ${{c.lr?'<p class="text-xs mt-1.5"><span class="text-dark-500">Churn reason:</span> <span class="text-amber-400 font-500">'+c.lr+'</span></p>':''}}
           ${{c.cc?'<p class="text-xs mt-1 text-dark-400"><span class="text-dark-500">Comment:</span> '+c.cc+'</p>':''}}
         </div>`).join('');
