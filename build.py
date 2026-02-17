@@ -9,6 +9,7 @@ import re
 import os
 import shutil
 from datetime import datetime, date
+from sub_start_dates import SUBSCRIPTION_START_DATES
 
 # ─── Configuration ──────────────────────────────────────────────────────────────
 
@@ -346,8 +347,9 @@ def compute_ltv(ws):
     upsell_arr = ws["upsell_arr"]
     est_ltv = ws["est_ltv"]
 
-    # Start date: prefer onboarding_date, fall back to created_at
-    start_date = ws["onboarding_date"] or ws["created_at"]
+    # Start date: use subscription start_date from Stripe, fall back to onboarding_date
+    record_id = ws["record_id"]
+    start_date = SUBSCRIPTION_START_DATES.get(record_id) or ws["onboarding_date"]
     tenure_months = compute_tenure_months(start_date)
 
     # --- Retention ---
@@ -890,7 +892,7 @@ tailwind.config = {{
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">Start Date</p>
-            <p class="text-dark-400 text-xs mt-1">When the customer started (from onboarding date or account creation). Longer tenure means more confidence in retention &mdash; clients who have been with us 18+ months get up to a 1.2x retention boost. New clients (&lt;1 month) get a 0.9x penalty since they haven't proven commitment yet.</p>
+            <p class="text-dark-400 text-xs mt-1">Subscription start date from Stripe (date of first payment). Longer tenure means more confidence in retention &mdash; clients who have been with us 18+ months get up to a 1.2x retention boost. New clients (&lt;1 month) get a 0.9x penalty since they haven't proven commitment yet.</p>
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">ROAS (ATD)</p>
@@ -902,7 +904,7 @@ tailwind.config = {{
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">Ret. %</p>
-            <p class="text-dark-400 text-xs mt-1">Estimated retention probability &mdash; the chance this client will still be with us in a year. Drives the LTV calculation. A client with 92% retention is worth almost 4x more over 2 years than one at 25%.</p>
+            <p class="text-dark-400 text-xs mt-1">How likely this customer is to stay for another year. Based on health rating, churn signals, activity level, and how long they've been a customer. Higher = more likely to renew. A client with 92% retention is worth almost 4x more over 2 years than one at 25%.</p>
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">2yr LTV</p>
@@ -1008,14 +1010,14 @@ tailwind.config = {{
             <th class="text-center px-3 py-3 font-600 text-dark-500">Links</th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Pod<span class="tip-text">Which CSM pod manages this client.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropPod')">&#9662;</span><div class="col-dropdown" id="dropPod"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">CSM<span class="tip-text">The Customer Success Manager responsible.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCSM')">&#9662;</span><div class="col-dropdown" id="dropCSM"></div></span></th>
-            <th class="sortable text-left px-3 py-3 font-600" data-sort="sd" onclick="sortCol(this)"><span class="tip">Start<span class="tip-text">When the customer started. Longer tenure = more LTV confidence. Based on onboarding date or account creation.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-left px-3 py-3 font-600" data-sort="sd" onclick="sortCol(this)"><span class="tip">Start<span class="tip-text">Subscription start date from Stripe. Longer tenure = more LTV confidence.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Plan<span class="tip-text">Subscription plan: Starter to Enterprise.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropPlan')">&#9662;</span><div class="col-dropdown" id="dropPlan"></div></span></th>
             <th class="sortable text-center px-3 py-3 font-600" data-sort="h" onclick="sortCol(this)"><span class="tip">Health<span class="tip-text">CSM's 1-5 star rating. Click to sort.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropHealth');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropHealth"></div></span></th>
-            <th class="sortable text-center px-3 py-3 font-600" data-sort="cs" onclick="sortCol(this)"><span class="tip">CS<span class="tip-text">Customer Score (1-3). CSM's subjective assessment of customer potential. Score 3 = high growth/strategic potential (1.4x growth boost). Score 2 = moderate (1.15x). Score 1 = standard.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCS');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropCS"></div></span></th>
+            <th class="sortable text-center px-3 py-3 font-600" data-sort="cs" onclick="sortCol(this)"><span class="tip">CS<span class="tip-text">Overall score based on CSM judgement of long-term value. 3 = high growth/strategic potential. 2 = moderate. 1 = low.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCS');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropCS"></div></span></th>
             <th class="sortable text-right px-3 py-3 font-600" data-sort="a" onclick="sortCol(this)"><span class="tip">Est. ARR<span class="tip-text">Estimated annual revenue from plan averages. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="sortable text-right px-3 py-3 font-600" data-sort="sh" onclick="sortCol(this)"><span class="tip">Shopify/30d<span class="tip-text">Client's Shopify store sales last 30 days. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="sortable text-right px-3 py-3 font-600" data-sort="ar" onclick="sortCol(this)"><span class="tip">ROAS (ATD)<span class="tip-text">All-time return on ad spend. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
-            <th class="sortable text-center px-3 py-3 font-600" data-sort="ret" onclick="sortCol(this)"><span class="tip">Ret. %<span class="tip-text">Estimated 1-year retention probability. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-center px-3 py-3 font-600" data-sort="ret" onclick="sortCol(this)"><span class="tip">Ret. %<span class="tip-text">How likely this customer is to stay for another year. Based on health rating, churn signals, activity level, and tenure. Higher = more likely to renew. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" onclick="sortCol(this)"><span class="tip">2yr LTV<span class="tip-text">Estimated 2-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Signals<span class="tip-text">Quick-glance tags. Use filter to find specific signals.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropSig')">&#9662;</span><div class="col-dropdown" id="dropSig"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Action / Note<span class="tip-text">Recommended next step or CSM's latest note.</span></span></th>
