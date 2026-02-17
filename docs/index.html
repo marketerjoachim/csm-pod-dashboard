@@ -350,7 +350,7 @@ function tierCls(t){return{1:'tier-1-row',2:'tier-2-row',3:'tier-3-row',4:'tier-
 function podLabel(p){return p.split('+').map(x=>x[0]).join('');}
 function podColor(p){const m={'Marcus+Martin':'blue','Sebastian+Daniel':'purple','Aimy+Espen':'pink','Nicklas+Hamsa':'teal'};return m[p]||'blue';}
 function stripeLink(wsId){if(!wsId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://dashboard.stripe.com/subscriptions/${wsId}" target="_blank" rel="noopener" class="link-icon text-dark-400 hover:text-blue-400" title="Open in Stripe">\u21D7</a>`;}
-function attioLink(recId){if(!recId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://app.attio.com/workspaces/${recId}" target="_blank" rel="noopener" class="link-icon text-dark-400 hover:text-purple-400" title="Open in Attio">\u21D7</a>`;}
+function attioLink(recId){if(!recId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://app.attio.com/metric/workspaces/record/${recId}/overview" target="_blank" rel="noopener" class="link-icon text-dark-400 hover:text-purple-400" title="Open in Attio">\u21D7</a>`;}
 
 function updateKPIs(){
   const el=document.getElementById('kpiCards');
