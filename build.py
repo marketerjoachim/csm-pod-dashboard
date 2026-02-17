@@ -1220,10 +1220,11 @@ function renderDailyCards(){{
   const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
   agEl.innerHTML=`
     <h3 class="text-lg font-700 text-white mb-3">All Teams</h3>
-    <div class="grid grid-cols-3 gap-3 text-center">
+    <div class="grid grid-cols-4 gap-3 text-center">
       <div><p class="text-2xl font-700 text-white">${{totCnt}}</p><p class="text-dark-500 text-xs">Total Customers</p><p class="text-dark-500 text-xs mt-1"><span class="text-amber-400">&#9733;${{totS3}}</span> <span class="text-dark-300">&#9733;${{totS2}}</span> <span class="text-dark-500">&#9733;${{totS1}}</span> <span class="text-dark-600">${{totSna}} n/a</span></p></div>
       <div><p class="text-2xl font-700 text-white">${{fmt(totArr)}}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
       <div><p class="text-2xl font-700 ${{agChurnColor}}">${{totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
+      <div><p class="text-2xl font-700 ${{agChurnColor}}">${{((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
     </div>`;
   const podOrder=pods.sort((a,b)=>{{
     const da=DAILY[a],db=DAILY[b];
@@ -1273,10 +1274,11 @@ function renderDailyCards(){{
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-3 gap-3 text-center mb-4">
+      <div class="grid grid-cols-4 gap-3 text-center mb-4">
         <div><p class="text-lg font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Active Customers</p><p class="text-dark-500 text-xs mt-1"><span class="text-amber-400">&#9733;${{d.s3}}</span> <span class="text-dark-300">&#9733;${{d.s2}}</span> <span class="text-dark-500">&#9733;${{d.s1}}</span> <span class="text-dark-600">${{d.sna}} n/a</span></p></div>
         <div><p class="text-lg font-700 text-white">${{fmt(d.arr)}}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
         <div><p class="text-lg font-700 ${{churnColor}}">${{hasCh?d.churnCnt:'0'}}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
+        <div><p class="text-lg font-700 ${{churnColor}}">${{((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
       </div>
       ${{hasCh?`
       <div class="border-t border-dark-800 pt-3">
