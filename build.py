@@ -10,6 +10,7 @@ import os
 import shutil
 from datetime import datetime, date
 from sub_start_dates import SUBSCRIPTION_START_DATES, SUBSCRIPTION_CHURN_DATA
+from stripe_arr_data import STRIPE_ARR
 
 # ─── Onboarding Queue (extracted from Attio) ─────────────────────────────────
 # Supplemental onboarding records not in main workspace data files
@@ -377,7 +378,9 @@ def compute_tenure_months(start_date_str):
 def compute_ltv(ws):
     """Compute 2yr LTV, priority, tier, signals for a workspace."""
     plan = ws["plan"]
-    arr = PLAN_ARR.get(plan, 9000)
+    record_id = ws["record_id"]
+    stripe_data = STRIPE_ARR.get(record_id)
+    arr = stripe_data["arr"] if stripe_data and stripe_data["arr"] > 0 else PLAN_ARR.get(plan, 9000)
     health = ws["health"]
     atd_roas = ws["atd_roas"] or 0
     shopify = ws["shopify"]
@@ -391,7 +394,6 @@ def compute_ltv(ws):
     est_ltv = ws["est_ltv"]
 
     # Start date: use subscription start_date from Stripe, fall back to onboarding_date
-    record_id = ws["record_id"]
     start_date = SUBSCRIPTION_START_DATES.get(record_id) or ws["onboarding_date"]
     tenure_months = compute_tenure_months(start_date)
 
