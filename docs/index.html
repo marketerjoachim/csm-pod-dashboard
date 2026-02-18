@@ -670,8 +670,8 @@ function renderDailyCards(){
       </div>
       <div class="text-center"><p class="text-xl font-700 text-white">${totCnt}</p><p class="text-dark-400 text-xs font-600">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${totS3}</span> <span class="text-dark-300">&#9733;${totS2}</span> <span class="text-dark-500">&#9733;${totS1}</span> <span class="text-dark-600">${totSna} n/a</span></p></div>
       <div class="text-center"><p class="text-xl font-700 text-white">$6.1M</p><p class="text-dark-400 text-xs font-600">Total ARR</p><p class="text-dark-500 text-xs">${fmt(totArr)} in pods</p></div>
-      <div class="text-center"><p class="text-xl font-700 ${agChurnColor}">${totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}</p><p class="text-dark-400 text-xs font-600">Churned</p></div>
-      <div class="text-center"><p class="text-xl font-700 ${totRenCnt>0?'text-emerald-400':'text-dark-500'}">${totRenCnt>0?totRenCnt+' ('+fmtChurnArr(totRenMrr)+')':'0'}</p><p class="text-dark-400 text-xs font-600">Renewed</p></div>
+      <div class="text-center"><p class="text-xl font-700 ${agChurnColor}">${totChurnCnt>0?totChurnCnt:'0'}</p><p class="text-dark-400 text-xs font-600">Churned</p>${totChurnCnt>0?'<p class="text-red-400/70 text-xs">'+fmtChurnArr(totChurnArr)+' MRR</p>':''}</div>
+      <div class="text-center"><p class="text-xl font-700 ${totRenCnt>0?'text-emerald-400':'text-dark-500'}">${totRenCnt>0?totRenCnt:'0'}</p><p class="text-dark-400 text-xs font-600">Renewed</p>${totRenCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(totRenMrr)+' MRR</p>':''}</div>
       <div class="text-center"><p class="text-xl font-700 ${agChurnColor}">${((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}%</p><p class="text-dark-400 text-xs font-600">Churn Rate</p></div>
       <div class="text-center"><p class="text-xl font-700 text-sky-400">${totTpCalls+totTpNotes}</p><p class="text-dark-400 text-xs font-600">Touchpoints</p><p class="text-dark-500 text-xs">${totTpCalls} calls &middot; ${totTpNotes} notes</p></div>
     </div>`;
@@ -718,7 +718,7 @@ function renderDailyCards(){
         </div>
         <div class="text-center"><p class="text-base font-700 text-white">${d.cnt}</p><p class="text-dark-500 text-xs">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${d.s3}</span> <span class="text-dark-300">&#9733;${d.s2}</span> <span class="text-dark-500">&#9733;${d.s1}</span> <span class="text-dark-600">${d.sna} n/a</span></p></div>
         <div class="text-center"><p class="text-base font-700 text-white">${fmt(d.arr)}</p><p class="text-dark-500 text-xs">ARR</p></div>
-        <div class="text-center"><p class="text-base font-700 ${churnColor}">${hasCh?d.churnCnt:'0'}</p><p class="text-dark-500 text-xs">Churned</p></div>
+        <div class="text-center"><p class="text-base font-700 ${churnColor}">${hasCh?d.churnCnt:'0'}</p><p class="text-dark-500 text-xs">Churned</p>${hasCh?'<p class="text-red-400/70 text-xs">'+fmtChurnArr(d.churnArr)+' MRR</p>':''}</div>
         <div class="text-center"><p class="text-base font-700 ${d.renCnt>0?'text-emerald-400':'text-dark-500'}">${d.renCnt>0?d.renCnt:'0'}</p><p class="text-dark-500 text-xs">Renewed</p>${d.renCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(d.renMrr)+' MRR</p>':''}</div>
         <div class="text-center"><p class="text-base font-700 ${churnColor}">${((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
         <div class="text-center"><p class="text-base font-700 text-sky-400">${d.tpCalls+d.tpNotes}</p><p class="text-dark-500 text-xs">Touchpoints</p><p class="text-dark-500 text-xs">${d.tpCalls} calls &middot; ${d.tpNotes} notes</p></div>
