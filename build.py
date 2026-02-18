@@ -11,6 +11,18 @@ import shutil
 from datetime import datetime, date
 from sub_start_dates import SUBSCRIPTION_START_DATES, SUBSCRIPTION_CHURN_DATA
 
+# ─── Onboarding Queue (extracted from Attio) ─────────────────────────────────
+# Supplemental onboarding records not in main workspace data files
+ONBOARDING_QUEUE_EXTRA = [
+    {"record_id": "d920fb32-f0a7-4948-ba70-7fac9859dfec", "name": "Cavvalure", "pod": "Aimy+Espen", "plan": "Pro", "arr": 0, "onboarding_date": "2026-02-18"},
+    {"record_id": "54cc5e11-c8ad-4aee-8934-468c70422686", "name": "Aleavia", "pod": "Marcus+Martin", "plan": "Performance", "arr": 0, "onboarding_date": "2026-02-18"},
+    {"record_id": "dbd807b7-1077-4e84-92b6-726b2b089c04", "name": "motocross4u.com", "pod": "Aimy+Espen", "plan": "Pro", "arr": 0, "onboarding_date": "2026-02-18"},
+    {"record_id": "a11461e3-41d3-4852-9bde-10b82085dc14", "name": "fjorda.com", "pod": "Aimy+Espen", "plan": "Growth", "arr": 0, "onboarding_date": "2026-02-18"},
+    {"record_id": "e6e89eae-d286-44e5-b1b9-282c7b23bf70", "name": "Company of Scott McKearn", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 0, "onboarding_date": "2026-02-18"},
+    {"record_id": "4c5b0e94-1d3c-404b-984f-bcf5db2fc8f6", "name": "equacare.com.au", "pod": "Marcus+Martin", "plan": "", "arr": 0, "onboarding_date": "2026-02-18"},
+    {"record_id": "bb0172b5-5057-48dc-bd9c-84b6cfb50ed3", "name": "lilcactus.com", "pod": "Marcus+Martin", "plan": "", "arr": 0, "onboarding_date": "2026-02-18"},
+]
+
 # ─── Churn Context (extracted from Attio calls/emails/CSM fields) ────────────
 # record_id -> {summary, source}
 CHURN_CONTEXT = {
@@ -34,9 +46,9 @@ CHURN_CONTEXT = {
 
 # ─── Configuration ──────────────────────────────────────────────────────────────
 
-TODAY = date(2026, 2, 17)
-YESTERDAY = date(2026, 2, 16)
-YESTERDAY_STR = "2026-02-16"
+TODAY = date(2026, 2, 18)
+YESTERDAY = date(2026, 2, 17)
+YESTERDAY_STR = "2026-02-17"
 
 DATA_DIR = os.path.expanduser(
     "~/.claude/projects/-Users-jmow/7cbfc0d6-2d21-47cb-82df-71bfbe25e5da/tool-results/"
@@ -810,9 +822,101 @@ def compute_daily_churn(workspaces):
     return "const DAILY={" + ",".join(js_parts) + "};"
 
 
+# ─── Onboarding Queue ────────────────────────────────────────────────────────────
+
+def compute_onboarding_queue(workspaces):
+    """Find workspaces with future onboarding dates and compute days since first payment."""
+    today_str = TODAY.isoformat()
+    queue = []
+    seen_ids = set()
+    # First pass: workspaces from main data
+    for ws in workspaces:
+        ob_date = ws.get("onboarding_date")
+        if not ob_date or ob_date < today_str:
+            continue
+        seen_ids.add(ws["record_id"])
+        record_id = ws["record_id"]
+        start_date = SUBSCRIPTION_START_DATES.get(record_id) or ""
+        days_gap = ""
+        if start_date and ob_date:
+            try:
+                sd = date.fromisoformat(start_date)
+                od = date.fromisoformat(ob_date)
+                days_gap = (od - sd).days
+            except ValueError:
+                days_gap = ""
+        days_until = ""
+        try:
+            od = date.fromisoformat(ob_date)
+            days_until = (od - TODAY).days
+        except ValueError:
+            pass
+        queue.append({
+            "record_id": record_id,
+            "name": ws["name"],
+            "pod": ws["pod"],
+            "plan": ws.get("plan", ""),
+            "arr": ws.get("arr", 0),
+            "onboarding_date": ob_date,
+            "start_date": start_date,
+            "days_gap": days_gap,
+            "days_until": days_until,
+        })
+    # Add supplemental onboarding records not in main workspace data
+    for extra in ONBOARDING_QUEUE_EXTRA:
+        if extra["record_id"] in seen_ids:
+            continue
+        ob_date = extra["onboarding_date"]
+        if ob_date < today_str:
+            continue
+        record_id = extra["record_id"]
+        start_date = SUBSCRIPTION_START_DATES.get(record_id) or ""
+        days_gap = ""
+        if start_date and ob_date:
+            try:
+                sd = date.fromisoformat(start_date)
+                od = date.fromisoformat(ob_date)
+                days_gap = (od - sd).days
+            except ValueError:
+                days_gap = ""
+        days_until = ""
+        try:
+            od = date.fromisoformat(ob_date)
+            days_until = (od - TODAY).days
+        except ValueError:
+            pass
+        queue.append({
+            "record_id": record_id,
+            "name": extra["name"],
+            "pod": extra["pod"],
+            "plan": extra.get("plan", ""),
+            "arr": extra.get("arr", 0),
+            "onboarding_date": ob_date,
+            "start_date": start_date,
+            "days_gap": days_gap,
+            "days_until": days_until,
+        })
+    # Sort by onboarding date ascending (soonest first)
+    queue.sort(key=lambda x: x["onboarding_date"])
+
+    # Build JS array
+    js_items = []
+    for q in queue:
+        n_esc = q["name"].replace("\\", "\\\\").replace("'", "\\'")
+        js_items.append(
+            f"{{ri:'{q['record_id']}',n:'{n_esc}',pod:'{q['pod']}',"
+            f"pl:'{q['plan']}',arr:{q['arr']},"
+            f"ob:'{q['onboarding_date']}',sd:'{q['start_date']}',"
+            f"gap:{q['days_gap'] if q['days_gap'] != '' else 'null'},"
+            f"until:{q['days_until'] if q['days_until'] != '' else 'null'}}}"
+        )
+    print(f"  Onboarding queue: {len(queue)} upcoming onboardings")
+    return "const ONBOARD=[" + ",".join(js_items) + "];"
+
+
 # ─── HTML Template ──────────────────────────────────────────────────────────────
 
-def generate_html(js_data, pm_js, total_js, daily_js, stats):
+def generate_html(js_data, pm_js, total_js, daily_js, onboard_js, stats):
     """Generate the complete HTML dashboard."""
 
     total_ws = stats["ws"]
@@ -938,6 +1042,7 @@ tailwind.config = {{
   <div class="flex border-b border-dark-800 mb-6 fade-in">
     <button class="top-tab active" data-toptab="daily" onclick="switchTopTab('daily')">Daily Customer Update</button>
     <button class="top-tab" data-toptab="priority" onclick="switchTopTab('priority')">Customer Prioritization</button>
+    <button class="top-tab" data-toptab="onboard" onclick="switchTopTab('onboard')">Onboarding Queue</button>
   </div>
 
   <!-- ============ DAILY CUSTOMER UPDATE TAB ============ -->
@@ -947,7 +1052,7 @@ tailwind.config = {{
         <h1 class="text-3xl sm:text-4xl font-800 text-white">Daily Customer Update</h1>
         <button onclick="document.getElementById('infoDailyPage').classList.toggle('hidden')" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:bg-dark-700 hover:text-dark-200 transition">How This Works</button>
       </div>
-      <p class="text-dark-400 text-sm">Feb 16, 2026 &mdash; Yesterday's churn summary across all pods</p>
+      <p class="text-dark-400 text-sm">Feb 17, 2026 &mdash; Yesterday's churn summary across all pods</p>
     </div>
 
     <!-- Daily Info Page (hidden by default) -->
@@ -1217,6 +1322,15 @@ tailwind.config = {{
 
   </div><!-- /tabPriority -->
 
+  <!-- ============ ONBOARDING QUEUE TAB ============ -->
+  <div id="tabOnboard" class="tab-panel fade-in">
+    <div class="mb-6">
+      <h1 class="text-3xl sm:text-4xl font-800 text-white mb-1">Onboarding Queue</h1>
+      <p class="text-dark-400 text-sm">Upcoming onboardings &mdash; sorted by date, soonest first</p>
+    </div>
+    <div id="onboardList"></div>
+  </div>
+
 </div>
 
 <script>
@@ -1224,6 +1338,7 @@ tailwind.config = {{
 {pm_js}
 {total_js}
 {daily_js}
+{onboard_js}
 
 let curPod='all',curTier='all',curCSM='all';
 let curTopTab='daily';
@@ -1235,8 +1350,10 @@ function switchTopTab(tab){{
   }});
   document.getElementById('tabDaily').classList.toggle('active',tab==='daily');
   document.getElementById('tabPriority').classList.toggle('active',tab==='priority');
+  document.getElementById('tabOnboard').classList.toggle('active',tab==='onboard');
   if(tab==='priority'){{selectPod(curPod);initColResize();}}
   if(tab==='daily')renderDailyCards();
+  if(tab==='onboard')renderOnboard();
 }}
 
 function renderDailyCards(){{
@@ -1329,6 +1446,48 @@ function renderDailyCards(){{
 }}
 
 function fmtChurnArr(v){{if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(1)+'K';return'$'+v;}}
+
+function renderOnboard(){{
+  const el=document.getElementById('onboardList');
+  if(!ONBOARD.length){{
+    el.innerHTML='<div class="glass rounded-xl p-6 text-center"><p class="text-dark-400">No upcoming onboardings scheduled.</p></div>';
+    return;
+  }}
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtD(s){{if(!s)return'<span class="text-dark-600">&mdash;</span>';const d=new Date(s+'T00:00:00');return months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}}
+  function gapColor(g){{if(g===null)return'text-dark-500';if(g<=3)return'text-emerald-400';if(g<=7)return'text-amber-400';return'text-red-400';}}
+  function untilBadge(u){{if(u===null)return'';if(u===0)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Today</span>';if(u===1)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">Tomorrow</span>';if(u<=7)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">'+u+' days</span>';return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-dark-700 text-dark-400">'+u+' days</span>';}}
+  el.innerHTML=`
+    <div class="glass rounded-xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead><tr class="border-b border-dark-800">
+          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">#</th>
+          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Customer</th>
+          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Pod</th>
+          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Plan</th>
+          <th class="px-4 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">ARR</th>
+          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">First Payment</th>
+          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding</th>
+          <th class="px-4 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">Days Between</th>
+          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Links</th>
+        </tr></thead>
+        <tbody>
+          ${{ONBOARD.map((q,i)=>`<tr class="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors">
+            <td class="px-4 py-3 text-dark-500 text-xs">${{i+1}}</td>
+            <td class="px-4 py-3 font-600 text-white">${{q.n}}</td>
+            <td class="px-4 py-3 text-dark-400 text-xs">${{(POD_DISPLAY[q.pod]||q.pod)}}</td>
+            <td class="px-4 py-3 text-dark-400 text-xs">${{q.pl||'&mdash;'}}</td>
+            <td class="px-4 py-3 text-right text-white font-600">${{q.arr?fmt(q.arr):'&mdash;'}}</td>
+            <td class="px-4 py-3 text-dark-400 text-xs">${{fmtD(q.sd)}}</td>
+            <td class="px-4 py-3 text-white text-xs">${{fmtD(q.ob)}}${{untilBadge(q.until)}}</td>
+            <td class="px-4 py-3 text-right"><span class="font-600 ${{gapColor(q.gap)}}">${{q.gap!==null?q.gap+' days':'&mdash;'}}</span></td>
+            <td class="px-4 py-3"><span class="inline-flex gap-2"><a href="https://app.attio.com/metric/workspaces/record/${{q.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a></span></td>
+          </tr>`).join('')}}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-dark-600 text-xs text-center mt-4">${{ONBOARD.length}} customer${{ONBOARD.length!==1?'s':''}} in onboarding queue</p>`;
+}}
 
 function toggleChurn(id,el){{
   el.classList.toggle('open');
@@ -1711,7 +1870,8 @@ def main():
     js_data = generate_js_data(workspaces)
     pm_js, total_js, stats = compute_pod_meta(workspaces)
     daily_js = compute_daily_churn(workspaces)
-    html = generate_html(js_data, pm_js, total_js, daily_js, stats)
+    onboard_js = compute_onboarding_queue(workspaces)
+    html = generate_html(js_data, pm_js, total_js, daily_js, onboard_js, stats)
 
     # Write output
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
