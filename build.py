@@ -1141,7 +1141,7 @@ tailwind.config = {{
 
     <div class="rounded-xl p-5 mb-8 border-2 border-sky-500/20" style="background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(30,41,59,0.9))" id="dailyAggregate"></div>
     <div class="grid grid-cols-1 gap-3" id="dailyCards"></div>
-    <p class="text-dark-600 text-xs mt-4 text-center">&#9733;3 = Gold (high value) &middot; &#9733;2 = Silver &middot; &#9733;1 = Bronze &middot; n/a = unrated</p>
+    <p class="text-dark-400 text-xs mt-5 text-center"><span class="text-dark-500 font-600">Customer Score</span> (estimated LTV potential): <span class="text-amber-400 font-600">&#9733;3 Gold</span> = highest &middot; <span class="text-dark-300 font-600">&#9733;2 Silver</span> = moderate &middot; <span class="text-dark-500 font-600">&#9733;1 Bronze</span> = low &middot; <span class="text-dark-600">n/a</span> = unrated</p>
   </div>
 
   <!-- ============ CUSTOMER PRIORITIZATION TAB ============ -->
@@ -1478,7 +1478,7 @@ function renderDailyCards(){{
         <div class="text-center"><p class="text-base font-700 ${{churnColor}}">${{((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
         <div class="text-center"><p class="text-base font-700 text-sky-400">${{d.tpCalls+d.tpNotes}}</p><p class="text-dark-500 text-xs">Touchpoints</p><p class="text-dark-500 text-xs">${{d.tpCalls}} calls &middot; ${{d.tpNotes}} notes</p></div>
       </div>
-      ${{hasCh?'<div class="mt-3 border-t border-dark-800 pt-2">'+churnRows+'</div>':''}}
+      ${{hasCh?'<div class="mt-3 border-t border-dark-800 pt-2"><p class="text-xs font-600 text-red-400/70 uppercase tracking-wider mb-1">Churned Yesterday</p>'+churnRows+'</div>':''}}
     </div>`;
   }}).join('');
 }}
