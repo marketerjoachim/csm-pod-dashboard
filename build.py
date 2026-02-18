@@ -1139,8 +1139,9 @@ tailwind.config = {{
       </div>
     </div>
 
-    <div class="glass rounded-xl p-5 mb-6" id="dailyAggregate"></div>
+    <div class="rounded-xl p-5 mb-8 border-2 border-sky-500/20" style="background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(30,41,59,0.9))" id="dailyAggregate"></div>
     <div class="grid grid-cols-1 gap-3" id="dailyCards"></div>
+    <p class="text-dark-600 text-xs mt-4 text-center">&#9733;3 = Gold (high value) &middot; &#9733;2 = Silver &middot; &#9733;1 = Bronze &middot; n/a = unrated</p>
   </div>
 
   <!-- ============ CUSTOMER PRIORITIZATION TAB ============ -->
@@ -1417,14 +1418,17 @@ function renderDailyCards(){{
   const agEl=document.getElementById('dailyAggregate');
   const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
   agEl.innerHTML=`
-    <h3 class="text-base font-700 text-white mb-2">All Teams</h3>
-    <div class="grid grid-cols-6 gap-2 text-center">
-      <div><p class="text-lg font-700 text-white">${{totCnt}}</p><p class="text-dark-500 text-xs">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{totS3}}</span> <span class="text-dark-300">&#9733;${{totS2}}</span> <span class="text-dark-500">&#9733;${{totS1}}</span> <span class="text-dark-600">${{totSna}} n/a</span></p></div>
-      <div><p class="text-lg font-700 text-white">${{fmt(totArr)}}</p><p class="text-dark-500 text-xs">ARR (pod-managed)</p><p class="text-dark-600 text-xs">$6.1M total incl. unassigned</p></div>
-      <div><p class="text-lg font-700 ${{agChurnColor}}">${{totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}}</p><p class="text-dark-500 text-xs">Churned</p></div>
-      <div><p class="text-lg font-700 ${{totRenCnt>0?'text-emerald-400':'text-dark-500'}}">${{totRenCnt>0?totRenCnt+' ('+fmtChurnArr(totRenMrr)+')':'0'}}</p><p class="text-dark-500 text-xs">Renewed</p></div>
-      <div><p class="text-lg font-700 ${{agChurnColor}}">${{((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
-      <div><p class="text-lg font-700 text-sky-400">${{totTpCalls+totTpNotes}}</p><p class="text-dark-500 text-xs">Touchpoints</p><p class="text-dark-500 text-xs">${{totTpCalls}} calls &middot; ${{totTpNotes}} notes</p></div>
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-800 text-white tracking-wide uppercase">All Teams</h3>
+      <span class="text-dark-500 text-xs">Feb 17, 2026</span>
+    </div>
+    <div class="grid grid-cols-6 gap-3 text-center">
+      <div><p class="text-xl font-700 text-white">${{totCnt}}</p><p class="text-dark-400 text-xs font-600">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{totS3}}</span> <span class="text-dark-300">&#9733;${{totS2}}</span> <span class="text-dark-500">&#9733;${{totS1}}</span> <span class="text-dark-600">${{totSna}} n/a</span></p></div>
+      <div><p class="text-xl font-700 text-white">$6.1M</p><p class="text-dark-400 text-xs font-600">Total ARR</p><p class="text-dark-500 text-xs">${{fmt(totArr)}} in pods</p></div>
+      <div><p class="text-xl font-700 ${{agChurnColor}}">${{totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}}</p><p class="text-dark-400 text-xs font-600">Churned</p></div>
+      <div><p class="text-xl font-700 ${{totRenCnt>0?'text-emerald-400':'text-dark-500'}}">${{totRenCnt>0?totRenCnt+' ('+fmtChurnArr(totRenMrr)+')':'0'}}</p><p class="text-dark-400 text-xs font-600">Renewed</p></div>
+      <div><p class="text-xl font-700 ${{agChurnColor}}">${{((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}}%</p><p class="text-dark-400 text-xs font-600">Churn Rate</p></div>
+      <div><p class="text-xl font-700 text-sky-400">${{totTpCalls+totTpNotes}}</p><p class="text-dark-400 text-xs font-600">Touchpoints</p><p class="text-dark-500 text-xs">${{totTpCalls}} calls &middot; ${{totTpNotes}} notes</p></div>
     </div>`;
   const podOrder=pods.sort((a,b)=>{{
     const da=DAILY[a],db=DAILY[b];
@@ -1438,66 +1442,43 @@ function renderDailyCards(){{
     const rank=idx+1;
     const hasCh=d.churnCnt>0;
     const churnColor=hasCh?'text-red-400':'text-emerald-400';
-    const churnLabel=hasCh?d.churnCnt+' churned ('+fmtChurnArr(d.churnArr)+')':'No churns yesterday';
-    const accordionId='churn_'+pod.replace('+','_');
     let churnRows='';
     if(hasCh){{
       churnRows=d.churns.map(c=>`
         <div class="py-2 border-b border-dark-800/50 last:border-0">
           <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
             <div class="flex-1 min-w-0">
-              <p class="text-white text-sm font-600 truncate">${{c.n}}</p>
-              <p class="text-dark-500 text-xs mt-0.5">${{c.ss}}</p>
-            </div>
-            <div class="flex items-center gap-3 shrink-0">
-              <span class="text-xs text-dark-400">${{c.pl}}</span>
-              <span class="text-sm font-600 text-red-400">&minus;${{c.arr.toLocaleString()}}</span>
-              <span class="inline-flex gap-2">
-                ${{c.sid?'<a href="https://dashboard.stripe.com/subscriptions/'+c.sid+'" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>':''}}
-                <a href="https://app.attio.com/metric/workspaces/record/${{c.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>
-              </span>
+              <p class="text-white text-sm font-600">${{c.n}} <span class="text-red-400 font-600">&minus;${{c.arr.toLocaleString()}}</span> <span class="text-dark-500 font-400">${{c.pl}}</span></p>
+              <div class="flex gap-2 mt-0.5">
+                ${{c.sid?'<a href="https://dashboard.stripe.com/subscriptions/'+c.sid+'" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30">Stripe</a>':''}}
+                <a href="https://app.attio.com/metric/workspaces/record/${{c.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30">Attio</a>
+              </div>
             </div>
           </div>
-          ${{c.cs?'<p class="text-xs mt-2 px-2 py-1.5 rounded bg-dark-800/50 border border-dark-700/30"><span class="text-dark-400">'+({{'call':'&#128222;','email':'&#9993;','csm_field':'&#128221;'}}[c.csrc]||'&#8226;')+' </span><span class="text-dark-200">'+c.cs+'</span> <span class="text-dark-600 ml-1">via '+c.csrc.replace('_',' ')+'</span></p>':''}}
-          ${{c.lr?'<p class="text-xs mt-1.5"><span class="text-dark-500">Churn reason:</span> <span class="text-amber-400 font-500">'+c.lr+'</span></p>':''}}
-          ${{c.cc?'<p class="text-xs mt-1 text-dark-400"><span class="text-dark-500">Comment:</span> '+c.cc+'</p>':''}}
+          ${{c.cs?'<p class="text-xs mt-1.5 px-2 py-1 rounded bg-dark-800/50 border border-dark-700/30"><span class="text-dark-400">'+({{'call':'&#128222;','email':'&#9993;','csm_field':'&#128221;'}}[c.csrc]||'&#8226;')+' </span><span class="text-dark-200">'+c.cs+'</span></p>':''}}
+          ${{c.lr?'<p class="text-xs mt-1"><span class="text-dark-500">Reason:</span> <span class="text-amber-400 font-500">'+c.lr+'</span></p>':''}}
+          ${{c.cc?'<p class="text-xs mt-0.5 text-dark-400">'+c.cc+'</p>':''}}
         </div>`).join('');
     }}
     return`
     <div class="glass rounded-xl p-4">
-      <div class="flex items-center justify-between mb-2">
+      <div class="grid grid-cols-7 gap-2 items-center">
         <div class="flex items-center gap-2">
           <span class="text-dark-500 text-sm font-600">#${{rank}}</span>
           ${{medal?'<span class="text-xl">'+medal+'</span>':''}}
           <div>
-            <h3 class="text-base font-700 text-white">${{POD_DISPLAY[pod]||pod}}</h3>
+            <p class="text-base font-700 text-white">${{POD_DISPLAY[pod]||pod}}</p>
             <p class="text-dark-500 text-xs">${{POD_MEMBERS[pod]||pod.replace('+',' + ')}}</p>
           </div>
         </div>
+        <div class="text-center"><p class="text-base font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{d.s3}}</span> <span class="text-dark-300">&#9733;${{d.s2}}</span> <span class="text-dark-500">&#9733;${{d.s1}}</span> <span class="text-dark-600">${{d.sna}} n/a</span></p></div>
+        <div class="text-center"><p class="text-base font-700 text-white">${{fmt(d.arr)}}</p><p class="text-dark-500 text-xs">ARR</p></div>
+        <div class="text-center"><p class="text-base font-700 ${{churnColor}}">${{hasCh?d.churnCnt:'0'}}</p><p class="text-dark-500 text-xs">Churned</p></div>
+        <div class="text-center"><p class="text-base font-700 ${{d.renCnt>0?'text-emerald-400':'text-dark-500'}}">${{d.renCnt>0?d.renCnt:'0'}}</p><p class="text-dark-500 text-xs">Renewed</p>${{d.renCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(d.renMrr)+' MRR</p>':''}}</div>
+        <div class="text-center"><p class="text-base font-700 ${{churnColor}}">${{((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
+        <div class="text-center"><p class="text-base font-700 text-sky-400">${{d.tpCalls+d.tpNotes}}</p><p class="text-dark-500 text-xs">Touchpoints</p><p class="text-dark-500 text-xs">${{d.tpCalls}} calls &middot; ${{d.tpNotes}} notes</p></div>
       </div>
-      <div class="grid grid-cols-6 gap-2 text-center mb-2">
-        <div><p class="text-base font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{d.s3}}</span> <span class="text-dark-300">&#9733;${{d.s2}}</span> <span class="text-dark-500">&#9733;${{d.s1}}</span> <span class="text-dark-600">${{d.sna}} n/a</span></p></div>
-        <div><p class="text-base font-700 text-white">${{fmt(d.arr)}}</p><p class="text-dark-500 text-xs">ARR</p></div>
-        <div><p class="text-base font-700 ${{churnColor}}">${{hasCh?d.churnCnt:'0'}}</p><p class="text-dark-500 text-xs">Churned</p></div>
-        <div><p class="text-base font-700 ${{d.renCnt>0?'text-emerald-400':'text-dark-500'}}">${{d.renCnt>0?d.renCnt:'0'}}</p><p class="text-dark-500 text-xs">Renewed</p>${{d.renCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(d.renMrr)+' MRR</p>':''}}</div>
-        <div><p class="text-base font-700 ${{churnColor}}">${{((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
-        <div><p class="text-base font-700 text-sky-400">${{d.tpCalls+d.tpNotes}}</p><p class="text-dark-500 text-xs">Touchpoints</p><p class="text-dark-500 text-xs">${{d.tpCalls}} calls &middot; ${{d.tpNotes}} notes</p></div>
-      </div>
-      ${{hasCh?`
-      <div class="border-t border-dark-800 pt-2">
-        <div class="churn-accordion open" onclick="toggleChurn('${{accordionId}}',this)">
-          <span class="chevron text-dark-400 text-xs mr-2">&#9654;</span>
-          <span class="text-sm font-600 text-red-400">${{churnLabel}}</span>
-        </div>
-        <div class="churn-detail open mt-2" id="${{accordionId}}">
-          ${{churnRows}}
-        </div>
-      </div>
-      `:`
-      <div class="border-t border-dark-800 pt-2">
-        <p class="text-emerald-400 text-sm font-500">&#10003; No churns yesterday</p>
-      </div>
-      `}}
+      ${{hasCh?'<div class="mt-3 border-t border-dark-800 pt-2">'+churnRows+'</div>':''}}
     </div>`;
   }}).join('');
 }}
