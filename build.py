@@ -1420,7 +1420,7 @@ function renderDailyCards(){{
   agEl.innerHTML=`
     <div class="grid grid-cols-7 gap-2 items-center">
       <div>
-        <p class="text-lg font-800 text-white tracking-wide uppercase">All Teams</p>
+        <p class="text-lg font-800 text-white tracking-wide uppercase">Total</p>
         <p class="text-dark-500 text-xs">Feb 17, 2026</p>
       </div>
       <div class="text-center"><p class="text-xl font-700 text-white">${{totCnt}}</p><p class="text-dark-400 text-xs font-600">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{totS3}}</span> <span class="text-dark-300">&#9733;${{totS2}}</span> <span class="text-dark-500">&#9733;${{totS1}}</span> <span class="text-dark-600">${{totSna}} n/a</span></p></div>
