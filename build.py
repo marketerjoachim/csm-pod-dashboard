@@ -1310,20 +1310,20 @@ tailwind.config = {{
       <table class="text-sm" id="mainTable">
         <thead>
           <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800" id="headerRow">
-            <th class="sortable text-left px-3 py-3 font-600" data-sort="pi" data-dir="desc" onclick="sortCol(this)"><span class="tip">#<span class="tip-text">Priority rank. #1 = highest-value workspace. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
-            <th class="sortable text-left px-3 py-3 font-600" data-sort="n" onclick="sortCol(this)"><span class="tip">Workspace<span class="tip-text">The client's workspace name. Click to sort A-Z.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-left px-3 py-3 font-600" data-sort="pi" data-dir="desc" data-sortable="1"><span class="tip">#<span class="tip-text">Priority rank. #1 = highest-value workspace. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
+            <th class="sortable text-left px-3 py-3 font-600" data-sort="n" data-sortable="1"><span class="tip">Workspace<span class="tip-text">The client's workspace name. Click to sort A-Z.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="text-center px-3 py-3 font-600 text-dark-500">Links</th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Pod<span class="tip-text">Which CSM pod manages this client.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropPod')">&#9662;</span><div class="col-dropdown" id="dropPod"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">CSM<span class="tip-text">The Customer Success Manager responsible.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCSM')">&#9662;</span><div class="col-dropdown" id="dropCSM"></div></span></th>
-            <th class="sortable text-left px-3 py-3 font-600" data-sort="sd" onclick="sortCol(this)"><span class="tip">Start<span class="tip-text">Subscription start date from Stripe. Longer tenure = more LTV confidence.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-left px-3 py-3 font-600" data-sort="sd" data-sortable="1"><span class="tip">Start<span class="tip-text">Subscription start date from Stripe. Longer tenure = more LTV confidence.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Plan<span class="tip-text">Subscription plan: Starter to Enterprise.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropPlan')">&#9662;</span><div class="col-dropdown" id="dropPlan"></div></span></th>
-            <th class="sortable text-center px-3 py-3 font-600" data-sort="h" onclick="sortCol(this)"><span class="tip">Health<span class="tip-text">CSM's 1-5 star rating. Click to sort.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropHealth');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropHealth"></div></span></th>
-            <th class="sortable text-center px-3 py-3 font-600" data-sort="cs" onclick="sortCol(this)"><span class="tip">CS<span class="tip-text">Overall score based on CSM judgement of long-term value. 3 = high growth/strategic potential. 2 = moderate. 1 = low.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCS');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropCS"></div></span></th>
-            <th class="sortable text-right px-3 py-3 font-600" data-sort="a" onclick="sortCol(this)"><span class="tip">Est. ARR<span class="tip-text">Estimated annual revenue from plan averages. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
-            <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" onclick="sortCol(this)"><span class="tip">2yr LTV<span class="tip-text">Estimated 2-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
-            <th class="sortable text-right px-3 py-3 font-600" data-sort="sh" onclick="sortCol(this)"><span class="tip">Shopify/30d<span class="tip-text">Client's Shopify store sales last 30 days. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
-            <th class="sortable text-right px-3 py-3 font-600" data-sort="ar" onclick="sortCol(this)"><span class="tip">ROAS (ATD)<span class="tip-text">All-time return on ad spend. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
-            <th class="sortable text-center px-3 py-3 font-600" data-sort="ret" onclick="sortCol(this)"><span class="tip">Ret. %<span class="tip-text">How likely this customer is to stay for another year. Based on health rating, churn signals, activity level, and tenure. Higher = more likely to renew. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-center px-3 py-3 font-600" data-sort="h" data-sortable="1"><span class="tip">Health<span class="tip-text">CSM's 1-5 star rating. Click to sort.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropHealth');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropHealth"></div></span></th>
+            <th class="sortable text-center px-3 py-3 font-600" data-sort="cs" data-sortable="1"><span class="tip">CS<span class="tip-text">Overall score based on CSM judgement of long-term value. 3 = high growth/strategic potential. 2 = moderate. 1 = low.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCS');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropCS"></div></span></th>
+            <th class="sortable text-right px-3 py-3 font-600" data-sort="a" data-sortable="1"><span class="tip">Est. ARR<span class="tip-text">Estimated annual revenue from plan averages. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" data-sortable="1"><span class="tip">2yr LTV<span class="tip-text">Estimated 2-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
+            <th class="sortable text-right px-3 py-3 font-600" data-sort="sh" data-sortable="1"><span class="tip">Shopify/30d<span class="tip-text">Client's Shopify store sales last 30 days. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-right px-3 py-3 font-600" data-sort="ar" data-sortable="1"><span class="tip">ROAS (ATD)<span class="tip-text">All-time return on ad spend. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-center px-3 py-3 font-600" data-sort="ret" data-sortable="1"><span class="tip">Ret. %<span class="tip-text">How likely this customer is to stay for another year. Based on health rating, churn signals, activity level, and tenure. Higher = more likely to renew. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Signals<span class="tip-text">Quick-glance tags. Use filter to find specific signals.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropSig')">&#9662;</span><div class="col-dropdown" id="dropSig"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Action / Note<span class="tip-text">Recommended next step or CSM's latest note.</span></span></th>
           </tr>
@@ -1595,12 +1595,19 @@ function sortCol(th){{
   if(!key)return;
   if(sortKey===key){{sortDir=sortDir==='asc'?'desc':'asc';}}
   else{{sortKey=key;sortDir=(key==='n'||key==='sd'?'asc':'desc');}}
-  // Update header classes
   document.querySelectorAll('#headerRow th.sortable').forEach(t=>{{t.classList.remove('asc','desc');}});
   th.classList.add(sortDir);
   th.querySelector('.sort-arrow').innerHTML=sortDir==='asc'?'&#9650;':'&#9660;';
   renderTable();
 }}
+// Attach sort handlers to sort-arrow spans only
+document.querySelectorAll('#headerRow th[data-sortable] .sort-arrow').forEach(function(arrow){{
+  arrow.style.cursor='pointer';
+  arrow.addEventListener('click',function(e){{
+    e.stopPropagation();
+    sortCol(arrow.closest('th'));
+  }});
+}});
 
 function getFilteredData(){{
   const search=document.getElementById('searchInput').value.toLowerCase();
@@ -1737,13 +1744,24 @@ if(scrollEl&&hintEl){{scrollEl.addEventListener('scroll',function(){{if(scrollEl
 
 // Column resize — must be called after table is visible (after unlock)
 let resizeInited=false;
+let colWidths=[];
+function lockTableLayout(){{
+  const table=document.getElementById('mainTable');
+  if(!table||table.dataset.locked)return;
+  const ths=table.querySelectorAll('thead th');
+  colWidths=[];
+  ths.forEach(function(th){{colWidths.push(th.offsetWidth);}});
+  table.style.tableLayout='fixed';
+  table.style.width=colWidths.reduce((a,b)=>a+b,0)+'px';
+  ths.forEach(function(th,i){{th.style.width=colWidths[i]+'px';}});
+  table.dataset.locked='1';
+}}
 function initColResize(){{
   if(resizeInited)return;
   const table=document.getElementById('mainTable');
   if(!table)return;
   const ths=table.querySelectorAll('thead th');
   requestAnimationFrame(function(){{
-    // Add resize handles on th elements — drag changes min-width only
     ths.forEach(function(th,i){{
       if(i===ths.length-1)return;
       const handle=document.createElement('div');
@@ -1752,21 +1770,17 @@ function initColResize(){{
       handle.addEventListener('mousedown',function(e){{
         e.preventDefault();
         e.stopPropagation();
+        lockTableLayout();
         const startX=e.pageX;
         const startW=th.offsetWidth;
+        const tableStartW=table.offsetWidth;
         handle.classList.add('active');
         document.body.style.cursor='col-resize';
         document.body.style.userSelect='none';
         function onMove(e2){{
           const nw=Math.max(30,startW+(e2.pageX-startX));
-          const px=nw+'px';
-          th.style.minWidth=px;
-          th.style.maxWidth=px;
-          th.style.width=px;
-          table.querySelectorAll('tbody tr').forEach(function(tr){{
-            const td=tr.children[i];
-            if(td){{td.style.minWidth=px;td.style.maxWidth=px;td.style.width=px;td.style.overflow='hidden';td.style.textOverflow='ellipsis';}}
-          }});
+          th.style.width=nw+'px';
+          table.style.width=(tableStartW-startW+nw)+'px';
         }}
         function onUp(){{
           handle.classList.remove('active');
