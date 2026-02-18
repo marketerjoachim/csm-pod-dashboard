@@ -366,10 +366,10 @@ tailwind.config = {
             <th class="sortable text-center px-3 py-3 font-600" data-sort="h" onclick="sortCol(this)"><span class="tip">Health<span class="tip-text">CSM's 1-5 star rating. Click to sort.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropHealth');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropHealth"></div></span></th>
             <th class="sortable text-center px-3 py-3 font-600" data-sort="cs" onclick="sortCol(this)"><span class="tip">CS<span class="tip-text">Overall score based on CSM judgement of long-term value. 3 = high growth/strategic potential. 2 = moderate. 1 = low.</span></span><span class="sort-arrow">&#9650;</span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCS');event.stopPropagation()">&#9662;</span><div class="col-dropdown" id="dropCS"></div></span></th>
             <th class="sortable text-right px-3 py-3 font-600" data-sort="a" onclick="sortCol(this)"><span class="tip">Est. ARR<span class="tip-text">Estimated annual revenue from plan averages. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
+            <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" onclick="sortCol(this)"><span class="tip">2yr LTV<span class="tip-text">Estimated 2-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
             <th class="sortable text-right px-3 py-3 font-600" data-sort="sh" onclick="sortCol(this)"><span class="tip">Shopify/30d<span class="tip-text">Client's Shopify store sales last 30 days. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="sortable text-right px-3 py-3 font-600" data-sort="ar" onclick="sortCol(this)"><span class="tip">ROAS (ATD)<span class="tip-text">All-time return on ad spend. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
             <th class="sortable text-center px-3 py-3 font-600" data-sort="ret" onclick="sortCol(this)"><span class="tip">Ret. %<span class="tip-text">How likely this customer is to stay for another year. Based on health rating, churn signals, activity level, and tenure. Higher = more likely to renew. Click to sort.</span></span><span class="sort-arrow">&#9650;</span></th>
-            <th class="sortable text-right px-3 py-3 font-600 desc" data-sort="l" onclick="sortCol(this)"><span class="tip">2yr LTV<span class="tip-text">Estimated 2-year lifetime value. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Signals<span class="tip-text">Quick-glance tags. Use filter to find specific signals.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropSig')">&#9662;</span><div class="col-dropdown" id="dropSig"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Action / Note<span class="tip-text">Recommended next step or CSM's latest note.</span></span></th>
           </tr>
@@ -924,10 +924,10 @@ function renderTable(){
       <td class="px-3 py-2.5 text-center text-xs">${stars(w.h)}</td>
       <td class="px-3 py-2.5 text-center text-xs">${csBadge(w.cs)}</td>
       <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${fmt(w.a)}</td>
+      <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${fmt(w.l)}</td>
       <td class="px-3 py-2.5 text-right text-sm">${fmtSh(w.sh)}</td>
       <td class="px-3 py-2.5 text-right text-xs ${w.ar>=5?'text-emerald-400 font-600':w.ar>=2?'text-blue-400':w.ar>0?'text-dark-400':'text-dark-600'}">${w.ar?w.ar.toFixed(1)+'x':'&mdash;'}</td>
       <td class="px-3 py-2.5 text-center">${retBadge(w.ret)}</td>
-      <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${fmt(w.l)}</td>
       <td class="px-3 py-2.5"><div class="flex gap-1 flex-wrap">${sigTags(w.s)}</div></td>
       <td class="px-3 py-2.5 text-xs text-dark-400 min-w-[200px]">${w.act}</td>
     </tr>`).join('');
@@ -1040,8 +1040,14 @@ function initColResize(){
         document.body.style.userSelect='none';
         function onMove(e2){
           const nw=Math.max(30,startW+(e2.pageX-startX));
-          th.style.minWidth=nw+'px';
-          th.style.maxWidth=nw+'px';
+          const px=nw+'px';
+          th.style.minWidth=px;
+          th.style.maxWidth=px;
+          th.style.width=px;
+          table.querySelectorAll('tbody tr').forEach(function(tr){
+            const td=tr.children[i];
+            if(td){td.style.minWidth=px;td.style.maxWidth=px;td.style.width=px;td.style.overflow='hidden';td.style.textOverflow='ellipsis';}
+          });
         }
         function onUp(){
           handle.classList.remove('active');
