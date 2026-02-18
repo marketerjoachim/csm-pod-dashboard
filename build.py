@@ -14,12 +14,12 @@ from sub_start_dates import SUBSCRIPTION_START_DATES, SUBSCRIPTION_CHURN_DATA
 # ─── Onboarding Queue (extracted from Attio) ─────────────────────────────────
 # Supplemental onboarding records not in main workspace data files
 ONBOARDING_QUEUE_EXTRA = [
-    {"record_id": "54cc5e11-c8ad-4aee-8934-468c70422686", "name": "Aleavia", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "mrr": 3999, "onboarding_date": "2026-02-18", "start_date": "2026-02-09", "last_payment": "2026-02-09", "renewal_date": "2026-03-09", "billing_cycle": "Monthly"},
-    {"record_id": "dbd807b7-1077-4e84-92b6-726b2b089c04", "name": "motocross4u.com", "pod": "Aimy+Espen", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-01-27", "last_payment": "2026-01-27", "renewal_date": "2026-02-27", "billing_cycle": "Monthly"},
-    {"record_id": "a11461e3-41d3-4852-9bde-10b82085dc14", "name": "fjorda.com", "pod": "Aimy+Espen", "plan": "Growth", "arr": 12000, "mrr": 1000, "onboarding_date": "2026-02-18", "start_date": "2026-02-16", "last_payment": "2026-02-16", "renewal_date": "2026-03-16", "billing_cycle": "Monthly"},
-    {"record_id": "e6e89eae-d286-44e5-b1b9-282c7b23bf70", "name": "Company of Scott McKearn", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "mrr": 1000, "onboarding_date": "2026-02-18", "start_date": "2026-02-04", "last_payment": "2026-02-04", "renewal_date": "2026-03-04", "billing_cycle": "Monthly"},
-    {"record_id": "4c5b0e94-1d3c-404b-984f-bcf5db2fc8f6", "name": "equacare.com.au", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-02-12", "last_payment": "2026-02-12", "renewal_date": "2026-03-12", "billing_cycle": "Monthly"},
-    {"record_id": "bb0172b5-5057-48dc-bd9c-84b6cfb50ed3", "name": "lilcactus.com", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-02-13", "last_payment": "2026-02-13", "renewal_date": "2026-03-13", "billing_cycle": "Monthly"},
+    {"record_id": "54cc5e11-c8ad-4aee-8934-468c70422686", "name": "Aleavia", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "mrr": 3999, "onboarding_date": "2026-02-18", "start_date": "2026-02-09", "last_payment": "2026-02-09", "renewal_date": "2026-03-09", "billing_cycle": "Monthly", "sales_rep": "William Habert"},
+    {"record_id": "dbd807b7-1077-4e84-92b6-726b2b089c04", "name": "motocross4u.com", "pod": "Aimy+Espen", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-01-27", "last_payment": "2026-01-27", "renewal_date": "2026-02-27", "billing_cycle": "Monthly", "sales_rep": "Kenneth Eriksen"},
+    {"record_id": "a11461e3-41d3-4852-9bde-10b82085dc14", "name": "fjorda.com", "pod": "Aimy+Espen", "plan": "Growth", "arr": 12000, "mrr": 1000, "onboarding_date": "2026-02-18", "start_date": "2026-02-16", "last_payment": "2026-02-16", "renewal_date": "2026-03-16", "billing_cycle": "Monthly", "sales_rep": "Victor Svalastog"},
+    {"record_id": "e6e89eae-d286-44e5-b1b9-282c7b23bf70", "name": "Company of Scott McKearn", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "mrr": 1000, "onboarding_date": "2026-02-18", "start_date": "2026-02-04", "last_payment": "2026-02-04", "renewal_date": "2026-03-04", "billing_cycle": "Monthly", "sales_rep": "Andreas Aasen"},
+    {"record_id": "4c5b0e94-1d3c-404b-984f-bcf5db2fc8f6", "name": "equacare.com.au", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-02-12", "last_payment": "2026-02-12", "renewal_date": "2026-03-12", "billing_cycle": "Monthly", "sales_rep": "Omid Aboui"},
+    {"record_id": "bb0172b5-5057-48dc-bd9c-84b6cfb50ed3", "name": "lilcactus.com", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-02-13", "last_payment": "2026-02-13", "renewal_date": "2026-03-13", "billing_cycle": "Monthly", "sales_rep": "Andreas Aasen"},
 ]
 
 # ─── Churn Context (extracted from Attio calls/emails/CSM fields) ────────────
@@ -868,6 +868,7 @@ def compute_onboarding_queue(workspaces):
             "last_payment": "",
             "renewal_date": "",
             "billing_cycle": "",
+            "sales_rep": "",
         })
     # Add supplemental onboarding records not in main workspace data
     for extra in ONBOARDING_QUEUE_EXTRA:
@@ -906,6 +907,7 @@ def compute_onboarding_queue(workspaces):
             "last_payment": extra.get("last_payment", ""),
             "renewal_date": extra.get("renewal_date", ""),
             "billing_cycle": extra.get("billing_cycle", ""),
+            "sales_rep": extra.get("sales_rep", ""),
         })
     # Sort by onboarding date ascending (soonest first)
     queue.sort(key=lambda x: x["onboarding_date"])
@@ -920,6 +922,7 @@ def compute_onboarding_queue(workspaces):
             f"ob:'{q['onboarding_date']}',sd:'{q['start_date']}',"
             f"lp:'{q.get('last_payment', '')}',rd:'{q.get('renewal_date', '')}',"
             f"bc:'{q.get('billing_cycle', '')}',"
+            f"sr:'{q.get('sales_rep', '')}',"
             f"gap:{q['days_gap'] if q['days_gap'] != '' else 'null'},"
             f"until:{q['days_until'] if q['days_until'] != '' else 'null'}}}"
         )
@@ -1478,6 +1481,7 @@ function renderOnboard(){{
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Customer</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Pod</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Plan</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Sales Rep</th>
           <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">MRR</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">First Payment</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding</th>
@@ -1492,6 +1496,7 @@ function renderOnboard(){{
             <td class="px-3 py-3 font-600 text-white">${{q.n}}</td>
             <td class="px-3 py-3 text-dark-400 text-xs">${{(POD_DISPLAY[q.pod]||q.pod)}}</td>
             <td class="px-3 py-3 text-dark-400 text-xs">${{q.pl||'&mdash;'}}</td>
+            <td class="px-3 py-3 text-dark-400 text-xs">${{q.sr||'&mdash;'}}</td>
             <td class="px-3 py-3 text-right text-white font-600">${{q.mrr?'$'+q.mrr.toLocaleString():'&mdash;'}}</td>
             <td class="px-3 py-3 text-dark-400 text-xs">${{fmtD(q.sd)}}</td>
             <td class="px-3 py-3 text-white text-xs">${{fmtD(q.ob)}}${{untilBadge(q.until)}}</td>
