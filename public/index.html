@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CSM Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
 tailwind.config = {
   theme: {
@@ -102,7 +103,7 @@ tailwind.config = {
 
   <!-- Top-level Tab Bar -->
   <div class="flex border-b border-dark-800 mb-6 fade-in">
-    <button class="top-tab active" data-toptab="daily" onclick="switchTopTab('daily')">Daily Customer Update</button>
+    <button class="top-tab active" data-toptab="daily" onclick="switchTopTab('daily')">Iron Herd Leaderboard</button>
     <button class="top-tab" data-toptab="priority" onclick="switchTopTab('priority')">Customer Prioritization</button>
     <button class="top-tab" data-toptab="onboard" onclick="switchTopTab('onboard')">Onboarding Queue</button>
   </div>
@@ -111,8 +112,9 @@ tailwind.config = {
   <div id="tabDaily" class="tab-panel active fade-in">
     <div class="mb-6">
       <div class="flex items-center gap-4 mb-1">
-        <h1 class="text-3xl sm:text-4xl font-800 text-white">Daily Customer Update</h1>
+        <h1 class="text-3xl sm:text-4xl font-800 text-white">Iron Herd Leaderboard</h1>
         <button onclick="document.getElementById('infoDailyPage').classList.toggle('hidden')" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:bg-dark-700 hover:text-dark-200 transition">How This Works</button>
+        <button id="btnCopyImg" onclick="copyDailyAsImage()" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-sky-600/20 text-sky-400 border border-sky-500/30 hover:bg-sky-600/30 hover:text-sky-300 transition">&#128247; Copy as Image</button>
       </div>
       <p class="text-dark-400 text-sm">Feb 17, 2026 &mdash; Yesterday's churn summary across all pods</p>
     </div>
@@ -742,6 +744,41 @@ function renderDailyCards(){
 }
 
 function fmtChurnArr(v){if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(1)+'K';return'$'+v;}
+
+function copyDailyAsImage(){
+  const btn=document.getElementById('btnCopyImg');
+  const origText=btn.innerHTML;
+  btn.innerHTML='Rendering...';btn.disabled=true;
+  // Build a self-contained snapshot div
+  const wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;left:-9999px;top:0;width:900px;padding:32px;background:#0f172a;color:#e2e8f0;font-family:Inter,system-ui,sans-serif;';
+  // Title + date
+  const hdr=document.createElement('div');
+  hdr.style.marginBottom='16px';
+  hdr.innerHTML='<div style="font-size:24px;font-weight:800;color:#fff;">Iron Herd Leaderboard</div><div style="font-size:13px;color:#64748b;margin-top:4px;">Feb 17, 2026</div>';
+  wrap.appendChild(hdr);
+  // Clone aggregate + cards
+  const ag=document.getElementById('dailyAggregate').cloneNode(true);
+  ag.style.marginBottom='12px';
+  wrap.appendChild(ag);
+  const cards=document.getElementById('dailyCards').cloneNode(true);
+  wrap.appendChild(cards);
+  document.body.appendChild(wrap);
+  html2canvas(wrap,{backgroundColor:'#0f172a',scale:2,useCORS:true}).then(function(canvas){
+    canvas.toBlob(function(blob){
+      if(navigator.clipboard&&navigator.clipboard.write){
+        navigator.clipboard.write([new ClipboardItem({'image/png':blob})])
+          .then(function(){btn.innerHTML='&#10003; Copied!';setTimeout(function(){btn.innerHTML=origText;btn.disabled=false;},2000);})
+          .catch(function(){fallbackDownload(canvas,btn,origText);});
+      }else{fallbackDownload(canvas,btn,origText);}
+    },'image/png');
+    document.body.removeChild(wrap);
+  }).catch(function(){btn.innerHTML=origText;btn.disabled=false;document.body.removeChild(wrap);});
+}
+function fallbackDownload(canvas,btn,origText){
+  const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='iron-herd-leaderboard.png';a.click();
+  btn.innerHTML='&#10003; Downloaded!';setTimeout(function(){btn.innerHTML=origText;btn.disabled=false;},2000);
+}
 
 function renderOnboard(){
   const el=document.getElementById('onboardList');
