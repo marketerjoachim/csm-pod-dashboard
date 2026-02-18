@@ -1312,7 +1312,6 @@ tailwind.config = {{
           <tr class="text-dark-400 text-xs uppercase tracking-wider border-b border-dark-800" id="headerRow">
             <th class="sortable text-left px-3 py-3 font-600" data-sort="pi" data-dir="desc" data-sortable="1"><span class="tip">#<span class="tip-text">Priority rank. #1 = highest-value workspace. Click to sort.</span></span><span class="sort-arrow">&#9660;</span></th>
             <th class="sortable text-left px-3 py-3 font-600" data-sort="n" data-sortable="1"><span class="tip">Workspace<span class="tip-text">The client's workspace name. Click to sort A-Z.</span></span><span class="sort-arrow">&#9650;</span></th>
-            <th class="text-center px-3 py-3 font-600 text-dark-500">Links</th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">Pod<span class="tip-text">Which CSM pod manages this client.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropPod')">&#9662;</span><div class="col-dropdown" id="dropPod"></div></span></th>
             <th class="text-left px-3 py-3 font-600"><span class="tip">CSM<span class="tip-text">The Customer Success Manager responsible.</span></span><span class="col-filter"><span class="col-filter-btn" onclick="toggleDrop(event,'dropCSM')">&#9662;</span><div class="col-dropdown" id="dropCSM"></div></span></th>
             <th class="sortable text-left px-3 py-3 font-600" data-sort="sd" data-sortable="1"><span class="tip">Start<span class="tip-text">Subscription start date from Stripe. Longer tenure = more LTV confidence.</span></span><span class="sort-arrow">&#9650;</span></th>
@@ -1641,8 +1640,7 @@ function renderTable(){{
   tbody.innerHTML=filtered.map((w,i)=>`
     <tr class="workspace-row border-b border-dark-800/50 ${{tierCls(w.t)}}">
       <td class="px-3 py-2.5 text-dark-500 text-xs font-500">${{i+1}}</td>
-      <td class="px-3 py-2.5 font-600 text-white text-xs overflow-hidden text-ellipsis whitespace-nowrap" title="${{w.n}}">${{w.n}}</td>
-      <td class="px-3 py-2.5 text-center whitespace-nowrap"><span class="inline-flex gap-2">${{stripeLink(w.w)}} ${{attioLink(w.ri)}}</span></td>
+      <td class="px-3 py-2.5 text-xs"><div class="font-600 text-white overflow-hidden text-ellipsis whitespace-nowrap" title="${{w.n}}">${{w.n}}</div><div class="flex gap-2 mt-0.5">${{stripeLink(w.w)}} ${{attioLink(w.ri)}}</div></td>
       <td class="px-3 py-2.5 text-xs"><span class="text-dark-400">${{w.p.split('+')[0].slice(0,3)}}</span></td>
       <td class="px-3 py-2.5 text-xs"><span class="px-2 py-0.5 rounded bg-${{podColor(w.p)}}-500/10 text-${{podColor(w.p)}}-400">${{w.c}}</span></td>
       <td class="px-3 py-2.5 text-xs">${{fmtDate(w.sd)}}</td>
