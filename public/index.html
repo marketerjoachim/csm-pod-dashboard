@@ -663,17 +663,17 @@ function renderDailyCards(){
   const agEl=document.getElementById('dailyAggregate');
   const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
   agEl.innerHTML=`
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-lg font-800 text-white tracking-wide uppercase">All Teams</h3>
-      <span class="text-dark-500 text-xs">Feb 17, 2026</span>
-    </div>
-    <div class="grid grid-cols-6 gap-3 text-center">
-      <div><p class="text-xl font-700 text-white">${totCnt}</p><p class="text-dark-400 text-xs font-600">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${totS3}</span> <span class="text-dark-300">&#9733;${totS2}</span> <span class="text-dark-500">&#9733;${totS1}</span> <span class="text-dark-600">${totSna} n/a</span></p></div>
-      <div><p class="text-xl font-700 text-white">$6.1M</p><p class="text-dark-400 text-xs font-600">Total ARR</p><p class="text-dark-500 text-xs">${fmt(totArr)} in pods</p></div>
-      <div><p class="text-xl font-700 ${agChurnColor}">${totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}</p><p class="text-dark-400 text-xs font-600">Churned</p></div>
-      <div><p class="text-xl font-700 ${totRenCnt>0?'text-emerald-400':'text-dark-500'}">${totRenCnt>0?totRenCnt+' ('+fmtChurnArr(totRenMrr)+')':'0'}</p><p class="text-dark-400 text-xs font-600">Renewed</p></div>
-      <div><p class="text-xl font-700 ${agChurnColor}">${((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}%</p><p class="text-dark-400 text-xs font-600">Churn Rate</p></div>
-      <div><p class="text-xl font-700 text-sky-400">${totTpCalls+totTpNotes}</p><p class="text-dark-400 text-xs font-600">Touchpoints</p><p class="text-dark-500 text-xs">${totTpCalls} calls &middot; ${totTpNotes} notes</p></div>
+    <div class="grid grid-cols-7 gap-2 items-center">
+      <div>
+        <p class="text-lg font-800 text-white tracking-wide uppercase">All Teams</p>
+        <p class="text-dark-500 text-xs">Feb 17, 2026</p>
+      </div>
+      <div class="text-center"><p class="text-xl font-700 text-white">${totCnt}</p><p class="text-dark-400 text-xs font-600">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${totS3}</span> <span class="text-dark-300">&#9733;${totS2}</span> <span class="text-dark-500">&#9733;${totS1}</span> <span class="text-dark-600">${totSna} n/a</span></p></div>
+      <div class="text-center"><p class="text-xl font-700 text-white">$6.1M</p><p class="text-dark-400 text-xs font-600">Total ARR</p><p class="text-dark-500 text-xs">${fmt(totArr)} in pods</p></div>
+      <div class="text-center"><p class="text-xl font-700 ${agChurnColor}">${totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}</p><p class="text-dark-400 text-xs font-600">Churned</p></div>
+      <div class="text-center"><p class="text-xl font-700 ${totRenCnt>0?'text-emerald-400':'text-dark-500'}">${totRenCnt>0?totRenCnt+' ('+fmtChurnArr(totRenMrr)+')':'0'}</p><p class="text-dark-400 text-xs font-600">Renewed</p></div>
+      <div class="text-center"><p class="text-xl font-700 ${agChurnColor}">${((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}%</p><p class="text-dark-400 text-xs font-600">Churn Rate</p></div>
+      <div class="text-center"><p class="text-xl font-700 text-sky-400">${totTpCalls+totTpNotes}</p><p class="text-dark-400 text-xs font-600">Touchpoints</p><p class="text-dark-500 text-xs">${totTpCalls} calls &middot; ${totTpNotes} notes</p></div>
     </div>`;
   const podOrder=pods.sort((a,b)=>{
     const da=DAILY[a],db=DAILY[b];
