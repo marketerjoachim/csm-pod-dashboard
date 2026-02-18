@@ -148,7 +148,7 @@ tailwind.config = {
     </div>
 
     <div class="glass rounded-xl p-5 mb-6" id="dailyAggregate"></div>
-    <div class="grid grid-cols-1 gap-4" id="dailyCards"></div>
+    <div class="grid grid-cols-1 gap-3" id="dailyCards"></div>
   </div>
 
   <!-- ============ CUSTOMER PRIORITIZATION TAB ============ -->
@@ -660,12 +660,12 @@ function renderDailyCards(){
   const agEl=document.getElementById('dailyAggregate');
   const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
   agEl.innerHTML=`
-    <h3 class="text-lg font-700 text-white mb-3">All Teams</h3>
-    <div class="grid grid-cols-4 gap-3 text-center">
-      <div><p class="text-2xl font-700 text-white">${totCnt}</p><p class="text-dark-500 text-xs">Total Customers</p><p class="text-dark-500 text-xs mt-1"><span class="text-amber-400">&#9733;${totS3}</span> <span class="text-dark-300">&#9733;${totS2}</span> <span class="text-dark-500">&#9733;${totS1}</span> <span class="text-dark-600">${totSna} n/a</span></p></div>
-      <div><p class="text-2xl font-700 text-white">${fmt(totArr)}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
-      <div><p class="text-2xl font-700 ${agChurnColor}">${totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
-      <div><p class="text-2xl font-700 ${agChurnColor}">${((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
+    <h3 class="text-base font-700 text-white mb-2">All Teams</h3>
+    <div class="grid grid-cols-4 gap-2 text-center">
+      <div><p class="text-lg font-700 text-white">${totCnt}</p><p class="text-dark-500 text-xs">Total Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${totS3}</span> <span class="text-dark-300">&#9733;${totS2}</span> <span class="text-dark-500">&#9733;${totS1}</span> <span class="text-dark-600">${totSna} n/a</span></p></div>
+      <div><p class="text-lg font-700 text-white">${fmt(totArr)}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
+      <div><p class="text-lg font-700 ${agChurnColor}">${totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
+      <div><p class="text-lg font-700 ${agChurnColor}">${((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
     </div>`;
   const podOrder=pods.sort((a,b)=>{
     const da=DAILY[a],db=DAILY[b];
@@ -684,8 +684,8 @@ function renderDailyCards(){
     let churnRows='';
     if(hasCh){
       churnRows=d.churns.map(c=>`
-        <div class="py-3 border-b border-dark-800/50 last:border-0">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+        <div class="py-2 border-b border-dark-800/50 last:border-0">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
             <div class="flex-1 min-w-0">
               <p class="text-white text-sm font-600 truncate">${c.n}</p>
               <p class="text-dark-500 text-xs mt-0.5">${c.ss}</p>
@@ -705,35 +705,35 @@ function renderDailyCards(){
         </div>`).join('');
     }
     return`
-    <div class="glass rounded-xl p-5">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-3">
+    <div class="glass rounded-xl p-4">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
           <span class="text-dark-500 text-sm font-600">#${rank}</span>
-          ${medal?'<span class="text-2xl">'+medal+'</span>':''}
+          ${medal?'<span class="text-xl">'+medal+'</span>':''}
           <div>
-            <h3 class="text-lg font-700 text-white">${POD_DISPLAY[pod]||pod}</h3>
+            <h3 class="text-base font-700 text-white">${POD_DISPLAY[pod]||pod}</h3>
             <p class="text-dark-500 text-xs">${POD_MEMBERS[pod]||pod.replace('+',' + ')}</p>
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-4 gap-3 text-center mb-4">
-        <div><p class="text-lg font-700 text-white">${d.cnt}</p><p class="text-dark-500 text-xs">Active Customers</p><p class="text-dark-500 text-xs mt-1"><span class="text-amber-400">&#9733;${d.s3}</span> <span class="text-dark-300">&#9733;${d.s2}</span> <span class="text-dark-500">&#9733;${d.s1}</span> <span class="text-dark-600">${d.sna} n/a</span></p></div>
-        <div><p class="text-lg font-700 text-white">${fmt(d.arr)}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
-        <div><p class="text-lg font-700 ${churnColor}">${hasCh?d.churnCnt:'0'}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
-        <div><p class="text-lg font-700 ${churnColor}">${((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
+      <div class="grid grid-cols-4 gap-2 text-center mb-2">
+        <div><p class="text-base font-700 text-white">${d.cnt}</p><p class="text-dark-500 text-xs">Active Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${d.s3}</span> <span class="text-dark-300">&#9733;${d.s2}</span> <span class="text-dark-500">&#9733;${d.s1}</span> <span class="text-dark-600">${d.sna} n/a</span></p></div>
+        <div><p class="text-base font-700 text-white">${fmt(d.arr)}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
+        <div><p class="text-base font-700 ${churnColor}">${hasCh?d.churnCnt:'0'}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
+        <div><p class="text-base font-700 ${churnColor}">${((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
       </div>
       ${hasCh?`
-      <div class="border-t border-dark-800 pt-3">
-        <div class="churn-accordion" onclick="toggleChurn('${accordionId}',this)">
+      <div class="border-t border-dark-800 pt-2">
+        <div class="churn-accordion open" onclick="toggleChurn('${accordionId}',this)">
           <span class="chevron text-dark-400 text-xs mr-2">&#9654;</span>
           <span class="text-sm font-600 text-red-400">${churnLabel}</span>
         </div>
-        <div class="churn-detail mt-3" id="${accordionId}">
+        <div class="churn-detail open mt-2" id="${accordionId}">
           ${churnRows}
         </div>
       </div>
       `:`
-      <div class="border-t border-dark-800 pt-3">
+      <div class="border-t border-dark-800 pt-2">
         <p class="text-emerald-400 text-sm font-500">&#10003; No churns yesterday</p>
       </div>
       `}
