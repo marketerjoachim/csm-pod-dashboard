@@ -1455,7 +1455,7 @@ function renderDailyCards(){{
               </div>
             </div>
           </div>
-          ${{c.cs?'<p class="text-xs mt-1.5 px-2 py-1 rounded bg-dark-800/50 border border-dark-700/30"><span class="text-dark-400">'+({{'call':'&#128222;','email':'&#9993;','csm_field':'&#128221;'}}[c.csrc]||'&#8226;')+' </span><span class="text-dark-200">'+c.cs+'</span></p>':''}}
+          ${{c.cs?'<p class="text-xs mt-1.5 px-2 py-1 rounded bg-dark-800/50 border border-dark-700/30"><span class="text-dark-400">'+({{'call':'&#128222;','email':'&#9993;','csm_field':'&#128221;'}}[c.csrc]||'&#8226;')+' </span><span class="text-dark-200">'+c.cs+'</span> <span class="text-dark-600 ml-1">via '+c.csrc.replace('_',' ')+'</span></p>':''}}
           ${{c.lr?'<p class="text-xs mt-1"><span class="text-dark-500">Reason:</span> <span class="text-amber-400 font-500">'+c.lr+'</span></p>':''}}
           ${{c.cc?'<p class="text-xs mt-0.5 text-dark-400">'+c.cc+'</p>':''}}
         </div>`).join('');
