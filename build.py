@@ -14,13 +14,12 @@ from sub_start_dates import SUBSCRIPTION_START_DATES, SUBSCRIPTION_CHURN_DATA
 # ─── Onboarding Queue (extracted from Attio) ─────────────────────────────────
 # Supplemental onboarding records not in main workspace data files
 ONBOARDING_QUEUE_EXTRA = [
-    {"record_id": "d920fb32-f0a7-4948-ba70-7fac9859dfec", "name": "Cavvalure", "pod": "Aimy+Espen", "plan": "Pro", "arr": 0, "onboarding_date": "2026-02-18"},
-    {"record_id": "54cc5e11-c8ad-4aee-8934-468c70422686", "name": "Aleavia", "pod": "Marcus+Martin", "plan": "Performance", "arr": 0, "onboarding_date": "2026-02-18"},
-    {"record_id": "dbd807b7-1077-4e84-92b6-726b2b089c04", "name": "motocross4u.com", "pod": "Aimy+Espen", "plan": "Pro", "arr": 0, "onboarding_date": "2026-02-18"},
-    {"record_id": "a11461e3-41d3-4852-9bde-10b82085dc14", "name": "fjorda.com", "pod": "Aimy+Espen", "plan": "Growth", "arr": 0, "onboarding_date": "2026-02-18"},
-    {"record_id": "e6e89eae-d286-44e5-b1b9-282c7b23bf70", "name": "Company of Scott McKearn", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 0, "onboarding_date": "2026-02-18"},
-    {"record_id": "4c5b0e94-1d3c-404b-984f-bcf5db2fc8f6", "name": "equacare.com.au", "pod": "Marcus+Martin", "plan": "", "arr": 0, "onboarding_date": "2026-02-18"},
-    {"record_id": "bb0172b5-5057-48dc-bd9c-84b6cfb50ed3", "name": "lilcactus.com", "pod": "Marcus+Martin", "plan": "", "arr": 0, "onboarding_date": "2026-02-18"},
+    {"record_id": "54cc5e11-c8ad-4aee-8934-468c70422686", "name": "Aleavia", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "mrr": 3999, "onboarding_date": "2026-02-18", "start_date": "2026-02-09", "last_payment": "2026-02-09", "renewal_date": "2026-03-09", "billing_cycle": "Monthly"},
+    {"record_id": "dbd807b7-1077-4e84-92b6-726b2b089c04", "name": "motocross4u.com", "pod": "Aimy+Espen", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-01-27", "last_payment": "2026-01-27", "renewal_date": "2026-02-27", "billing_cycle": "Monthly"},
+    {"record_id": "a11461e3-41d3-4852-9bde-10b82085dc14", "name": "fjorda.com", "pod": "Aimy+Espen", "plan": "Growth", "arr": 12000, "mrr": 1000, "onboarding_date": "2026-02-18", "start_date": "2026-02-16", "last_payment": "2026-02-16", "renewal_date": "2026-03-16", "billing_cycle": "Monthly"},
+    {"record_id": "e6e89eae-d286-44e5-b1b9-282c7b23bf70", "name": "Company of Scott McKearn", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "mrr": 1000, "onboarding_date": "2026-02-18", "start_date": "2026-02-04", "last_payment": "2026-02-04", "renewal_date": "2026-03-04", "billing_cycle": "Monthly"},
+    {"record_id": "4c5b0e94-1d3c-404b-984f-bcf5db2fc8f6", "name": "equacare.com.au", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-02-12", "last_payment": "2026-02-12", "renewal_date": "2026-03-12", "billing_cycle": "Monthly"},
+    {"record_id": "bb0172b5-5057-48dc-bd9c-84b6cfb50ed3", "name": "lilcactus.com", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-02-13", "last_payment": "2026-02-13", "renewal_date": "2026-03-13", "billing_cycle": "Monthly"},
 ]
 
 # ─── Churn Context (extracted from Attio calls/emails/CSM fields) ────────────
@@ -41,6 +40,10 @@ CHURN_CONTEXT = {
     "686b3476-4e8f-4a29-93ff-577949ccb041": {
         "summary": "Pausing due to budget constraints, wants to rebuild website first; plans to return mid-March",
         "source": "call",
+    },
+    "3bf59165-d9f3-40a4-aaca-89fc5f920de2": {
+        "summary": "Near-zero ROI after ~$2K ad spend, poor creative quality, CSM handover left account neglected with ads not running, repeated escalations unaddressed",
+        "source": "email",
     },
 }
 
@@ -857,10 +860,14 @@ def compute_onboarding_queue(workspaces):
             "pod": ws["pod"],
             "plan": ws.get("plan", ""),
             "arr": ws.get("arr", 0),
+            "mrr": ws.get("mrr", 0),
             "onboarding_date": ob_date,
             "start_date": start_date,
             "days_gap": days_gap,
             "days_until": days_until,
+            "last_payment": "",
+            "renewal_date": "",
+            "billing_cycle": "",
         })
     # Add supplemental onboarding records not in main workspace data
     for extra in ONBOARDING_QUEUE_EXTRA:
@@ -870,7 +877,7 @@ def compute_onboarding_queue(workspaces):
         if ob_date < today_str:
             continue
         record_id = extra["record_id"]
-        start_date = SUBSCRIPTION_START_DATES.get(record_id) or ""
+        start_date = extra.get("start_date") or SUBSCRIPTION_START_DATES.get(record_id) or ""
         days_gap = ""
         if start_date and ob_date:
             try:
@@ -891,10 +898,14 @@ def compute_onboarding_queue(workspaces):
             "pod": extra["pod"],
             "plan": extra.get("plan", ""),
             "arr": extra.get("arr", 0),
+            "mrr": extra.get("mrr", 0),
             "onboarding_date": ob_date,
             "start_date": start_date,
             "days_gap": days_gap,
             "days_until": days_until,
+            "last_payment": extra.get("last_payment", ""),
+            "renewal_date": extra.get("renewal_date", ""),
+            "billing_cycle": extra.get("billing_cycle", ""),
         })
     # Sort by onboarding date ascending (soonest first)
     queue.sort(key=lambda x: x["onboarding_date"])
@@ -905,8 +916,10 @@ def compute_onboarding_queue(workspaces):
         n_esc = q["name"].replace("\\", "\\\\").replace("'", "\\'")
         js_items.append(
             f"{{ri:'{q['record_id']}',n:'{n_esc}',pod:'{q['pod']}',"
-            f"pl:'{q['plan']}',arr:{q['arr']},"
+            f"pl:'{q['plan']}',arr:{q['arr']},mrr:{q.get('mrr', 0)},"
             f"ob:'{q['onboarding_date']}',sd:'{q['start_date']}',"
+            f"lp:'{q.get('last_payment', '')}',rd:'{q.get('renewal_date', '')}',"
+            f"bc:'{q.get('billing_cycle', '')}',"
             f"gap:{q['days_gap'] if q['days_gap'] != '' else 'null'},"
             f"until:{q['days_until'] if q['days_until'] != '' else 'null'}}}"
         )
@@ -1458,30 +1471,34 @@ function renderOnboard(){{
   function gapColor(g){{if(g===null)return'text-dark-500';if(g<=3)return'text-emerald-400';if(g<=7)return'text-amber-400';return'text-red-400';}}
   function untilBadge(u){{if(u===null)return'';if(u===0)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Today</span>';if(u===1)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">Tomorrow</span>';if(u<=7)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">'+u+' days</span>';return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-dark-700 text-dark-400">'+u+' days</span>';}}
   el.innerHTML=`
-    <div class="glass rounded-xl overflow-hidden">
+    <div class="glass rounded-xl overflow-hidden overflow-x-auto scrollbar-thin">
       <table class="w-full text-sm">
         <thead><tr class="border-b border-dark-800">
-          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">#</th>
-          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Customer</th>
-          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Pod</th>
-          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Plan</th>
-          <th class="px-4 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">ARR</th>
-          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">First Payment</th>
-          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding</th>
-          <th class="px-4 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">Days Between</th>
-          <th class="px-4 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Links</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">#</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Customer</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Pod</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Plan</th>
+          <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">MRR</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">First Payment</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding</th>
+          <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">Days Between</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Billing Period</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Renewal</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Links</th>
         </tr></thead>
         <tbody>
           ${{ONBOARD.map((q,i)=>`<tr class="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors">
-            <td class="px-4 py-3 text-dark-500 text-xs">${{i+1}}</td>
-            <td class="px-4 py-3 font-600 text-white">${{q.n}}</td>
-            <td class="px-4 py-3 text-dark-400 text-xs">${{(POD_DISPLAY[q.pod]||q.pod)}}</td>
-            <td class="px-4 py-3 text-dark-400 text-xs">${{q.pl||'&mdash;'}}</td>
-            <td class="px-4 py-3 text-right text-white font-600">${{q.arr?fmt(q.arr):'&mdash;'}}</td>
-            <td class="px-4 py-3 text-dark-400 text-xs">${{fmtD(q.sd)}}</td>
-            <td class="px-4 py-3 text-white text-xs">${{fmtD(q.ob)}}${{untilBadge(q.until)}}</td>
-            <td class="px-4 py-3 text-right"><span class="font-600 ${{gapColor(q.gap)}}">${{q.gap!==null?q.gap+' days':'&mdash;'}}</span></td>
-            <td class="px-4 py-3"><span class="inline-flex gap-2"><a href="https://app.attio.com/metric/workspaces/record/${{q.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a></span></td>
+            <td class="px-3 py-3 text-dark-500 text-xs">${{i+1}}</td>
+            <td class="px-3 py-3 font-600 text-white">${{q.n}}</td>
+            <td class="px-3 py-3 text-dark-400 text-xs">${{(POD_DISPLAY[q.pod]||q.pod)}}</td>
+            <td class="px-3 py-3 text-dark-400 text-xs">${{q.pl||'&mdash;'}}</td>
+            <td class="px-3 py-3 text-right text-white font-600">${{q.mrr?'$'+q.mrr.toLocaleString():'&mdash;'}}</td>
+            <td class="px-3 py-3 text-dark-400 text-xs">${{fmtD(q.sd)}}</td>
+            <td class="px-3 py-3 text-white text-xs">${{fmtD(q.ob)}}${{untilBadge(q.until)}}</td>
+            <td class="px-3 py-3 text-right"><span class="font-600 ${{gapColor(q.gap)}}">${{q.gap!==null?q.gap+' days':'&mdash;'}}</span></td>
+            <td class="px-3 py-3 text-dark-400 text-xs">${{q.lp&&q.rd?fmtD(q.lp)+' &rarr; '+fmtD(q.rd):'&mdash;'}}</td>
+            <td class="px-3 py-3 text-dark-400 text-xs">${{fmtD(q.rd)}}${{q.bc?' <span class="text-dark-600">('+q.bc+')</span>':''}}</td>
+            <td class="px-3 py-3"><span class="inline-flex gap-2"><a href="https://app.attio.com/metric/workspaces/record/${{q.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a></span></td>
           </tr>`).join('')}}
         </tbody>
       </table>
