@@ -48,6 +48,26 @@ CHURN_CONTEXT = {
     },
 }
 
+# Renewals yesterday — subscriptions with last_payment_date = yesterday
+# workspace_record_id -> {mrr, arr, plan, sub_id}
+RENEWALS_YESTERDAY = [
+    {"workspace_record_id": None, "mrr": 1000, "arr": 12000, "plan": "Growth", "sub_id": "sub_1T1tZ6FopWoUwtLcR1slL1Rg"},
+    {"workspace_record_id": "3a5b4a2a-14b0-4451-b5da-858a8bc2a669", "mrr": 3999, "arr": 47988, "plan": "Performance", "sub_id": "sub_1T1w7VFopWoUwtLcY4tv5Ht9"},
+    {"workspace_record_id": "d7cf1931-74f5-4635-9116-523cf0afa4e2", "mrr": 1000, "arr": 12000, "plan": "Growth", "sub_id": "sub_1T1xhZFopWoUwtLcCq9lls8b"},
+    {"workspace_record_id": "3278a100-12d2-5d26-a5c0-f9d881df8bf5", "mrr": 2399, "arr": 28788, "plan": "Pro", "sub_id": "sub_1T1dXfFopWoUwtLc1Ku5PFOc"},
+    {"workspace_record_id": "7d4d4d3d-1190-4af7-ad4b-672ebc50ae5e", "mrr": 2399, "arr": 28788, "plan": "Pro", "sub_id": "sub_1T1tsvFopWoUwtLc73zPpVHC"},
+    {"workspace_record_id": "404c1548-50cc-48c7-ba39-c790dccb6066", "mrr": 2399, "arr": 28788, "plan": "Pro", "sub_id": "sub_1SokcQFopWoUwtLc0nYNdJSa"},
+    {"workspace_record_id": "f5bbddbc-2a95-4e14-ba62-f2df2abd14f6", "mrr": 2399, "arr": 28788, "plan": "Pro", "sub_id": "sub_1T1uKwFopWoUwtLcfcpd7j4Z"},
+]
+
+# Touchpoints yesterday — per pod {calls, notes}
+TOUCHPOINTS_YESTERDAY = {
+    "Marcus+Martin": {"calls": 5, "notes": 2},
+    "Sebastian+Daniel": {"calls": 6, "notes": 0},
+    "Aimy+Espen": {"calls": 6, "notes": 3},
+    "Nicklas+Hamsa": {"calls": 1, "notes": 0},
+}
+
 # ─── Configuration ──────────────────────────────────────────────────────────────
 
 TODAY = date(2026, 2, 18)
@@ -796,11 +816,23 @@ def compute_daily_churn(workspaces):
                         "churn_source": churn_source,
                     })
 
+    # Compute renewals per pod
+    pod_renewals = {p: {"count": 0, "mrr": 0} for p in pod_order}
+    for r in RENEWALS_YESTERDAY:
+        ws_id = r.get("workspace_record_id")
+        if ws_id and ws_id in ws_lookup:
+            pod = ws_lookup[ws_id]["pod"]
+            if pod in pod_renewals:
+                pod_renewals[pod]["count"] += 1
+                pod_renewals[pod]["mrr"] += r["mrr"]
+
     # Build JS constant
     js_parts = []
     for pod_name in pod_order:
         churns = pod_churns[pod_name]
         totals = pod_totals.get(pod_name, {"count": 0, "arr": 0})
+        ren = pod_renewals.get(pod_name, {"count": 0, "mrr": 0})
+        tp = TOUCHPOINTS_YESTERDAY.get(pod_name, {"calls": 0, "notes": 0})
         churn_js_items = []
         for c in churns:
             name_esc = c["name"].replace("\\", "\\\\").replace("'", "\\'")
@@ -821,6 +853,8 @@ def compute_daily_churn(workspaces):
             f"'{pod_name}':{{cnt:{totals['count']},arr:{totals['arr']},"
             f"s3:{totals['s3']},s2:{totals['s2']},s1:{totals['s1']},sna:{totals['sna']},"
             f"churnCnt:{churn_count},churnArr:{churn_arr},"
+            f"renCnt:{ren['count']},renMrr:{ren['mrr']},"
+            f"tpCalls:{tp['calls']},tpNotes:{tp['notes']},"
             f"churns:[{churns_str}]}}"
         )
 
@@ -1378,17 +1412,19 @@ function switchTopTab(tab){{
 function renderDailyCards(){{
   const el=document.getElementById('dailyCards');
   const pods=['Marcus+Martin','Sebastian+Daniel','Aimy+Espen','Nicklas+Hamsa'];
-  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0,totS3=0,totS2=0,totS1=0,totSna=0;
-  pods.forEach(p=>{{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;totS3+=d.s3;totS2+=d.s2;totS1+=d.s1;totSna+=d.sna;}});
+  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0,totS3=0,totS2=0,totS1=0,totSna=0,totRenCnt=0,totRenMrr=0,totTpCalls=0,totTpNotes=0;
+  pods.forEach(p=>{{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;totS3+=d.s3;totS2+=d.s2;totS1+=d.s1;totSna+=d.sna;totRenCnt+=d.renCnt;totRenMrr+=d.renMrr;totTpCalls+=d.tpCalls;totTpNotes+=d.tpNotes;}});
   const agEl=document.getElementById('dailyAggregate');
   const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
   agEl.innerHTML=`
     <h3 class="text-base font-700 text-white mb-2">All Teams</h3>
-    <div class="grid grid-cols-4 gap-2 text-center">
-      <div><p class="text-lg font-700 text-white">${{totCnt}}</p><p class="text-dark-500 text-xs">Total Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{totS3}}</span> <span class="text-dark-300">&#9733;${{totS2}}</span> <span class="text-dark-500">&#9733;${{totS1}}</span> <span class="text-dark-600">${{totSna}} n/a</span></p></div>
-      <div><p class="text-lg font-700 text-white">${{fmt(totArr)}}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
-      <div><p class="text-lg font-700 ${{agChurnColor}}">${{totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
+    <div class="grid grid-cols-6 gap-2 text-center">
+      <div><p class="text-lg font-700 text-white">${{totCnt}}</p><p class="text-dark-500 text-xs">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{totS3}}</span> <span class="text-dark-300">&#9733;${{totS2}}</span> <span class="text-dark-500">&#9733;${{totS1}}</span> <span class="text-dark-600">${{totSna}} n/a</span></p></div>
+      <div><p class="text-lg font-700 text-white">${{fmt(totArr)}}</p><p class="text-dark-500 text-xs">ARR (pod-managed)</p><p class="text-dark-600 text-xs">$6.1M total incl. unassigned</p></div>
+      <div><p class="text-lg font-700 ${{agChurnColor}}">${{totChurnCnt>0?totChurnCnt+' ('+fmtChurnArr(totChurnArr)+')':'0'}}</p><p class="text-dark-500 text-xs">Churned</p></div>
+      <div><p class="text-lg font-700 ${{totRenCnt>0?'text-emerald-400':'text-dark-500'}}">${{totRenCnt>0?totRenCnt+' ('+fmtChurnArr(totRenMrr)+')':'0'}}</p><p class="text-dark-500 text-xs">Renewed</p></div>
       <div><p class="text-lg font-700 ${{agChurnColor}}">${{((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
+      <div><p class="text-lg font-700 text-sky-400">${{totTpCalls+totTpNotes}}</p><p class="text-dark-500 text-xs">Touchpoints</p><p class="text-dark-500 text-xs">${{totTpCalls}} calls &middot; ${{totTpNotes}} notes</p></div>
     </div>`;
   const podOrder=pods.sort((a,b)=>{{
     const da=DAILY[a],db=DAILY[b];
@@ -1439,11 +1475,13 @@ function renderDailyCards(){{
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-4 gap-2 text-center mb-2">
-        <div><p class="text-base font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Active Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{d.s3}}</span> <span class="text-dark-300">&#9733;${{d.s2}}</span> <span class="text-dark-500">&#9733;${{d.s1}}</span> <span class="text-dark-600">${{d.sna}} n/a</span></p></div>
-        <div><p class="text-base font-700 text-white">${{fmt(d.arr)}}</p><p class="text-dark-500 text-xs">Total ARR</p></div>
-        <div><p class="text-base font-700 ${{churnColor}}">${{hasCh?d.churnCnt:'0'}}</p><p class="text-dark-500 text-xs">Churned Yesterday</p></div>
+      <div class="grid grid-cols-6 gap-2 text-center mb-2">
+        <div><p class="text-base font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{d.s3}}</span> <span class="text-dark-300">&#9733;${{d.s2}}</span> <span class="text-dark-500">&#9733;${{d.s1}}</span> <span class="text-dark-600">${{d.sna}} n/a</span></p></div>
+        <div><p class="text-base font-700 text-white">${{fmt(d.arr)}}</p><p class="text-dark-500 text-xs">ARR</p></div>
+        <div><p class="text-base font-700 ${{churnColor}}">${{hasCh?d.churnCnt:'0'}}</p><p class="text-dark-500 text-xs">Churned</p></div>
+        <div><p class="text-base font-700 ${{d.renCnt>0?'text-emerald-400':'text-dark-500'}}">${{d.renCnt>0?d.renCnt:'0'}}</p><p class="text-dark-500 text-xs">Renewed</p>${{d.renCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(d.renMrr)+' MRR</p>':''}}</div>
         <div><p class="text-base font-700 ${{churnColor}}">${{((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
+        <div><p class="text-base font-700 text-sky-400">${{d.tpCalls+d.tpNotes}}</p><p class="text-dark-500 text-xs">Touchpoints</p><p class="text-dark-500 text-xs">${{d.tpCalls}} calls &middot; ${{d.tpNotes}} notes</p></div>
       </div>
       ${{hasCh?`
       <div class="border-t border-dark-800 pt-2">
