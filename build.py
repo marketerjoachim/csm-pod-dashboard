@@ -817,21 +817,21 @@ def compute_daily_churn(workspaces):
                     })
 
     # Compute renewals per pod
-    pod_renewals = {p: {"count": 0, "arr": 0} for p in pod_order}
+    pod_renewals = {p: {"count": 0, "mrr": 0} for p in pod_order}
     for r in RENEWALS_YESTERDAY:
         ws_id = r.get("workspace_record_id")
         if ws_id and ws_id in ws_lookup:
             pod = ws_lookup[ws_id]["pod"]
             if pod in pod_renewals:
                 pod_renewals[pod]["count"] += 1
-                pod_renewals[pod]["arr"] += r["arr"]
+                pod_renewals[pod]["mrr"] += r["mrr"]
 
     # Build JS constant
     js_parts = []
     for pod_name in pod_order:
         churns = pod_churns[pod_name]
         totals = pod_totals.get(pod_name, {"count": 0, "arr": 0})
-        ren = pod_renewals.get(pod_name, {"count": 0, "arr": 0})
+        ren = pod_renewals.get(pod_name, {"count": 0, "mrr": 0})
         tp = TOUCHPOINTS_YESTERDAY.get(pod_name, {"calls": 0, "notes": 0})
         churn_js_items = []
         for c in churns:
@@ -853,7 +853,7 @@ def compute_daily_churn(workspaces):
             f"'{pod_name}':{{cnt:{totals['count']},arr:{totals['arr']},"
             f"s3:{totals['s3']},s2:{totals['s2']},s1:{totals['s1']},sna:{totals['sna']},"
             f"churnCnt:{churn_count},churnArr:{churn_arr},"
-            f"renCnt:{ren['count']},renArr:{ren['arr']},"
+            f"renCnt:{ren['count']},renMrr:{ren['mrr']},"
             f"tpCalls:{tp['calls']},tpNotes:{tp['notes']},"
             f"churns:[{churns_str}]}}"
         )
@@ -1124,7 +1124,7 @@ tailwind.config = {{
           <h3 class="text-base font-700 text-white mb-2">How pods are ranked</h3>
           <p class="text-dark-300 leading-relaxed">Pods are ranked best-to-worst each day using two simple rules:</p>
           <ol class="text-dark-300 leading-relaxed list-decimal list-inside mt-2 space-y-1">
-            <li><strong class="text-white">Least MRR churned</strong> &mdash; the pod that lost the least revenue ranks highest.</li>
+            <li><strong class="text-white">Least ARR churned</strong> &mdash; the pod that lost the least revenue ranks highest.</li>
             <li><strong class="text-white">Most ARR under management</strong> &mdash; if two pods tied on churn, the one managing more total ARR ranks higher.</li>
           </ol>
         </div>
@@ -1413,8 +1413,8 @@ function switchTopTab(tab){{
 function renderDailyCards(){{
   const el=document.getElementById('dailyCards');
   const pods=['Marcus+Martin','Sebastian+Daniel','Aimy+Espen','Nicklas+Hamsa'];
-  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0,totS3=0,totS2=0,totS1=0,totSna=0,totRenCnt=0,totRenArr=0,totTpCalls=0,totTpNotes=0;
-  pods.forEach(p=>{{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;totS3+=d.s3;totS2+=d.s2;totS1+=d.s1;totSna+=d.sna;totRenCnt+=d.renCnt;totRenArr+=d.renArr;totTpCalls+=d.tpCalls;totTpNotes+=d.tpNotes;}});
+  let totCnt=0,totArr=0,totChurnCnt=0,totChurnArr=0,totS3=0,totS2=0,totS1=0,totSna=0,totRenCnt=0,totRenMrr=0,totTpCalls=0,totTpNotes=0;
+  pods.forEach(p=>{{const d=DAILY[p];totCnt+=d.cnt;totArr+=d.arr;totChurnCnt+=d.churnCnt;totChurnArr+=d.churnArr;totS3+=d.s3;totS2+=d.s2;totS1+=d.s1;totSna+=d.sna;totRenCnt+=d.renCnt;totRenMrr+=d.renMrr;totTpCalls+=d.tpCalls;totTpNotes+=d.tpNotes;}});
   const agEl=document.getElementById('dailyAggregate');
   const agChurnColor=totChurnCnt>0?'text-red-400':'text-emerald-400';
   agEl.innerHTML=`
@@ -1426,7 +1426,7 @@ function renderDailyCards(){{
       <div class="text-center"><p class="text-xl font-700 text-white">${{totCnt}}</p><p class="text-dark-400 text-xs font-600">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{totS3}}</span> <span class="text-dark-300">&#9733;${{totS2}}</span> <span class="text-dark-500">&#9733;${{totS1}}</span> <span class="text-dark-600">${{totSna}} n/a</span></p></div>
       <div class="text-center"><p class="text-xl font-700 text-white">$6.1M</p><p class="text-dark-400 text-xs font-600">Total ARR</p><p class="text-dark-500 text-xs">${{fmt(totArr)}} in pods</p></div>
       <div class="text-center"><p class="text-xl font-700 ${{agChurnColor}}">${{totChurnCnt>0?totChurnCnt:'0'}}</p><p class="text-dark-400 text-xs font-600">Churned</p>${{totChurnCnt>0?'<p class="text-red-400/70 text-xs">'+fmtChurnArr(totChurnArr)+' ARR</p>':''}}</div>
-      <div class="text-center"><p class="text-xl font-700 ${{totRenCnt>0?'text-emerald-400':'text-dark-500'}}">${{totRenCnt>0?totRenCnt:'0'}}</p><p class="text-dark-400 text-xs font-600">Renewed</p>${{totRenCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(totRenArr)+' ARR</p>':''}}</div>
+      <div class="text-center"><p class="text-xl font-700 ${{totRenCnt>0?'text-emerald-400':'text-dark-500'}}">${{totRenCnt>0?totRenCnt:'0'}}</p><p class="text-dark-400 text-xs font-600">Renewed</p>${{totRenCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(totRenMrr)+' ARR</p>':''}}</div>
       <div class="text-center"><p class="text-xl font-700 ${{agChurnColor}}">${{((totChurnArr/(totArr+totChurnArr))*100).toFixed(2)}}%</p><p class="text-dark-400 text-xs font-600">Churn Rate</p></div>
       <div class="text-center"><p class="text-xl font-700 text-sky-400">${{totTpCalls+totTpNotes}}</p><p class="text-dark-400 text-xs font-600">Touchpoints</p><p class="text-dark-500 text-xs">${{totTpCalls}} calls &middot; ${{totTpNotes}} notes</p></div>
     </div>`;
@@ -1474,7 +1474,7 @@ function renderDailyCards(){{
         <div class="text-center"><p class="text-base font-700 text-white">${{d.cnt}}</p><p class="text-dark-500 text-xs">Customers</p><p class="text-dark-500 text-xs"><span class="text-amber-400">&#9733;${{d.s3}}</span> <span class="text-dark-300">&#9733;${{d.s2}}</span> <span class="text-dark-500">&#9733;${{d.s1}}</span> <span class="text-dark-600">${{d.sna}} n/a</span></p></div>
         <div class="text-center"><p class="text-base font-700 text-white">${{fmt(d.arr)}}</p><p class="text-dark-500 text-xs">ARR</p></div>
         <div class="text-center"><p class="text-base font-700 ${{churnColor}}">${{hasCh?d.churnCnt:'0'}}</p><p class="text-dark-500 text-xs">Churned</p>${{hasCh?'<p class="text-red-400/70 text-xs">'+fmtChurnArr(d.churnArr)+' ARR</p>':''}}</div>
-        <div class="text-center"><p class="text-base font-700 ${{d.renCnt>0?'text-emerald-400':'text-dark-500'}}">${{d.renCnt>0?d.renCnt:'0'}}</p><p class="text-dark-500 text-xs">Renewed</p>${{d.renCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(d.renArr)+' ARR</p>':''}}</div>
+        <div class="text-center"><p class="text-base font-700 ${{d.renCnt>0?'text-emerald-400':'text-dark-500'}}">${{d.renCnt>0?d.renCnt:'0'}}</p><p class="text-dark-500 text-xs">Renewed</p>${{d.renCnt>0?'<p class="text-emerald-400/70 text-xs">'+fmtChurnArr(d.renMrr)+' ARR</p>':''}}</div>
         <div class="text-center"><p class="text-base font-700 ${{churnColor}}">${{((d.churnArr/(d.arr+d.churnArr))*100).toFixed(2)}}%</p><p class="text-dark-500 text-xs">Churn Rate</p></div>
         <div class="text-center"><p class="text-base font-700 text-sky-400">${{d.tpCalls+d.tpNotes}}</p><p class="text-dark-500 text-xs">Touchpoints</p><p class="text-dark-500 text-xs">${{d.tpCalls}} calls &middot; ${{d.tpNotes}} notes</p></div>
       </div>
@@ -1539,7 +1539,7 @@ function renderOnboard(){{
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Pod</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Plan</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Sales Rep</th>
-          <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">MRR</th>
+          <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">ARR</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">First Payment</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding</th>
           <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider cursor-help" title="Days between first Stripe payment and onboarding call. Lower is better — long waits increase early churn risk.">Wait Time</th>
