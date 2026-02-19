@@ -932,9 +932,11 @@ def compute_onboarding_queue(workspaces):
     js_items = []
     for q in queue:
         n_esc = q["name"].replace("\\", "\\\\").replace("'", "\\'")
+        stripe_data = STRIPE_ARR.get(q["record_id"])
+        sid = stripe_data["subs"][0]["sub_id"] if stripe_data and stripe_data.get("subs") else ""
         js_items.append(
             f"{{ri:'{q['record_id']}',n:'{n_esc}',pod:'{q['pod']}',"
-            f"pl:'{q['plan']}',arr:{q['arr']},"
+            f"pl:'{q['plan']}',arr:{q['arr']},sid:'{sid}',"
             f"stg:'{q['stage']}',ob:'{q['onboarding_date']}'}}"
         )
     print(f"  Onboarding queue: {len(queue)} workspaces in onboarding")
@@ -1523,18 +1525,16 @@ function renderOnboard(){{
           <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">ARR</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Stage</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding Date</th>
-          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Links</th>
         </tr></thead>
         <tbody>
           ${{ONBOARD.map((q,i)=>`<tr class="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors">
             <td class="px-3 py-3 text-dark-500 text-xs">${{i+1}}</td>
-            <td class="px-3 py-3 font-600 text-white">${{q.n}}</td>
+            <td class="px-3 py-3"><p class="font-600 text-white">${{q.n}}</p><div class="flex gap-2 mt-0.5">${{q.sid?'<a href="https://dashboard.stripe.com/subscriptions/'+q.sid+'" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30">Stripe</a>':''}}<a href="https://app.attio.com/metric/workspaces/record/${{q.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30">Attio</a></div></td>
             <td class="px-3 py-3 text-dark-400 text-xs">${{(POD_DISPLAY[q.pod]||q.pod||'Unassigned')}}</td>
             <td class="px-3 py-3 text-dark-400 text-xs">${{q.pl||'-'}}</td>
             <td class="px-3 py-3 text-right text-white font-600">${{q.arr?'$'+q.arr.toLocaleString():'-'}}</td>
             <td class="px-3 py-3">${{stagePill(q.stg)}}</td>
             <td class="px-3 py-3 text-white text-xs">${{fmtD(q.ob)}}</td>
-            <td class="px-3 py-3"><span class="inline-flex gap-2"><a href="https://app.attio.com/metric/workspaces/record/${{q.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a></span></td>
           </tr>`).join('')}}
         </tbody>
       </table>
