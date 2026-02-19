@@ -12,15 +12,54 @@ from datetime import datetime, date
 from sub_start_dates import SUBSCRIPTION_START_DATES, SUBSCRIPTION_CHURN_DATA
 from stripe_arr_data import STRIPE_ARR
 
-# ─── Onboarding Queue (extracted from Attio) ─────────────────────────────────
-# Supplemental onboarding records not in main workspace data files
-ONBOARDING_QUEUE_EXTRA = [
-    {"record_id": "54cc5e11-c8ad-4aee-8934-468c70422686", "name": "Aleavia", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "mrr": 3999, "onboarding_date": "2026-02-18", "start_date": "2026-02-09", "last_payment": "2026-02-09", "renewal_date": "2026-03-09", "billing_cycle": "Monthly", "sales_rep": "William Habert"},
-    {"record_id": "dbd807b7-1077-4e84-92b6-726b2b089c04", "name": "motocross4u.com", "pod": "Aimy+Espen", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-01-27", "last_payment": "2026-01-27", "renewal_date": "2026-02-27", "billing_cycle": "Monthly", "sales_rep": "Kenneth Eriksen"},
-    {"record_id": "a11461e3-41d3-4852-9bde-10b82085dc14", "name": "fjorda.com", "pod": "Aimy+Espen", "plan": "Growth", "arr": 12000, "mrr": 1000, "onboarding_date": "2026-02-18", "start_date": "2026-02-16", "last_payment": "2026-02-16", "renewal_date": "2026-03-16", "billing_cycle": "Monthly", "sales_rep": "Victor Svalastog"},
-    {"record_id": "e6e89eae-d286-44e5-b1b9-282c7b23bf70", "name": "Company of Scott McKearn", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "mrr": 1000, "onboarding_date": "2026-02-18", "start_date": "2026-02-04", "last_payment": "2026-02-04", "renewal_date": "2026-03-04", "billing_cycle": "Monthly", "sales_rep": "Andreas Aasen"},
-    {"record_id": "4c5b0e94-1d3c-404b-984f-bcf5db2fc8f6", "name": "equacare.com.au", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-02-12", "last_payment": "2026-02-12", "renewal_date": "2026-03-12", "billing_cycle": "Monthly", "sales_rep": "Omid Aboui"},
-    {"record_id": "bb0172b5-5057-48dc-bd9c-84b6cfb50ed3", "name": "lilcactus.com", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "mrr": 2399, "onboarding_date": "2026-02-18", "start_date": "2026-02-13", "last_payment": "2026-02-13", "renewal_date": "2026-03-13", "billing_cycle": "Monthly", "sales_rep": "Andreas Aasen"},
+# ─── Onboarding Queue (extracted from Attio — all workspaces in onboarding stages with active subs) ──
+ONBOARDING_ATTIO = [
+    # ── Onboarding Booked (active subs) ──
+    {"record_id": "01ff8d4b-deaf-4ca1-aa20-8fe32a5570a4", "name": "POWDR", "pod": "Nicklas+Hamsa", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "0e6e0d0a-2d82-496c-9d91-c96cecad5b23", "name": "theintelligenthealth.com", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": ""},
+    {"record_id": "4c5b0e94-1d3c-404b-984f-bcf5db2fc8f6", "name": "equacare.com.au", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "54cc5e11-c8ad-4aee-8934-468c70422686", "name": "Aleavia", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "a11461e3-41d3-4852-9bde-10b82085dc14", "name": "fjorda.com", "pod": "Aimy+Espen", "plan": "Growth", "arr": 12000, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "a92d5039-ff0b-4cd4-9c31-0564d9954121", "name": "CORE7 by Ampelis", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "ae5a4ac5-d5d5-5422-a3d3-41701f47b32a", "name": "Silver State Foundry", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "bb0172b5-5057-48dc-bd9c-84b6cfb50ed3", "name": "lilcactus.com", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "7d4d4d3d-1190-4af7-ad4b-672ebc50ae5e", "name": "luglife.com", "pod": "Nicklas+Hamsa", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "dbd807b7-1077-4e84-92b6-726b2b089c04", "name": "motocross4u.com", "pod": "Aimy+Espen", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "e6e89eae-d286-44e5-b1b9-282c7b23bf70", "name": "Company of Scott McKearn", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "f56e65c0-3186-412c-a3b2-0b46722b119f", "name": "Combat Corner Norge", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Booked", "onboarding_date": "2026-02-18"},
+    {"record_id": "2d8ec473-002f-4ae8-8b10-e9f63ef5d809", "name": "Superoom", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "stage": "Booked", "onboarding_date": ""},
+    {"record_id": "8bf71f1d-8e9f-49e2-8e4d-01860ef0d2d4", "name": "MiceDirect", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Booked", "onboarding_date": ""},
+    {"record_id": "af91cc65-c372-57fc-bb04-8a2403877013", "name": "LaMaria", "pod": "Unassigned", "plan": "Lite", "arr": 6000, "stage": "Booked", "onboarding_date": ""},
+    {"record_id": "b1c3db34-db0c-4211-ba06-2c15e8dfad5b", "name": "Peonie Collection", "pod": "Aimy+Espen", "plan": "Growth", "arr": 12000, "stage": "Booked", "onboarding_date": ""},
+    # ── Onboarding Held (active/past_due subs) ──
+    {"record_id": "33e2be14-cbc1-440f-a2f3-05c0ae04dc3f", "name": "Chinook Auto Supplies", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "43d2ae6d-8126-4251-ac12-3997602b41ed", "name": "Amalgam Official", "pod": "Sebastian+Daniel", "plan": "Pro", "arr": 28788, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "4575d290-197d-4435-9da7-aec814b0a6bb", "name": "Vansta Tradgard", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "48bd8d85-5e79-5e74-8e2a-66ae1f213899", "name": "Stella & Dot Jewelry", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "85b56072-86dd-418b-bfa4-c824632b9205", "name": "Modkat", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "bd55f673-eac9-491f-9c8d-f727c0ca3ee5", "name": "AnyiproWest", "pod": "Sebastian+Daniel", "plan": "Pro", "arr": 28788, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "c15952d5-9e98-4806-b099-84290b15db85", "name": "Dr. Paws Choice", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "c1cc9697-0ce1-4053-93d9-62cb555852e9", "name": "DearlyDone", "pod": "Aimy+Espen", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "caab7146-d7b9-4b81-85fd-4e9a4eceb2fc", "name": "The Final Chapter", "pod": "Sebastian+Daniel", "plan": "Pro", "arr": 28788, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "d920fb32-f0a7-4948-ba70-7fac9859dfec", "name": "Cavvalure", "pod": "Aimy+Espen", "plan": "Pro", "arr": 28788, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "df853d44-54e0-4206-b671-f17296435390", "name": "Rudy Santayana Fine Jewelry", "pod": "Marcus+Martin", "plan": "Pro", "arr": 28788, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "e0b7539c-dc24-43e6-8d48-0cf544e62890", "name": "AmericUrn", "pod": "Aimy+Espen", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "f50b1b82-eab3-4b9c-b7aa-7c7e59ac346b", "name": "AGCF", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "stage": "Held", "onboarding_date": "2026-01-27"},
+    {"record_id": "1f5f0315-5911-4317-bb5f-43f938512ef9", "name": "DeenFuel", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "57cd81bd-dfb6-4451-aa58-630f53f0c09d", "name": "RAWDOSE", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "65d3e7c3-431c-4bb2-85fd-df8487b6c344", "name": "Barisi International", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "661926df-b314-4cff-9e15-34f29f38b84f", "name": "SolarEnergyLightingUS", "pod": "Sebastian+Daniel", "plan": "Performance", "arr": 47988, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "739e4efd-1208-4e01-bb68-fecbd2948bf6", "name": "AlphaCell Labs", "pod": "Sebastian+Daniel", "plan": "Performance", "arr": 47988, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "86af0b37-ed92-4ccb-b25b-7c4fb78fc5d2", "name": "Cologne Butter", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "8b1ca73f-477d-4b0b-a386-9e39f42f87da", "name": "Raging Bull", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "93c22485-bdaf-49dc-bab4-d480195ea971", "name": "Darzi Clothing Company", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "95af3351-46c7-4712-8cc2-a56b48506a03", "name": "Company of Johannes Bittag", "pod": "Sebastian+Daniel", "plan": "Performance", "arr": 47988, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "acede250-9bed-432c-85af-13908d1d5b5e", "name": "Teddy Stratford", "pod": "Marcus+Martin", "plan": "Performance", "arr": 47988, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "b691abee-1673-4605-8f1a-69a15935447f", "name": "bathroomsalesdirect.com.au", "pod": "Sebastian+Daniel", "plan": "Performance", "arr": 47988, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "b6ba0f85-9344-4168-8b7d-1088809e2543", "name": "Bean Bros", "pod": "Nicklas+Hamsa", "plan": "Growth", "arr": 12000, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "d8f9e40a-08b8-4cf4-8379-8401f5a88a5b", "name": "botaneco.com", "pod": "Sebastian+Daniel", "plan": "Performance", "arr": 47988, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "f344e25f-9ea2-4515-b8a4-ca12d6fdd593", "name": "Company of Philomina Kane", "pod": "Sebastian+Daniel", "plan": "Pro", "arr": 28788, "stage": "Held", "onboarding_date": ""},
+    {"record_id": "f49cd3ed-7075-42fe-9439-a57dac83726b", "name": "Momentko", "pod": "Nicklas+Hamsa", "plan": "Starter", "arr": 3899, "stage": "Held", "onboarding_date": ""},
 ]
 
 # ─── Churn Context (extracted from Attio calls/emails/CSM fields) ────────────
@@ -864,89 +903,40 @@ def compute_daily_churn(workspaces):
 # ─── Onboarding Queue ────────────────────────────────────────────────────────────
 
 def compute_onboarding_queue(workspaces):
-    """Find workspaces with future onboarding dates and compute days since first payment."""
-    today_str = TODAY.isoformat()
+    """Build onboarding queue from ONBOARDING_ATTIO data (all workspaces in onboarding stages)."""
     queue = []
     seen_ids = set()
-    # First pass: workspaces from main data
-    for ws in workspaces:
-        ob_date = ws.get("onboarding_date")
-        if not ob_date or ob_date < today_str:
+    for entry in ONBOARDING_ATTIO:
+        record_id = entry["record_id"]
+        if record_id in seen_ids:
             continue
-        seen_ids.add(ws["record_id"])
-        record_id = ws["record_id"]
+        seen_ids.add(record_id)
+        ob_date = entry.get("onboarding_date") or ""
         start_date = SUBSCRIPTION_START_DATES.get(record_id) or ""
-        days_gap = ""
-        if start_date and ob_date:
+        days_waiting = ""
+        if start_date:
             try:
                 sd = date.fromisoformat(start_date)
-                od = date.fromisoformat(ob_date)
-                days_gap = (od - sd).days
+                days_waiting = (TODAY - sd).days
             except ValueError:
-                days_gap = ""
-        days_until = ""
-        try:
-            od = date.fromisoformat(ob_date)
-            days_until = (od - TODAY).days
-        except ValueError:
-            pass
+                pass
         queue.append({
             "record_id": record_id,
-            "name": ws["name"],
-            "pod": ws["pod"],
-            "plan": ws.get("plan", ""),
-            "arr": ws.get("arr", 0),
-            "mrr": ws.get("mrr", 0),
+            "name": entry["name"],
+            "pod": entry["pod"],
+            "plan": entry.get("plan", ""),
+            "arr": entry.get("arr", 0),
+            "stage": entry.get("stage", "Booked"),
             "onboarding_date": ob_date,
             "start_date": start_date,
-            "days_gap": days_gap,
-            "days_until": days_until,
-            "last_payment": "",
-            "renewal_date": "",
-            "billing_cycle": "",
-            "sales_rep": "",
+            "days_waiting": days_waiting,
         })
-    # Add supplemental onboarding records not in main workspace data
-    for extra in ONBOARDING_QUEUE_EXTRA:
-        if extra["record_id"] in seen_ids:
-            continue
-        ob_date = extra["onboarding_date"]
-        if ob_date < today_str:
-            continue
-        record_id = extra["record_id"]
-        start_date = extra.get("start_date") or SUBSCRIPTION_START_DATES.get(record_id) or ""
-        days_gap = ""
-        if start_date and ob_date:
-            try:
-                sd = date.fromisoformat(start_date)
-                od = date.fromisoformat(ob_date)
-                days_gap = (od - sd).days
-            except ValueError:
-                days_gap = ""
-        days_until = ""
-        try:
-            od = date.fromisoformat(ob_date)
-            days_until = (od - TODAY).days
-        except ValueError:
-            pass
-        queue.append({
-            "record_id": record_id,
-            "name": extra["name"],
-            "pod": extra["pod"],
-            "plan": extra.get("plan", ""),
-            "arr": extra.get("arr", 0),
-            "mrr": extra.get("mrr", 0),
-            "onboarding_date": ob_date,
-            "start_date": start_date,
-            "days_gap": days_gap,
-            "days_until": days_until,
-            "last_payment": extra.get("last_payment", ""),
-            "renewal_date": extra.get("renewal_date", ""),
-            "billing_cycle": extra.get("billing_cycle", ""),
-            "sales_rep": extra.get("sales_rep", ""),
-        })
-    # Sort by onboarding date ascending (soonest first)
-    queue.sort(key=lambda x: x["onboarding_date"])
+    # Sort: Booked before Held, then by onboarding date (dated first, then undated)
+    def sort_key(x):
+        stage_order = 0 if x["stage"] == "Booked" else 1
+        has_date = 0 if x["onboarding_date"] else 1
+        return (stage_order, has_date, x["onboarding_date"] or "9999")
+    queue.sort(key=sort_key)
 
     # Build JS array
     js_items = []
@@ -954,15 +944,11 @@ def compute_onboarding_queue(workspaces):
         n_esc = q["name"].replace("\\", "\\\\").replace("'", "\\'")
         js_items.append(
             f"{{ri:'{q['record_id']}',n:'{n_esc}',pod:'{q['pod']}',"
-            f"pl:'{q['plan']}',arr:{q['arr']},mrr:{q.get('mrr', 0)},"
-            f"ob:'{q['onboarding_date']}',sd:'{q['start_date']}',"
-            f"lp:'{q.get('last_payment', '')}',rd:'{q.get('renewal_date', '')}',"
-            f"bc:'{q.get('billing_cycle', '')}',"
-            f"sr:'{q.get('sales_rep', '')}',"
-            f"gap:{q['days_gap'] if q['days_gap'] != '' else 'null'},"
-            f"until:{q['days_until'] if q['days_until'] != '' else 'null'}}}"
+            f"pl:'{q['plan']}',arr:{q['arr']},"
+            f"stg:'{q['stage']}',ob:'{q['onboarding_date']}',sd:'{q['start_date']}',"
+            f"dw:{q['days_waiting'] if q['days_waiting'] != '' else 'null'}}}"
         )
-    print(f"  Onboarding queue: {len(queue)} upcoming onboardings")
+    print(f"  Onboarding queue: {len(queue)} workspaces in onboarding")
     return "const ONBOARD=[" + ",".join(js_items) + "];"
 
 
@@ -1380,7 +1366,7 @@ tailwind.config = {{
   <div id="tabOnboard" class="tab-panel fade-in">
     <div class="mb-6">
       <h1 class="text-3xl sm:text-4xl font-800 text-white mb-1">Onboarding Queue</h1>
-      <p class="text-dark-400 text-sm">Upcoming onboardings &mdash; sorted by date, soonest first</p>
+      <p class="text-dark-400 text-sm">All workspaces in onboarding stages &mdash; booked first, then held</p>
     </div>
     <div id="onboardList"></div>
   </div>
@@ -1523,14 +1509,22 @@ function fallbackDownload(canvas,btn,origText){{
 function renderOnboard(){{
   const el=document.getElementById('onboardList');
   if(!ONBOARD.length){{
-    el.innerHTML='<div class="glass rounded-xl p-6 text-center"><p class="text-dark-400">No upcoming onboardings scheduled.</p></div>';
+    el.innerHTML='<div class="glass rounded-xl p-6 text-center"><p class="text-dark-400">No workspaces in onboarding.</p></div>';
     return;
   }}
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  function fmtD(s){{if(!s)return'<span class="text-dark-600">&mdash;</span>';const d=new Date(s+'T00:00:00');return months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();}}
-  function gapColor(g){{if(g===null)return'text-dark-500';if(g<=3)return'text-emerald-400';if(g<=7)return'text-amber-400';return'text-red-400';}}
-  function untilBadge(u){{if(u===null)return'';if(u===0)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">Today</span>';if(u===1)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">Tomorrow</span>';if(u<=7)return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">'+u+' days</span>';return'<span class="ml-2 text-xs font-600 px-2 py-0.5 rounded bg-dark-700 text-dark-400">'+u+' days</span>';}}
+  function fmtD(s){{if(!s)return'<span class="text-dark-600">TBD</span>';const d=new Date(s+'T00:00:00');return months[d.getMonth()]+' '+d.getDate();}}
+  function waitColor(d){{if(d===null)return'text-dark-500';if(d<=7)return'text-emerald-400';if(d<=14)return'text-amber-400';return'text-red-400';}}
+  function stagePill(s){{return s==='Held'?'<span class="text-xs font-600 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Held</span>':'<span class="text-xs font-600 px-2 py-0.5 rounded bg-amber-500/15 text-amber-400">Booked</span>';}}
+  const booked=ONBOARD.filter(q=>q.stg==='Booked');
+  const held=ONBOARD.filter(q=>q.stg==='Held');
+  const totalArr=ONBOARD.reduce((s,q)=>s+q.arr,0);
   el.innerHTML=`
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="glass rounded-xl p-4"><p class="text-dark-500 text-xs font-600 uppercase tracking-wider mb-1">Total in Onboarding</p><p class="text-2xl font-800 text-white">${{ONBOARD.length}}</p><p class="text-dark-500 text-xs mt-1">${{booked.length}} booked &middot; ${{held.length}} held</p></div>
+      <div class="glass rounded-xl p-4"><p class="text-dark-500 text-xs font-600 uppercase tracking-wider mb-1">Onboarding ARR</p><p class="text-2xl font-800 text-white">${{fmt(totalArr)}}</p></div>
+      <div class="glass rounded-xl p-4"><p class="text-dark-500 text-xs font-600 uppercase tracking-wider mb-1">No Date Scheduled</p><p class="text-2xl font-800 ${{ONBOARD.filter(q=>!q.ob).length>0?'text-amber-400':'text-emerald-400'}}">${{ONBOARD.filter(q=>!q.ob).length}}</p><p class="text-dark-500 text-xs mt-1">of ${{ONBOARD.length}} workspaces</p></div>
+    </div>
     <div class="glass rounded-xl overflow-hidden overflow-x-auto scrollbar-thin">
       <table class="w-full text-sm">
         <thead><tr class="border-b border-dark-800">
@@ -1538,34 +1532,28 @@ function renderOnboard(){{
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Customer</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Pod</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Plan</th>
-          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Sales Rep</th>
           <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">ARR</th>
-          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">First Payment</th>
-          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding</th>
-          <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider cursor-help" title="Days between first Stripe payment and onboarding call. Lower is better — long waits increase early churn risk.">Wait Time</th>
-          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Billing Period</th>
-          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Renewal</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Stage</th>
+          <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding Date</th>
+          <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider cursor-help" title="Days since first Stripe payment. Higher = longer the customer has been paying without being onboarded.">Days Waiting</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Links</th>
         </tr></thead>
         <tbody>
           ${{ONBOARD.map((q,i)=>`<tr class="border-b border-dark-800/50 hover:bg-dark-800/30 transition-colors">
             <td class="px-3 py-3 text-dark-500 text-xs">${{i+1}}</td>
             <td class="px-3 py-3 font-600 text-white">${{q.n}}</td>
-            <td class="px-3 py-3 text-dark-400 text-xs">${{(POD_DISPLAY[q.pod]||q.pod)}}</td>
+            <td class="px-3 py-3 text-dark-400 text-xs">${{(POD_DISPLAY[q.pod]||q.pod||'Unassigned')}}</td>
             <td class="px-3 py-3 text-dark-400 text-xs">${{q.pl||'&mdash;'}}</td>
-            <td class="px-3 py-3 text-dark-400 text-xs">${{q.sr||'&mdash;'}}</td>
-            <td class="px-3 py-3 text-right text-white font-600">${{q.mrr?'$'+q.mrr.toLocaleString():'&mdash;'}}</td>
-            <td class="px-3 py-3 text-dark-400 text-xs">${{fmtD(q.sd)}}</td>
-            <td class="px-3 py-3 text-white text-xs">${{fmtD(q.ob)}}${{untilBadge(q.until)}}</td>
-            <td class="px-3 py-3 text-right"><span class="font-600 ${{gapColor(q.gap)}}">${{q.gap!==null?q.gap+' days':'&mdash;'}}</span></td>
-            <td class="px-3 py-3 text-dark-400 text-xs">${{q.lp&&q.rd?fmtD(q.lp)+' &rarr; '+fmtD(q.rd):'&mdash;'}}</td>
-            <td class="px-3 py-3 text-dark-400 text-xs">${{fmtD(q.rd)}}${{q.bc?' <span class="text-dark-600">('+q.bc+')</span>':''}}</td>
+            <td class="px-3 py-3 text-right text-white font-600">${{q.arr?'$'+q.arr.toLocaleString():'&mdash;'}}</td>
+            <td class="px-3 py-3">${{stagePill(q.stg)}}</td>
+            <td class="px-3 py-3 text-white text-xs">${{fmtD(q.ob)}}</td>
+            <td class="px-3 py-3 text-right"><span class="font-600 ${{waitColor(q.dw)}}">${{q.dw!==null?q.dw+'d':'&mdash;'}}</span></td>
             <td class="px-3 py-3"><span class="inline-flex gap-2"><a href="https://app.attio.com/metric/workspaces/record/${{q.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a></span></td>
           </tr>`).join('')}}
         </tbody>
       </table>
     </div>
-    <p class="text-dark-600 text-xs text-center mt-4">${{ONBOARD.length}} customer${{ONBOARD.length!==1?'s':''}} in onboarding queue</p>`;
+    <p class="text-dark-600 text-xs text-center mt-4">${{ONBOARD.length}} workspace${{ONBOARD.length!==1?'s':''}} in onboarding pipeline</p>`;
 }}
 
 function toggleChurn(id,el){{
