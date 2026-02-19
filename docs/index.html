@@ -329,10 +329,10 @@ tailwind.config = {
   <!-- Pod Tabs -->
   <div class="flex flex-wrap gap-2 mb-6 fade-in" style="animation-delay:0.05s" id="podTabs">
     <button onclick="selectPod('all')" class="pod-tab active px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50" data-pod="all">All Pods (234)</button>
-    <button onclick="selectPod('Marcus+Martin')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Marcus+Martin">Angus <span class="text-dark-600 text-xs">(Marcus &amp; Martin)</span> (82)</button>
-    <button onclick="selectPod('Sebastian+Daniel')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Sebastian+Daniel">Belgian Blue <span class="text-dark-600 text-xs">(Sebastian &amp; Daniel)</span> (79)</button>
-    <button onclick="selectPod('Aimy+Espen')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Aimy+Espen">Charolais <span class="text-dark-600 text-xs">(Aimy &amp; Espen)</span> (16)</button>
-    <button onclick="selectPod('Nicklas+Hamsa')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Nicklas+Hamsa">Buffalo <span class="text-dark-600 text-xs">(Nicklas &amp; Hamsa)</span> (57)</button>
+    <button onclick="selectPod('Marcus+Martin')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Marcus+Martin">Angus <span class="text-dark-600 text-xs">Perf &amp; Pro &middot; Marcus &amp; Martin</span> (82)</button>
+    <button onclick="selectPod('Sebastian+Daniel')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Sebastian+Daniel">Belgian Blue <span class="text-dark-600 text-xs">Pro &amp; Growth &middot; Sebastian &amp; Daniel</span> (79)</button>
+    <button onclick="selectPod('Aimy+Espen')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Aimy+Espen">Charolais <span class="text-dark-600 text-xs">Growth &middot; Aimy &amp; Espen</span> (16)</button>
+    <button onclick="selectPod('Nicklas+Hamsa')" class="pod-tab px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/30 text-dark-500 border border-dark-800/30" data-pod="Nicklas+Hamsa">Buffalo <span class="text-dark-600 text-xs">Growth &amp; Starter &middot; Nicklas &amp; Hamsa</span> (57)</button>
   </div>
 
   <!-- KPI Cards (dynamic) -->
@@ -712,7 +712,7 @@ function renderDailyCards(){
           <span class="text-dark-500 text-sm font-600">#${rank}</span>
           ${medal?'<span class="text-xl">'+medal+'</span>':''}
           <div>
-            <p class="text-base font-700 text-white">${POD_DISPLAY[pod]||pod}</p>
+            <p class="text-base font-700 text-white">${POD_DISPLAY[pod]||pod} <span class="text-dark-500 text-xs font-500 uppercase">${POD_SEGMENT[pod]||''}</span></p>
             <p class="text-dark-500 text-xs">${POD_MEMBERS[pod]||pod.replace('+',' + ')}</p>
           </div>
         </div>
@@ -831,6 +831,7 @@ function tierCls(t){return{1:'tier-1-row',2:'tier-2-row',3:'tier-3-row',4:'tier-
 function podLabel(p){return POD_DISPLAY[p]||p;}
 const POD_DISPLAY={'Marcus+Martin':'Angus','Sebastian+Daniel':'Belgian Blue','Aimy+Espen':'Charolais','Nicklas+Hamsa':'Buffalo'};
 const POD_MEMBERS={'Marcus+Martin':'Marcus & Martin','Sebastian+Daniel':'Sebastian & Daniel','Aimy+Espen':'Aimy & Espen','Nicklas+Hamsa':'Nicklas & Hamsa'};
+const POD_SEGMENT={'Marcus+Martin':'Perf & Pro','Sebastian+Daniel':'Pro & Growth','Aimy+Espen':'Growth','Nicklas+Hamsa':'Growth & Starter'};
 function podColor(p){const m={'Marcus+Martin':'blue','Sebastian+Daniel':'purple','Aimy+Espen':'pink','Nicklas+Hamsa':'teal'};return m[p]||'blue';}
 function stripeLink(wsId){if(!wsId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://dashboard.stripe.com/subscriptions/${wsId}" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>`;}
 function attioLink(recId){if(!recId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://app.attio.com/metric/workspaces/record/${recId}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>`;}
