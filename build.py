@@ -66,7 +66,7 @@ ONBOARDING_ATTIO = [
 # record_id -> {summary, source}
 CHURN_CONTEXT = {
     "31f36ad0-1ee1-53ba-bb70-884b70900da9": {
-        "summary": "Ghosted — unable to reach client, no campaigns running, doesn't open emails",
+        "summary": "Ghosted - unable to reach client, no campaigns running, doesn't open emails",
         "source": "csm_field",
     },
     "3d95ba46-68d0-5e96-99e7-36ab16f57f9b": {
@@ -912,14 +912,6 @@ def compute_onboarding_queue(workspaces):
             continue
         seen_ids.add(record_id)
         ob_date = entry.get("onboarding_date") or ""
-        start_date = SUBSCRIPTION_START_DATES.get(record_id) or ""
-        days_waiting = ""
-        if start_date:
-            try:
-                sd = date.fromisoformat(start_date)
-                days_waiting = (TODAY - sd).days
-            except ValueError:
-                pass
         queue.append({
             "record_id": record_id,
             "name": entry["name"],
@@ -928,8 +920,6 @@ def compute_onboarding_queue(workspaces):
             "arr": entry.get("arr", 0),
             "stage": entry.get("stage", "Booked"),
             "onboarding_date": ob_date,
-            "start_date": start_date,
-            "days_waiting": days_waiting,
         })
     # Sort: Booked before Held, then by onboarding date (dated first, then undated)
     def sort_key(x):
@@ -945,8 +935,7 @@ def compute_onboarding_queue(workspaces):
         js_items.append(
             f"{{ri:'{q['record_id']}',n:'{n_esc}',pod:'{q['pod']}',"
             f"pl:'{q['plan']}',arr:{q['arr']},"
-            f"stg:'{q['stage']}',ob:'{q['onboarding_date']}',sd:'{q['start_date']}',"
-            f"dw:{q['days_waiting'] if q['days_waiting'] != '' else 'null'}}}"
+            f"stg:'{q['stage']}',ob:'{q['onboarding_date']}'}}"
         )
     print(f"  Onboarding queue: {len(queue)} workspaces in onboarding")
     return "const ONBOARD=[" + ",".join(js_items) + "];"
@@ -1092,7 +1081,7 @@ tailwind.config = {{
         <button onclick="document.getElementById('infoDailyPage').classList.toggle('hidden')" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-dark-800/50 text-dark-400 border border-dark-700/50 hover:bg-dark-700 hover:text-dark-200 transition">How This Works</button>
         <button id="btnCopyImg" onclick="copyDailyAsImage()" class="shrink-0 px-4 py-2 rounded-lg text-sm font-600 bg-sky-600/20 text-sky-400 border border-sky-500/30 hover:bg-sky-600/30 hover:text-sky-300 transition">&#128247; Copy as Image</button>
       </div>
-      <p class="text-dark-400 text-sm">Feb 17, 2026 &mdash; Yesterday's churn summary across all pods</p>
+      <p class="text-dark-400 text-sm">Feb 17, 2026 - Yesterday's churn summary across all pods</p>
     </div>
 
     <!-- Daily Info Page (hidden by default) -->
@@ -1110,13 +1099,13 @@ tailwind.config = {{
           <h3 class="text-base font-700 text-white mb-2">How pods are ranked</h3>
           <p class="text-dark-300 leading-relaxed">Pods are ranked best-to-worst each day using two simple rules:</p>
           <ol class="text-dark-300 leading-relaxed list-decimal list-inside mt-2 space-y-1">
-            <li><strong class="text-white">Least ARR churned</strong> &mdash; the pod that lost the least revenue ranks highest.</li>
-            <li><strong class="text-white">Most ARR under management</strong> &mdash; if two pods tied on churn, the one managing more total ARR ranks higher.</li>
+            <li><strong class="text-white">Least ARR churned</strong> - the pod that lost the least revenue ranks highest.</li>
+            <li><strong class="text-white">Most ARR under management</strong> - if two pods tied on churn, the one managing more total ARR ranks higher.</li>
           </ol>
         </div>
         <div>
           <h3 class="text-base font-700 text-white mb-2">Medals</h3>
-          <p class="text-dark-300 leading-relaxed">The top 3 pods receive gold, silver, and bronze medals. This resets every day &mdash; yesterday's winner starts fresh today.</p>
+          <p class="text-dark-300 leading-relaxed">The top 3 pods receive gold, silver, and bronze medals. This resets every day - yesterday's winner starts fresh today.</p>
         </div>
         <div>
           <h3 class="text-base font-700 text-white mb-2">Churn details</h3>
@@ -1159,13 +1148,13 @@ tailwind.config = {{
       <!-- What is this? -->
       <div>
         <h3 class="text-base font-700 text-white mb-2">What is this dashboard?</h3>
-        <p class="text-dark-300 leading-relaxed">This dashboard helps CSM (Customer Success Manager) team leads decide <strong class="text-white">where to spend their team's time</strong>. We manage ~{total_ws} client workspaces across 4 pods. Each pod is a pair of CSMs: one &ldquo;front-end&rdquo; (client-facing, runs meetings) and one &ldquo;back-end&rdquo; (operations, campaign setup, creatives). Not every client deserves equal attention &mdash; this tool ranks them by how much long-term value they represent, so CSMs focus on the clients that matter most.</p>
+        <p class="text-dark-300 leading-relaxed">This dashboard helps CSM (Customer Success Manager) team leads decide <strong class="text-white">where to spend their team's time</strong>. We manage ~{total_ws} client workspaces across 4 pods. Each pod is a pair of CSMs: one &ldquo;front-end&rdquo; (client-facing, runs meetings) and one &ldquo;back-end&rdquo; (operations, campaign setup, creatives). Not every client deserves equal attention - this tool ranks them by how much long-term value they represent, so CSMs focus on the clients that matter most.</p>
       </div>
 
       <!-- The big idea -->
       <div>
         <h3 class="text-base font-700 text-white mb-2">The big idea: Priority = Lifetime Value &divide; Effort</h3>
-        <p class="text-dark-300 leading-relaxed mb-3">Every workspace gets a <strong class="text-white">Priority Index</strong> score. This is simply: <em>how much is this client worth to us over the next 2 years, divided by how much CSM time they need?</em> High-value, low-effort clients rank highest. At-risk clients that need heavy investment rank lower &mdash; unless saving them protects a lot of revenue.</p>
+        <p class="text-dark-300 leading-relaxed mb-3">Every workspace gets a <strong class="text-white">Priority Index</strong> score. This is simply: <em>how much is this client worth to us over the next 2 years, divided by how much CSM time they need?</em> High-value, low-effort clients rank highest. At-risk clients that need heavy investment rank lower - unless saving them protects a lot of revenue.</p>
         <p class="text-dark-300 leading-relaxed">Workspaces are grouped into 4 tiers based on this score:</p>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
           <div class="rounded-lg p-3 border-l-3 border-emerald-500 bg-emerald-500/5">
@@ -1214,7 +1203,7 @@ tailwind.config = {{
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">Health (1-5 stars)</p>
-            <p class="text-dark-400 text-xs mt-1">The CSM's gut-check rating of the client relationship. 5 = happy client, strong results. 3 = needs work. 1 = about to leave. &ldquo;Not rated&rdquo; means the CSM hasn't assessed this client yet &mdash; a blind spot.</p>
+            <p class="text-dark-400 text-xs mt-1">The CSM's gut-check rating of the client relationship. 5 = happy client, strong results. 3 = needs work. 1 = about to leave. &ldquo;Not rated&rdquo; means the CSM hasn't assessed this client yet - a blind spot.</p>
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">Customer Score (1-3)</p>
@@ -1222,7 +1211,7 @@ tailwind.config = {{
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">Start Date</p>
-            <p class="text-dark-400 text-xs mt-1">Subscription start date from Stripe (date of first payment). Longer tenure means more confidence in retention &mdash; clients who have been with us 18+ months get up to a 1.2x retention boost. New clients (&lt;1 month) get a 0.9x penalty since they haven't proven commitment yet.</p>
+            <p class="text-dark-400 text-xs mt-1">Subscription start date from Stripe (date of first payment). Longer tenure means more confidence in retention - clients who have been with us 18+ months get up to a 1.2x retention boost. New clients (&lt;1 month) get a 0.9x penalty since they haven't proven commitment yet.</p>
           </div>
           <div class="bg-dark-800/30 rounded-lg p-3">
             <p class="text-white font-600">ROAS (ATD)</p>
@@ -1253,14 +1242,14 @@ tailwind.config = {{
         <p class="text-dark-400 mb-3">Quick-glance labels that flag important things about a client:</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
           <div class="flex gap-3 items-start"><span class="signal-tag bg-red-500/10 text-red-400 shrink-0">CHURN</span><p class="text-dark-400">Client is at risk of leaving. Their subscription is cancelled or overdue, or they've been explicitly flagged as a churn risk.</p></div>
-          <div class="flex gap-3 items-start"><span class="signal-tag bg-amber-500/10 text-amber-400 shrink-0">IDLE</span><p class="text-dark-400">No active ad campaigns for 20+ days. If a client isn't running ads, they're not seeing value from our service &mdash; churn risk increases.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-amber-500/10 text-amber-400 shrink-0">IDLE</span><p class="text-dark-400">No active ad campaigns for 20+ days. If a client isn't running ads, they're not seeing value from our service - churn risk increases.</p></div>
           <div class="flex gap-3 items-start"><span class="signal-tag bg-orange-500/10 text-orange-400 shrink-0">INT.ERR</span><p class="text-dark-400">A technical integration with the client's store is broken. Until this is fixed, we can't deliver value. Needs engineering attention.</p></div>
           <div class="flex gap-3 items-start"><span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">ROAS&#9733;</span><p class="text-dark-400">Excellent all-time ROAS (8x+). This client's ads are performing very well. A star performer worth protecting.</p></div>
           <div class="flex gap-3 items-start"><span class="signal-tag bg-blue-500/10 text-blue-400 shrink-0">ROAS&#10003;</span><p class="text-dark-400">Good all-time ROAS (2x-8x). Ads are working, client should be seeing value. Solid performer.</p></div>
           <div class="flex gap-3 items-start"><span class="signal-tag bg-emerald-500/10 text-emerald-400 shrink-0">LTV UP</span><p class="text-dark-400">The CSM believes this client has untapped potential. Given more time and attention, the return could be significant. Prioritize.</p></div>
           <div class="flex gap-3 items-start"><span class="signal-tag bg-cyan-500/10 text-cyan-400 shrink-0">UPSELL</span><p class="text-dark-400">Client's usage or business size suggests they should be on a higher plan. E.g. a $500K/mo Shopify store on a $9K Growth plan.</p></div>
-          <div class="flex gap-3 items-start"><span class="signal-tag bg-teal-500/10 text-teal-400 shrink-0">REVSHARE</span><p class="text-dark-400">We have a revenue-share agreement with this client &mdash; we earn a % of their ad-driven revenue. Aligned incentives: the better they do, the more we earn.</p></div>
-          <div class="flex gap-3 items-start"><span class="signal-tag bg-dark-700 text-dark-300 shrink-0">NEW</span><p class="text-dark-400">New client still in onboarding or with very limited data. Too early to judge performance &mdash; needs time to ramp up.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-teal-500/10 text-teal-400 shrink-0">REVSHARE</span><p class="text-dark-400">We have a revenue-share agreement with this client - we earn a % of their ad-driven revenue. Aligned incentives: the better they do, the more we earn.</p></div>
+          <div class="flex gap-3 items-start"><span class="signal-tag bg-dark-700 text-dark-300 shrink-0">NEW</span><p class="text-dark-400">New client still in onboarding or with very limited data. Too early to judge performance - needs time to ramp up.</p></div>
         </div>
       </div>
 
@@ -1291,7 +1280,7 @@ tailwind.config = {{
         <h3 class="text-base font-700 text-white mb-2">Important caveats</h3>
         <ul class="text-dark-400 space-y-2 list-disc list-inside">
           <li><strong class="text-dark-300">ARR is estimated, not exact.</strong> We use plan-level averages, not actual subscription amounts. Individual pricing deals may differ.</li>
-          <li><strong class="text-dark-300">Unrated clients are a blind spot.</strong> Workspaces without a health rating default to 65% retention &mdash; this may overstate weak clients or understate strong ones. Rating all clients is the single highest-impact action any CSM can take.</li>
+          <li><strong class="text-dark-300">Unrated clients are a blind spot.</strong> Workspaces without a health rating default to 65% retention - this may overstate weak clients or understate strong ones. Rating all clients is the single highest-impact action any CSM can take.</li>
           <li><strong class="text-dark-300">Shopify sales are a 30-day snapshot.</strong> Seasonal businesses may look artificially high or low depending on the time of year.</li>
           <li><strong class="text-dark-300">Customer Score is subjective.</strong> The est_ltv field (Customer Score 1-3) reflects the CSM's own assessment of potential. It directly influences the growth multiplier in the LTV model. Keeping this up to date helps the model surface the right priorities.</li>
           <li><strong class="text-dark-300">The model is directional, not exact.</strong> Use it to guide priorities and spot patterns, not as the final word. CSM judgment and context always matter.</li>
@@ -1366,7 +1355,7 @@ tailwind.config = {{
   <div id="tabOnboard" class="tab-panel fade-in">
     <div class="mb-6">
       <h1 class="text-3xl sm:text-4xl font-800 text-white mb-1">Onboarding Queue</h1>
-      <p class="text-dark-400 text-sm">All workspaces in onboarding stages &mdash; booked first, then held</p>
+      <p class="text-dark-400 text-sm">All workspaces in onboarding stages - booked first, then held</p>
     </div>
     <div id="onboardList"></div>
   </div>
@@ -1514,7 +1503,6 @@ function renderOnboard(){{
   }}
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function fmtD(s){{if(!s)return'<span class="text-dark-600">TBD</span>';const d=new Date(s+'T00:00:00');return months[d.getMonth()]+' '+d.getDate();}}
-  function waitColor(d){{if(d===null)return'text-dark-500';if(d<=7)return'text-emerald-400';if(d<=14)return'text-amber-400';return'text-red-400';}}
   function stagePill(s){{return s==='Held'?'<span class="text-xs font-600 px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Held</span>':'<span class="text-xs font-600 px-2 py-0.5 rounded bg-amber-500/15 text-amber-400">Booked</span>';}}
   const booked=ONBOARD.filter(q=>q.stg==='Booked');
   const held=ONBOARD.filter(q=>q.stg==='Held');
@@ -1535,7 +1523,6 @@ function renderOnboard(){{
           <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider">ARR</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Stage</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Onboarding Date</th>
-          <th class="px-3 py-3 text-right text-xs font-600 text-dark-400 uppercase tracking-wider cursor-help" title="Days since first Stripe payment. Higher = longer the customer has been paying without being onboarded.">Days Waiting</th>
           <th class="px-3 py-3 text-left text-xs font-600 text-dark-400 uppercase tracking-wider">Links</th>
         </tr></thead>
         <tbody>
@@ -1543,11 +1530,10 @@ function renderOnboard(){{
             <td class="px-3 py-3 text-dark-500 text-xs">${{i+1}}</td>
             <td class="px-3 py-3 font-600 text-white">${{q.n}}</td>
             <td class="px-3 py-3 text-dark-400 text-xs">${{(POD_DISPLAY[q.pod]||q.pod||'Unassigned')}}</td>
-            <td class="px-3 py-3 text-dark-400 text-xs">${{q.pl||'&mdash;'}}</td>
-            <td class="px-3 py-3 text-right text-white font-600">${{q.arr?'$'+q.arr.toLocaleString():'&mdash;'}}</td>
+            <td class="px-3 py-3 text-dark-400 text-xs">${{q.pl||'-'}}</td>
+            <td class="px-3 py-3 text-right text-white font-600">${{q.arr?'$'+q.arr.toLocaleString():'-'}}</td>
             <td class="px-3 py-3">${{stagePill(q.stg)}}</td>
             <td class="px-3 py-3 text-white text-xs">${{fmtD(q.ob)}}</td>
-            <td class="px-3 py-3 text-right"><span class="font-600 ${{waitColor(q.dw)}}">${{q.dw!==null?q.dw+'d':'&mdash;'}}</span></td>
             <td class="px-3 py-3"><span class="inline-flex gap-2"><a href="https://app.attio.com/metric/workspaces/record/${{q.ri}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a></span></td>
           </tr>`).join('')}}
         </tbody>
@@ -1561,11 +1547,11 @@ function toggleChurn(id,el){{
   document.getElementById(id).classList.toggle('open');
 }}
 
-function fmt(v){{if(!v)return'<span class="text-dark-600">&mdash;</span>';if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}}
-function fmtSh(v){{if(!v)return'<span class="text-dark-600">&mdash;</span>';if(v>=1e6)return'<span class="text-emerald-400 font-600">$'+(v/1e6).toFixed(1)+'M</span>';if(v>=1e5)return'<span class="text-emerald-400">$'+(v/1e3).toFixed(0)+'K</span>';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}}
+function fmt(v){{if(!v)return'<span class="text-dark-600">-</span>';if(v>=1e6)return'$'+(v/1e6).toFixed(1)+'M';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}}
+function fmtSh(v){{if(!v)return'<span class="text-dark-600">-</span>';if(v>=1e6)return'<span class="text-emerald-400 font-600">$'+(v/1e6).toFixed(1)+'M</span>';if(v>=1e5)return'<span class="text-emerald-400">$'+(v/1e3).toFixed(0)+'K</span>';if(v>=1e3)return'$'+(v/1e3).toFixed(0)+'K';return'$'+v;}}
 function stars(h){{if(h===null||h===undefined)return'<span class="text-dark-600 text-xs">Not rated</span>';const c={{1:'text-red-400',2:'text-orange-400',3:'text-amber-400',4:'text-emerald-400',5:'text-emerald-300'}};let s='';for(let i=1;i<=5;i++)s+=i<=h?'<span class="'+c[h]+'">\u2605</span>':'<span class="text-dark-700">\u2605</span>';return s;}}
-function csBadge(cs){{if(cs===null||cs===undefined)return'<span class="text-dark-600">&mdash;</span>';if(cs===3)return'<span class="signal-tag bg-emerald-500/10 text-emerald-400">3</span>';if(cs===2)return'<span class="signal-tag bg-blue-500/10 text-blue-400">2</span>';return'<span class="signal-tag bg-dark-700 text-dark-300">1</span>';}}
-function fmtDate(sd){{if(!sd)return'<span class="text-dark-600">&mdash;</span>';const d=new Date(sd+'T00:00:00');const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return'<span class="text-dark-400 text-xs">'+m[d.getMonth()]+' \\''+String(d.getFullYear()).slice(2)+'</span>';}}
+function csBadge(cs){{if(cs===null||cs===undefined)return'<span class="text-dark-600">-</span>';if(cs===3)return'<span class="signal-tag bg-emerald-500/10 text-emerald-400">3</span>';if(cs===2)return'<span class="signal-tag bg-blue-500/10 text-blue-400">2</span>';return'<span class="signal-tag bg-dark-700 text-dark-300">1</span>';}}
+function fmtDate(sd){{if(!sd)return'<span class="text-dark-600">-</span>';const d=new Date(sd+'T00:00:00');const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return'<span class="text-dark-400 text-xs">'+m[d.getMonth()]+' \\''+String(d.getFullYear()).slice(2)+'</span>';}}
 function retBadge(r){{const p=Math.round(r*100);let c='text-red-400 bg-red-500/10';if(p>=80)c='text-emerald-400 bg-emerald-500/10';else if(p>=60)c='text-amber-400 bg-amber-500/10';else if(p>=40)c='text-orange-400 bg-orange-500/10';return`<span class="signal-tag ${{c}}">${{p}}%</span>`;}}
 function sigTags(sigs){{const cm={{'LTV UP':'bg-emerald-500/10 text-emerald-400','CHURN':'bg-red-500/10 text-red-400','IDLE':'bg-amber-500/10 text-amber-400','INT.ERR':'bg-orange-500/10 text-orange-400','UPSELL':'bg-cyan-500/10 text-cyan-400','REVSHARE':'bg-teal-500/10 text-teal-400','NEW':'bg-dark-700 text-dark-300'}};return sigs.map(s=>{{let c='bg-dark-700 text-dark-300';for(const[k,v]of Object.entries(cm))if(s.includes(k)){{c=v;break;}};if(s.includes('ROAS'))c=s.includes('\u2605')?'bg-emerald-500/10 text-emerald-400':s.includes('\u2713')?'bg-blue-500/10 text-blue-400':'bg-amber-500/10 text-amber-400';return`<span class="signal-tag ${{c}}">${{s}}</span>`;}}).join(' ');}}
 function tierCls(t){{return{{1:'tier-1-row',2:'tier-2-row',3:'tier-3-row',4:'tier-4-row'}}[t]||'';}}
@@ -1574,8 +1560,8 @@ const POD_DISPLAY={{'Marcus+Martin':'Angus','Sebastian+Daniel':'Belgian Blue','A
 const POD_MEMBERS={{'Marcus+Martin':'Marcus & Martin','Sebastian+Daniel':'Sebastian & Daniel','Aimy+Espen':'Aimy & Espen','Nicklas+Hamsa':'Nicklas & Hamsa'}};
 const POD_SEGMENT={{'Marcus+Martin':'Perf & Pro','Sebastian+Daniel':'Pro & Growth','Aimy+Espen':'Growth','Nicklas+Hamsa':'Growth & Starter'}};
 function podColor(p){{const m={{'Marcus+Martin':'blue','Sebastian+Daniel':'purple','Aimy+Espen':'pink','Nicklas+Hamsa':'teal'}};return m[p]||'blue';}}
-function stripeLink(wsId){{if(!wsId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://dashboard.stripe.com/subscriptions/${{wsId}}" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>`;}}
-function attioLink(recId){{if(!recId)return'<span class="text-dark-700">&mdash;</span>';return`<a href="https://app.attio.com/metric/workspaces/record/${{recId}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>`;}}
+function stripeLink(wsId){{if(!wsId)return'<span class="text-dark-700">-</span>';return`<a href="https://dashboard.stripe.com/subscriptions/${{wsId}}" target="_blank" rel="noopener" class="text-blue-400/70 hover:text-blue-300 text-xs font-500 underline decoration-blue-400/30 hover:decoration-blue-300/60 transition-colors">Stripe</a>`;}}
+function attioLink(recId){{if(!recId)return'<span class="text-dark-700">-</span>';return`<a href="https://app.attio.com/metric/workspaces/record/${{recId}}/overview" target="_blank" rel="noopener" class="text-purple-400/70 hover:text-purple-300 text-xs font-500 underline decoration-purple-400/30 hover:decoration-purple-300/60 transition-colors">Attio</a>`;}}
 
 function updateKPIs(){{
   const el=document.getElementById('kpiCards');
@@ -1697,7 +1683,7 @@ function renderTable(){{
       <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${{fmt(w.a)}}</td>
       <td class="px-3 py-2.5 text-right text-sm font-500 text-white">${{fmt(w.l)}}</td>
       <td class="px-3 py-2.5 text-right text-sm">${{fmtSh(w.sh)}}</td>
-      <td class="px-3 py-2.5 text-right text-xs ${{w.ar>=5?'text-emerald-400 font-600':w.ar>=2?'text-blue-400':w.ar>0?'text-dark-400':'text-dark-600'}}">${{w.ar?w.ar.toFixed(1)+'x':'&mdash;'}}</td>
+      <td class="px-3 py-2.5 text-right text-xs ${{w.ar>=5?'text-emerald-400 font-600':w.ar>=2?'text-blue-400':w.ar>0?'text-dark-400':'text-dark-600'}}">${{w.ar?w.ar.toFixed(1)+'x':'-'}}</td>
       <td class="px-3 py-2.5 text-center">${{retBadge(w.ret)}}</td>
       <td class="px-3 py-2.5"><div class="flex gap-1 flex-wrap">${{sigTags(w.s)}}</div></td>
       <td class="px-3 py-2.5 text-xs text-dark-400 min-w-[200px]">${{w.act}}</td>
